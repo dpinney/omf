@@ -373,7 +373,12 @@ def work(modelDir, inputDict):
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
 
-	## If REopt outputs any Electric Storage (BESS) or generator (GEN) that also does not contain all zeros:
+
+	########################################################################################################################################################
+	## DER Serving Load Overview plot 
+	########################################################################################################################################################
+
+	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
 	if 'ElectricStorage' in reoptResults: 
 		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
 			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -386,7 +391,7 @@ def work(modelDir, inputDict):
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
 		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
-	
+
 	## vbatDispatch variables
 	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
 	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
@@ -407,6 +412,234 @@ def work(modelDir, inputDict):
 	else:
 		generator = np.zeros_like(demand)
 		generator_W = np.zeros_like(demand)
+	
+	## Put all DER plot variables into a dataFrame for plotting
+	df = pd.DataFrame({
+		'timestamp': timestamps,
+		'Home BESS Serving Load': BESS_W,
+		'Home TESS Serving Load': vbat_discharge_component_W,
+		'Grid Serving Load': grid_serving_new_load_W,
+		'Home Generator Serving Load': generator_W,
+		'Grid Charging Home BESS': grid_charging_BESS_W,
+		'Grid Charging Home TESS': vbat_charge_component_W
+	})
+
+	## Define colors for each plot series
+	colors = {
+		'Grid Serving Load': 'rgba(128, 128, 128, 0.8)',  ## Gray
+		'Home BESS Serving Load': 'rgba(0, 128, 0, 0.8)',  ## Green
+		'Home Generator Serving Load': 'rgba(139, 0, 0, 0.8)',  ## Dark red
+		'Home TESS Serving Load': 'rgba(128, 0, 128, 0.8)',  ## Purple
+		'Grid Charging Home BESS': 'rgba(0, 128, 0, 0.4)',  ## Green w/ half opacity
+		'Grid Charging Home TESS': 'rgba(128, 0, 128, 0.4)'  ## Purple w/ half opacity
+	}
+
+	## Plot options
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
+	fig = go.Figure()
+
+	## Discharging DERs to plot
+	for col in ["Grid Serving Load", "Home BESS Serving Load", "Home Generator Serving Load", "Home TESS Serving Load","Grid Charging Home BESS", "Grid Charging Home TESS"]:
+		fig.add_trace(go.Scatter(
+			x=df["timestamp"],
+			y=df[col],
+			fill="tonexty",
+			mode="none",
+			name=col,
+			fillcolor=colors[col],
+			line_shape=lineshape,			
+			stackgroup="discharge"  ## Stack all the discharging DERs together
+		))
+
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
+	
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
+	fig.update_layout(
+		xaxis_title="Timestamp",yaxis_title="Power (W)",
+		yaxis2=dict(title='degrees Fahrenheit',overlaying='y',side='right'),
+    	legend=dict(orientation='h',yanchor='bottom', xanchor='right',y=1.02,x=1,)
+	)
+
+	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
+	## NOTE (cont.): For some reason, the slash-mark patterns are not showing up on the OMF page otherwise. Eventually we will delete this part.
+	#fig.show()
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
+
+	## Encode plot data as JSON for showing in the HTML 
+	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	###################################################################################################################################
+	## Create Exported Power plot object
+	###################################################################################################################################
+	fig = go.Figure()
+	
+	## Power used to charge BESS (electric_to_storage_series_kw)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(grid_charging_BESS),
+						mode='none',
+						fill='tozeroy',
+						name='Power Used to Charge BESS',
+						fillcolor='rgba(75,137,83,1)',
+						showlegend=True))
+	
+	## Power used to charge vbat (vbat_charging)
+
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(vbat_charge_component),
+						mode='none',
+						fill='tozeroy',
+						name='Power Used to Charge TESS',
+						fillcolor='rgba(155,148,225,1)',
+						showlegend=True))
+		
+	## Power used to meet load (NOTE: Does this mean grid to load?)
+	fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(grid_to_load),
+					mode='none',
+					fill='tozeroy',
+					name='Grid Serving Load',
+					fillcolor='rgba(100,131,130,1)',
+					showlegend=True))
+
+	fig.update_layout(
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title='Power (kW)'),
+    	legend=dict(
+			orientation='h',
+			yanchor='bottom',
+			y=1.02,
+			xanchor='right',
+			x=1
+			)
+	)
+	
+	## Encode plot data as JSON for showing in the HTML side
+	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	###################################################################################################################################
+	## Impact to Demand plot 
+	###################################################################################################################################
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
+
+	fig = go.Figure()
+	new_demand = demand_W + vbat_charge_component_W + grid_charging_BESS_W - BESS_W - vbat_discharge_component_W - generator_W
+
+	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
+	fig.add_trace(go.Scatter(x=timestamps,
+						y = demand_W,
+						yaxis='y1',
+						mode='none',
+						name='Original Demand',
+						fill='tozeroy',
+						fillcolor='rgba(81,40,136,1)',
+						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	#fig.update_traces(legendgroup='Original Demand', visible='legendonly', selector=dict(name='Original Demand')) 
+
+	## New demand piece (minus any vbat or BESS charging aka 'new/additional loads')
+	fig.add_trace(go.Scatter(x=timestamps,
+						y = new_demand,
+						yaxis='y1',
+						mode='none',
+						name='New Demand',
+						fill='tozeroy',
+						fillcolor='rgba(235,97,35,0.5)',
+						showlegend=showlegend))
+
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
+	
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
+
+	## Plot layout
+	fig.update_layout(
+    	xaxis=dict(title='Timestamp'),
+    	#yaxis=dict(title='Power (W)',type='log'),
+		yaxis=dict(title='Power (W)'),
+    	yaxis2=dict(title='degrees Fahrenheit',overlaying='y',side='right'),
+		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1)
+	)
+
+	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
+	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
+	## Eventually we will delete this part.
+	#fig.show()
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_NewDemand.html"))
+
+	## Encode plot data as JSON for showing in the HTML 
+	outData['newDemandData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['newDemandLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+################################################################################################################################################
+	## Create Thermal Battery Power plot object 
+	################################################################################################################################################
+	fig = go.Figure()
+
+	data_names = ['vbatMinPowerCapacity', 'vbatMaxPowerCapacity', 'vbatPower']
+	colors = ['green', 'blue', 'black']
+	titles = ['Minimum Calculated Power Capacity', 'Maximum Calculated Power Capacity', 'Actual Power Utilized']
+
+	dataCheckList = []
+	for data_name, color, title in zip(data_names, colors, titles):
+		dataCheck = np.sum(combined_device_results[data_name])
+		dataCheckList.append(dataCheck)
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=np.array(combined_device_results[data_name])*1000., ## convert from kW to W
+			yaxis='y1',
+			mode='lines',
+			line=dict(color=color, width=1),
+			name=title,
+			showlegend=True
+		))
+
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (W)'),
+		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
+	
+	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
+	outData['thermalDataCheck'] = float(sum(np.array(dataCheckList)))
+	
+	## Encode plot data as JSON for showing in the HTML side
+	outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)	
+
+	################################################################################################################################################
+	## Create Chemical BESS State of Charge plot object 
+	################################################################################################################################################
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=timestamps, y=outData['chargeLevelBattery'],
+						mode='lines',
+						line=dict(color='purple', width=1),
+						name='Battery SOC',
+						showlegend=True))
+	
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Charge (%)'), legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right',x=1))
+
+	outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	## Update energy and power variables
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
@@ -508,216 +741,7 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_allyears_array = np.full(projectionLength, allDevices_subsidy_ongoing*12.0)
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
 
-
 	#total_govt_rebate = float(inputDict['total_govt_rebate'])
-
-
-	## DER Overview plot ###################################################################################################################################################################
-	if 'Generator' in reoptResults:
-		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
-	
-	## Using REopt's Battery Energy Storage System (BESS) output
-	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
-		print("Using REopt's BESS output. \n")
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
-
-		## Update the monthly consumer savings
-		## Add BESS compensation amount to vbatDispatch's thermal BESS savings
-		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-		rateCompensation = float(inputDict['rateCompensation'])
-		BESS_compensation_monthly = np.asarray([rateCompensation*sum(BESS[s:f]) for s, f in monthHours])
-		#outData['savings'] = list(np.asarray(outData['savings'])+np.asarray(BESS_compensation_monthly)) ## NOTE: There is likely a better way to add two lists together, but this works for now
-
-	else:
-		print('No BESS found in REopt: Setting BESS data to 0. \n')
-		BESS = np.zeros_like(demand)
-		grid_charging_BESS = np.zeros_like(demand)
-		outData['chargeLevelBattery'] = np.zeros_like(demand)
-
-	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
-	#	static_reopt_results = json.load(f)
-	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-
-
-	## Create DER overview plot object ######################################################################################################################################################
-	fig = go.Figure()
-	showlegend = True # either enable or disable the legend toggle in the plot
-
-	## vbatDispatch variables
-	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
-	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
-
-	## Convert all values from kW to Watts for plotting purposes only
-	grid_to_load = np.array(grid_to_load) * 1000.
-	BESS = np.array(BESS) * 1000.
-	grid_charging_BESS = np.array(grid_charging_BESS) * 1000.
-	vbat_discharge_component = vbat_discharge_component * 1000.
-	vbat_charge_component = vbat_charge_component * 1000.
-	demand = np.array(demand) * 1000.
-
-	## BESS serving load piece
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(BESS), #+ np.asarray(demand) + vbat_discharge_component,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						name='BESS Serving Load',
-						fillcolor='rgba(0,137,83,1)',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
-
-	## Temperature line on a secondary y-axis (defined in the plot layout)
-	fig.add_trace(go.Scatter(x=timestamps,
-						  y=temperatures,
-						  yaxis='y2',
-						  mode='lines',
-						  line=dict(color='red',width=1),
-						  name='Average Air Temperature',
-						  showlegend=showlegend 
-						  ))
-	
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=vbat_discharge_component, # + np.asarray(demand),
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(127,0,255,1)',
-						name='vbat Serving Load',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
-
-	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(demand),#-np.asarray(BESS)-vbat_discharge_component,
-						yaxis='y1',
-						mode='none',
-						name='Original Load',
-						fill='tozeroy',
-						fillcolor='rgba(100,200,210,1)',
-						showlegend=showlegend))
-	
-	## Additional load (Charging BESS and vbat)
-	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
-	## How or if this should be done is still being discussed
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
-						 yaxis='y1',
-                         mode='none',
-                         name='Additional Load (Charging BESS and vbat)', ## TODO: Edit this title accordingly if BESS and/or vbat are disabled
-                         fill='tonexty',
-                         fillcolor='rgba(175,0,42,0)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
-
-	## Grid serving new load
-	grid_serving_new_load = np.asarray(grid_to_load), #  + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=grid_serving_new_load,
-						 yaxis='y1',
-                         mode='none',
-                         fill='tozeroy',
-                         name='Grid Serving New Load',
-                         fillcolor='rgba(192,192,192,1)',
-						 showlegend=showlegend))
-
-	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
-	## toggled back on by the user by clicking it in the plot legend
-	#fig.add_trace(go.Scatter(x=timestamps, 
-	#				 y=demand,
-	#				 yaxis='y1',
-	#				 mode='lines',
-	#				 line=dict(color='black'),
-	#				 name='Demand',
-	#				 showlegend=showlegend))
-	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
-
-	## Fossil Generator piece
-	if 'Generator' in reoptResults:
-		fig.add_trace(go.Scatter(x=timestamps,
-						y = generator,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(153,0,0,1)',
-						name='Fossil Generator Serving Load',
-						showlegend=showlegend))
-
-	## Plot layout
-	fig.update_layout(
-    	#title='Residential Data',
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Power (kW)'),
-    	yaxis2=dict(title='degrees Celsius',
-                overlaying='y',
-                side='right'
-                ),
-		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1)
-	)
-
-	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
-	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
-	## Eventually we want to delete this part.
-	#fig.show()
-	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
-
-	## Encode plot data as JSON for showing in the HTML side
-	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-
-	## Create Exported Power plot object ######################################################################################################################################################
-	fig = go.Figure()
-	
-	## Power used to charge BESS (electric_to_storage_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(grid_charging_BESS),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge BESS',
-						fillcolor='rgba(75,137,83,1)',
-						showlegend=True))
-	
-	## Power used to charge vbat (vbat_charging)
-
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(vbat_charge_component),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge TESS',
-						fillcolor='rgba(155,148,225,1)',
-						showlegend=True))
-		
-	## Power used to meet load (NOTE: Does this mean grid to load?)
-	fig.add_trace(go.Scatter(x=timestamps,
-					y=np.asarray(grid_to_load),
-					mode='none',
-					fill='tozeroy',
-					name='Grid Serving Load',
-					fillcolor='rgba(100,131,130,1)',
-					showlegend=True))
-
-	fig.update_layout(
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Power (kW)'),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
-	)
-	
-	## Encode plot data as JSON for showing in the HTML side
-	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-
 
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	## Consumer costs = generator fuel cost + installed cost of BESS (per kW and per kWh) + BESS replacement cost + BESS inverter replacement cost + TESS unit cost + TESS upkeep cost
@@ -828,9 +852,9 @@ def new(modelDir):
 		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
-		## Modeled after Generac Guardian 22 kW model ## NOTE: For liquid propane: 3.56 gal/hr
+		## Modeled after Generac Guardian 5 kW model ## NOTE: For liquid propane: 3.56 gal/hr
 		'fossilGenerator': 'Yes',
-		'existing_gen_kw': '22',
+		'existing_gen_kw': '5',
 		'gen_retrofit_cost': '0',
 		'fuel_available_gal': '1000', 
 		'fuel_cost_per_gal': '1.00',
