@@ -211,6 +211,14 @@
 				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
 				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Generator Replacement Cost ($/kW)<span class="classic">Specify the cost of replacing the generator in the specified year in $/kW.</span></label>
+				<input type="text" id="replace_cost_generator_per_kw" name="replace_cost_generator_per_kw" value="{{allInputDataDict.replace_cost_generator_per_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Generator Lifetime (years)<span class="classic">Specify a year in which the generator will be replaced at the cost specified in the Generator Replacement Cost input. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<input type="text" id="generator_replacement_year" name="generator_replacement_year" value="{{allInputDataDict.generator_replacement_year}}" required="required"/>
+			</div>
 
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 

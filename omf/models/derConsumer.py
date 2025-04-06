@@ -212,7 +212,9 @@ def work(modelDir, inputDict):
 			'min_kw': 0,
 			'only_runs_during_grid_outage': False,
 			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
-			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal'])
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
+			'replacement_year': float(inputDict['generator_replacement_year']),
+			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw'])
 		}
 	else:
 		GENcheck = 'disabled'
@@ -858,6 +860,8 @@ def new(modelDir):
 		'gen_retrofit_cost': '0',
 		'fuel_available_gal': '1000', 
 		'fuel_cost_per_gal': '1.00',
+		'replace_cost_generator_per_kw': '450',
+		'generator_replacement_year': '15',
 
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1', 
