@@ -262,7 +262,7 @@ def work(modelDir, inputDict):
 			grid_charging_BESS = np.array(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
 			grid_charging_BESS = np.where(grid_charging_BESS == -0.0, 0.0, grid_charging_BESS) ## convert negative zero values to positive zero values
 			grid_charging_BESS_W = grid_charging_BESS * 1000. ## convert from kW to W for plotting
-			outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
 		else:
 			#raise ValueError('The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
 			BESS = np.zeros_like(demand)

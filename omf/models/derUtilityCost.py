@@ -345,7 +345,7 @@ def work(modelDir, inputDict):
 		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
 			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-			outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
 		else:
 			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
 	else:
