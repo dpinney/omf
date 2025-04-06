@@ -389,7 +389,7 @@ def work(modelDir, inputDict):
 		'timestamp': timestamps,
 		'Home BESS Serving Load': BESS_W,
 		'Home TESS Serving Load': vbat_discharge_component_W,
-		'Grid Serving Load': grid_serving_new_load_W,
+		'Grid Serving Load': grid_to_load_W, #grid_serving_new_load_W,
 		'Home Generator Serving Load': generator_W,
 		'Grid Charging Home BESS': grid_charging_BESS_W,
 		'Grid Charging Home TESS': vbat_charge_component_W
