@@ -69,8 +69,8 @@ def work(modelDir, inputDict):
 		GENcheck = 'enabled'
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
-			'max_kw': 0,
-			'min_kw': 0,
+			'max_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
+			'min_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
 			'only_runs_during_grid_outage': False,
 			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_GEN']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),

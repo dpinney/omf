@@ -193,12 +193,12 @@ def work(modelDir, inputDict):
 			'max_kwh': float(inputDict['BESS_kwh']), 
 			'can_grid_charge': True,
 			'total_rebate_per_kw': 0.0,
-			'macrs_option_years': 0.0,
+			'macrs_option_years': 0,
 			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
 			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
-			#'total_itc_fraction': float(inputDict['total_itc_fraction']),
-			'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
-			'battery_replacement_year': float(inputDict['battery_replacement_year']),
+			'total_itc_fraction': 0.0,
+			'inverter_replacement_year': int(inputDict['inverter_replacement_year']),
+			'battery_replacement_year': int(inputDict['battery_replacement_year']),
 			}
 	else:
 		BESScheck = 'disabled'
@@ -208,12 +208,12 @@ def work(modelDir, inputDict):
 		GENcheck = 'enabled'
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']),
-			'max_kw': 0,
-			'min_kw': 0,
+			'max_kw': float(inputDict['existing_gen_kw']),
+			'min_kw': float(inputDict['existing_gen_kw']),
 			'only_runs_during_grid_outage': False,
 			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
-			'replacement_year': float(inputDict['generator_replacement_year']),
+			'replacement_year': int(inputDict['generator_replacement_year']),
 			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw'])
 		}
 	else:
@@ -483,55 +483,6 @@ def work(modelDir, inputDict):
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	###################################################################################################################################
-	## Create Exported Power plot object
-	###################################################################################################################################
-	fig = go.Figure()
-	
-	## Power used to charge BESS (electric_to_storage_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(grid_charging_BESS),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge BESS',
-						fillcolor='rgba(75,137,83,1)',
-						showlegend=True))
-	
-	## Power used to charge vbat (vbat_charging)
-
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(vbat_charge_component),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge TESS',
-						fillcolor='rgba(155,148,225,1)',
-						showlegend=True))
-		
-	## Power used to meet load (NOTE: Does this mean grid to load?)
-	fig.add_trace(go.Scatter(x=timestamps,
-					y=np.asarray(grid_to_load),
-					mode='none',
-					fill='tozeroy',
-					name='Grid Serving Load',
-					fillcolor='rgba(100,131,130,1)',
-					showlegend=True))
-
-	fig.update_layout(
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Power (kW)'),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
-	)
-	
-	## Encode plot data as JSON for showing in the HTML side
-	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-	###################################################################################################################################
 	## Impact to Demand plot 
 	###################################################################################################################################
 	showlegend = True ## either enable or disable the legend toggle in the plot
@@ -595,7 +546,7 @@ def work(modelDir, inputDict):
 	outData['newDemandData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['newDemandLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-################################################################################################################################################
+	################################################################################################################################################
 	## Create Thermal Battery Power plot object 
 	################################################################################################################################################
 	fig = go.Figure()
@@ -752,7 +703,7 @@ def work(modelDir, inputDict):
 	## ongoing costs are everything else
 	projectionLength = int(inputDict['projectionLength'])
 	#SPP = utilityCosts_year1_total / utilityNetSavings_year1_total
-	BESS_initial_cost = reoptResults['ElectricStorage']['initial_capital_cost']
+	BESS_initial_cost = 0 #reoptResults['ElectricStorage']['initial_capital_cost']
 	#TESS_initial_cost = float(inputDict['unitDeviceCost']) * float(inputDict['number_devices'])
 	BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])
 	BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])
