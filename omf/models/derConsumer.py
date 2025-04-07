@@ -762,14 +762,14 @@ def work(modelDir, inputDict):
 
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	## What are the net savings for the consumer? 
-	outData['NPV'] = npv(float(inputDict['discountRate'])/100., consumerNetSavings_allyears_array)
-	SPP = initialInvestment/net_savings_year1_total
+	outData['NPV'] = 0. #npv(float(inputDict['discountRate'])/100., consumerNetSavings_allyears_array)
+	SPP = 0. #initialInvestment/net_savings_year1_total
 	outData['SPP'] = SPP
 
-	total_costs_allYears = np.full(projectionLength,total_costs_minus_initial_investment)
-	total_costs_allYears[0] += initialInvestment
+	total_costs_allYears = np.full(projectionLength,0) #total_costs_minus_initial_investment)
+	#total_costs_allYears[0] += initialInvestment
 	outData['costsAllYears'] = list(np.full(projectionLength,total_costs_allYears*-1.0)) ## negative for plotting purposes
-	outData['cumulativeCashflow_total'] = list(np.cumsum(consumerNetSavings_allyears_array))
+	outData['cumulativeCashflow_total'] = 0. #list(np.cumsum(consumerNetSavings_allyears_array))
 
 	######################################################################################################################################################
 	## CashFlow Projection Plot variables
