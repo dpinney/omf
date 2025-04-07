@@ -81,6 +81,7 @@ def work(modelDir, inputDict):
 			'total_itc_fraction': 0.0,
 			'inverter_replacement_year': int(inputDict['inverter_replacement_year']),
 			'battery_replacement_year': int(inputDict['battery_replacement_year']),
+			'soc_min_fraction': 1.0 - float(inputDict['utility_BESS_portion'])/100,
 			}
 	else:
 		BESScheck = 'disabled'
@@ -598,8 +599,7 @@ def work(modelDir, inputDict):
 	### Calculate the compensation per kWh for BESS, TESS, and GEN technologies
 	#########################################################################################################################################################
 
-	BESS_percentage_to_utility = float(inputDict['utility_BESS_portion'])/100.
-	BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation*BESS_percentage_to_utility for s, f in monthHours])
+	BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
 	BESS_compensation_year1_total = np.sum(BESS_compensation_year1_array)
 	BESS_compensation_allyears_array = np.full(projectionLength, BESS_compensation_year1_total)
 	GEN_compensation_year1_array = np.array([sum(generator[s:f])*rateCompensation for s, f in monthHours])
@@ -811,7 +811,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load_tenX.csv')) as f:
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
 		temp_curve = f.read()

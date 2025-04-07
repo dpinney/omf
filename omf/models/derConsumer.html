@@ -476,7 +476,7 @@
 						newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
 						for (i=0; i<vector.length; i++) {
 							cell = newRow.insertCell()
-							cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
+							cell.innerHTML = delimitNumbers(vector[i].toFixed(2))
 						}
 					}
 				</script>
