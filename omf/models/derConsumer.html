@@ -487,11 +487,11 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.monthlyAdjustedEnergyConsumption)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.monthlyEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
-					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.monthlyPeakDemandCost)
-					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost)
+					//insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.monthlyPeakDemandCost)
+					//insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost)
 					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.monthlyTotalCostService)
 					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.monthlyTotalCostAdjustedService)
-					insertMetric("monthlySummaryTable","Consumer Savings ($)", allOutputData.savings)
+					insertMetric("monthlySummaryTable","Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
 				</script>
 			</div>
 		</div>
@@ -532,11 +532,11 @@
 					"series":[
 						//{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
 						//{"name":"Total Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
-						{"name":"BESS Demand Savings", "data": allOutputData.savings_peakDemand_BESS_allyears, "color": "rgba(27,121,57,1)"},
+						//{"name":"BESS Demand Savings", "data": allOutputData.savings_peakDemand_BESS_allyears, "color": "rgba(27,121,57,1)"},
 						{"name":"BESS Consumption Savings", "data": allOutputData.savings_consumption_BESS_allyears, "color": "rgba(27,121,57,0.5)"},
-						{"name":"TESS Demand Savings", "data": allOutputData.savings_peakDemand_TESS_allyears, "color": "rgba(92,174,99,1)"},
+						//{"name":"TESS Demand Savings", "data": allOutputData.savings_peakDemand_TESS_allyears, "color": "rgba(92,174,99,1)"},
 						{"name":"TESS Consumption Savings", "data": allOutputData.savings_consumption_TESS_allyears, "color": "rgba(92,174,99,0.5)"},
-						{"name":"Generator Demand Savings", "data": allOutputData.savings_peakDemand_GEN_allyears, "color": "rgba(139,195,27,1)"},
+						//{"name":"Generator Demand Savings", "data": allOutputData.savings_peakDemand_GEN_allyears, "color": "rgba(139,195,27,1)"},
 						{"name":"Generator Consumption Savings", "data": allOutputData.savings_consumption_GEN_allyears, "color": "rgba(139,195,27,0.5)"},
 						{"name":"BESS Incentives", "data": allOutputData.totalCosts_BESS_allyears, "color": "rgb(116,40,129)"},
 						{"name":"TESS Incentives", "data": allOutputData.totalCosts_TESS_allyears, "color": "rgb(152,110,172)"},

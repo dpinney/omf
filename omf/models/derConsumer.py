@@ -750,15 +750,11 @@ def work(modelDir, inputDict):
 	consumerNetSavings_allyears_array = np.full(projectionLength, 0) #net_savings)
 
 	######################################################################################################################################################
-	## FINANCIAL PLOT PARAMETERS
-	## Combine all savings and costs to calculate Net Present Value (NPV), Simple Payback Period (SPP), and other plot variables.
+	## MONTHLY COST COMPARISON PLOT VARIABLES
 	######################################################################################################################################################
 
-	## Calculate the compensation to the member-consumer for their enrolled DERs
-
-	outData['savings'] = list(savings_year1_array)
-	outData['savingsAllYears'] = list(np.full(projectionLength,savings_year1_total))
-
+	outData['savings_year1_monthly_array'] = list(savings_year1_array)
+	outData['savingsAllYears'] = list(savings_allyears_array)
 
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	## What are the net savings for the consumer? 
@@ -774,6 +770,7 @@ def work(modelDir, inputDict):
 	######################################################################################################################################################
 	## CashFlow Projection Plot variables
 	## NOTE: The costs are shown as negative values
+	## Combine all savings and costs to calculate Net Present Value (NPV), Simple Payback Period (SPP), and other plot variables.
 	######################################################################################################################################################
 	## Calculate ongoing and onetime operational costs
 	## NOTE: This includes costs for things like API calls to control the DERs
@@ -826,7 +823,7 @@ def work(modelDir, inputDict):
 	outData['totalCosts_BESS_allyears'] = list(-1.0*totalCosts_BESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
-	outData['cumulativeSavings_total'] = list(np.cumsum(utilitySavings_allyears_array))
+	outData['cumulativeSavings_total'] = list(np.cumsum(savings_allyears_array))
 
 	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
 	outData['techCheck'] = float(sum(BESS) + sum(vbat_discharge_component) + sum(generator))
@@ -843,8 +840,9 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
 		temp_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
-		criticalLoad_curve = f.read()
+	## NOTE: Following line commented out because it was used for simulating outages in REopt.
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
+	#	criticalLoad_curve = f.read()
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -858,14 +856,15 @@ def new(modelDir):
 		'longitude': '-81.640283',
 		'year' : '2018',
 		'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV (Appalachian Power Co Residential Time of Day URDB label)
-		'fileName': 'residential_PV_load.csv',
+		'fileName': 'residential_PV_load_tenX.csv',
 		'tempFileName': 'residential_extended_temperature_data.csv',
-		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		## NOTE: Following lines commented out because it was used for simulating outages in REopt.
+		#'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		#'criticalLoad': criticalLoad_curve,
+		#'criticalLoadSwitch': 'Yes',
+		#'criticalLoadFactor': '0.50',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
-		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'Yes',
-		'criticalLoadFactor': '0.50',
 
 		## Financial Inputs
 		'demandChargeCost': '0.0', ## Set to zero because this component is not usually included in residential retail rates
