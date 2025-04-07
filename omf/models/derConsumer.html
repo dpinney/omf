@@ -506,8 +506,8 @@
 					"title":{"text":"NPV: $" + allOutputData.NPV.toFixed(0) + ", SPP: " + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":20, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					//"title":{"text":""},
 					"series":[
-						{"name":"Utility Savings", "data": allOutputData.savingsAllYears, "color": "rgb(41,94,17)"},
-						{"name":"Utility Costs", "data": allOutputData.costsAllYears, "color": "rgb(88,9,79)"},
+						{"name":"Member Savings", "data": allOutputData.savings_allyears_array, "color": "rgb(41,94,17)"},
+						{"name":"Member Costs", "data": allOutputData.costs_allyears_array, "color": "rgb(88,9,79)"},
 						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "purple"},
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},

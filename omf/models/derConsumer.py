@@ -634,28 +634,45 @@ def work(modelDir, inputDict):
 	BESS_kw = float(inputDict['BESS_kw'])
 	BESS_kwh = float(inputDict['BESS_kwh'])
 	replacement_cost_BESS = BESS_kw * replacement_cost_BESS_kw + BESS_kwh * replacement_cost_BESS_kwh
-	replacement_frequency_BESS = projectionLength/int(inputDict['battery_replacement_year'])
+	replacement_year_BESS = int(inputDict['battery_replacement_year'])
+	replacement_frequency_BESS = projectionLength/replacement_year_BESS
 	replacement_cost_BESS_total = replacement_cost_BESS * replacement_frequency_BESS
 
 	## Inverter replacement cost
 	replacement_cost_inverter = float(inputDict['replace_cost_inverter'])
-	replacement_frequency_inverter = projectionLength/int(inputDict['inverter_replacement_year'])
+	replacement_year_inverter = int(inputDict['inverter_replacement_year'])
+	replacement_frequency_inverter = projectionLength/replacement_year_inverter 
 	replacement_cost_inverter_total = replacement_cost_inverter * replacement_frequency_inverter
 
 	## GEN replacement cost
 	replacement_cost_GEN = float(inputDict['replace_cost_generator_per_kw']) * float(inputDict['existing_gen_kw']) ## units: $
-	replacement_frequency_GEN = projectionLength/int(inputDict['generator_replacement_year'])
+	replacement_year_GEN = int(inputDict['generator_replacement_year'])
+	replacement_frequency_GEN = projectionLength/replacement_year_GEN
 	replacement_cost_GEN_total = replacement_cost_GEN * replacement_frequency_GEN
 
 	## Initial Investment
 	initialInvestment = retrofit_cost_total
 	
 	## Create cost array that accounts for replacement costs in specified years
-	#costs_allyears_array = np.zeros(projectionLength)
-	#costs_year1_total = 
-	total_costs = initialInvestment + replacement_cost_BESS_total + replacement_cost_inverter_total + replacement_cost_GEN_total
-	total_costs_minus_initial_investment = total_costs - initialInvestment
+	costs_allyears_array = np.zeros(projectionLength)
+	costs_allyears_array[0] += initialInvestment ## index=1 corresponds to year 1
+	for year in range(0, projectionLength):
+		if year % replacement_year_BESS == 0 and year != 0:
+			costs_allyears_array[year] += replacement_cost_BESS
+		if year % replacement_year_GEN == 0 and year != 0:
+			costs_allyears_array[year] += replacement_cost_GEN
+		if year % replacement_year_inverter == 0 and year != 0:
+			costs_allyears_array[year] += replacement_cost_inverter
 
+	## Calculate cost array for year 1 only
+	## TODO: potentially add electricity cost for electricity bought from utility here
+	costs_allyears_total = sum(costs_allyears_array)
+	costs_year1_array = np.zeros(12)
+	costs_year1_array[0] += initialInvestment
+	costs_year1_total = sum(costs_year1_array)
+	#total_costs = initialInvestment + replacement_cost_BESS_total + replacement_cost_inverter_total + replacement_cost_GEN_total
+	#total_costs_minus_initial_investment = costs_allyears_total - initialInvestment
+	costs_allyears_total_minus_initial_investment = costs_allyears_total - initialInvestment
 
 	######################################################################################################################################################
 	## SAVINGS
@@ -745,27 +762,23 @@ def work(modelDir, inputDict):
 	savings_allyears_total = sum(savings_allyears_array)
 	
 	## Calculate net savings = savings - costs
-	net_savings_year1_total = savings_year1_total #- costs_year1_total
-	net_savings_allyears_total = savings_year1_total - total_costs_minus_initial_investment
-	consumerNetSavings_allyears_array = np.full(projectionLength, 0) #net_savings)
+	net_savings_year1_total = savings_year1_total - costs_year1_total
+	net_savings_allyears_array = savings_allyears_array - costs_allyears_array
+	net_savings_allyears_total = savings_allyears_total - costs_allyears_total
 
 	######################################################################################################################################################
 	## MONTHLY COST COMPARISON PLOT VARIABLES
 	######################################################################################################################################################
 
 	outData['savings_year1_monthly_array'] = list(savings_year1_array)
-	outData['savingsAllYears'] = list(savings_allyears_array)
+	outData['savings_allyears_array'] = list(savings_allyears_array)
+	outData['costs_allyears_array'] = list(costs_allyears_array*-1.0) ## negative for plotting purposes
+	outData['cumulativeCashflow_total'] = list(np.cumsum(net_savings_allyears_array))
 
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
-	## What are the net savings for the consumer? 
-	outData['NPV'] = 0. #npv(float(inputDict['discountRate'])/100., consumerNetSavings_allyears_array)
-	SPP = 0. #initialInvestment/net_savings_year1_total
+	outData['NPV'] = npv(float(inputDict['discountRate'])/100., net_savings_allyears_array)
+	SPP = initialInvestment/savings_year1_total
 	outData['SPP'] = SPP
-
-	total_costs_allYears = np.full(projectionLength,0) #total_costs_minus_initial_investment)
-	#total_costs_allYears[0] += initialInvestment
-	outData['costsAllYears'] = list(np.full(projectionLength,total_costs_allYears*-1.0)) ## negative for plotting purposes
-	outData['cumulativeCashflow_total'] = 0. #list(np.cumsum(consumerNetSavings_allyears_array))
 
 	######################################################################################################################################################
 	## CashFlow Projection Plot variables
@@ -814,11 +827,11 @@ def work(modelDir, inputDict):
 	utilitySavings_allyears_array = np.full(projectionLength, utilitySavings_year1_total)
 	utilitySavings_allyears_total = np.sum(utilitySavings_allyears_array)
 
-	outData['savings_peakDemand_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_peakDemand_savings)))
+	#outData['savings_peakDemand_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_peakDemand_savings)))
 	outData['savings_consumption_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_consumption_savings)))
-	outData['savings_peakDemand_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_peakDemand_savings)))
+	#outData['savings_peakDemand_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_peakDemand_savings)))
 	outData['savings_consumption_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_consumption_savings)))
-	outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_peakDemand_savings)))
+	#outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_peakDemand_savings)))
 	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_consumption_savings)))
 	outData['totalCosts_BESS_allyears'] = list(-1.0*totalCosts_BESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
