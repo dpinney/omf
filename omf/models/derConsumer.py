@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -54,7 +54,8 @@ def work(modelDir, inputDict):
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel
+			'urdb_label': urdbLabel,
+			'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -486,12 +487,21 @@ def work(modelDir, inputDict):
 	consumptionCost = float(inputDict['electricityCost'])
 	demandCost = 0.0
 	rateCompensation = float(inputDict['rateCompensation'])
-	
+
+
 	## Calculate the monthly demand and energy consumption (for the demand curve without DERs)
+	demandCost = 0
 	outData['monthlyPeakDemand'] = [max(demand[s:f]) for s, f in monthHours] ## The maximum peak kW for each month
 	outData['monthlyPeakDemandCost'] = [peak*demandCost for peak in outData['monthlyPeakDemand']] ## peak demand charge before including DERs
-	outData['monthlyEnergyConsumption'] = [sum(demand[s:f]) for s, f in monthHours] ## The total energy kWh for each month
-	outData['monthlyEnergyConsumptionCost'] = [em*consumptionCost for em in outData['monthlyEnergyConsumption']] ## The total cost of kWh energy each month
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
+	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
+	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+	demand_cost_array = [ float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
+	outData['monthlyEnergyConsumptionCost'] = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy kcost in $$ for each month	
+
 
 	## Calculate the monthly adjusted demand ("adjusted" = the demand curve including DERs)
 	outData['adjustedDemand'] = list(demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component)
@@ -881,6 +891,8 @@ def new(modelDir):
 	## NOTE: Following line commented out because it was used for simulating outages in REopt.
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
 	#	criticalLoad_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -890,10 +902,15 @@ def new(modelDir):
 
 		## REopt inputs:
 		## NOTE: Variables are strings as dictated by the html input options
-		'latitude':  '38.353673', ## Charleston, WV
-		'longitude': '-81.640283',
+
+		#'latitude':  '38.353673', ## Charleston, WV
+		#'longitude': '-81.640283', ## Charleston, WV
+		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
+		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO TOU residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
+		'longitude' : '-104.812599', ## Brighton, CO
+
 		'year' : '2018',
-		'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV (Appalachian Power Co Residential Time of Day URDB label)
 		'fileName': 'residential_PV_load_tenX.csv',
 		'tempFileName': 'residential_extended_temperature_data.csv',
 		## NOTE: Following lines commented out because it was used for simulating outages in REopt.
@@ -903,6 +920,7 @@ def new(modelDir):
 		#'criticalLoadFactor': '0.50',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
+		'energyRateCurve': energy_rate_curve,
 
 		## Financial Inputs
 		'projectionLength': '25',
@@ -918,8 +936,8 @@ def new(modelDir):
 		'TESS_subsidy_onetime_wh': '25.0',
 		'TESS_subsidy_ongoing_wh': '0.0',
 		'BESS_subsidy_onetime': '100.0',
-		'BESS_subsidy_ongoing': '10.0',
-		'GEN_subsidy_onetime': '25.0',
+		'BESS_subsidy_ongoing': '0.0',
+		'GEN_subsidy_onetime': '0.0',
 		'GEN_subsidy_ongoing': '0.0',
 
 		## Chemical Battery Inputs

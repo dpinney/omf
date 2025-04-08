@@ -28,7 +28,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'distributed energy resources (DERs) using the NREL Renewable Energy Optimization Tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -964,10 +964,15 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
-		'latitude' : '39.986771', 
+		
+		#'latitude':  '38.353673', ## Charleston, WV
+		#'longitude': '-81.640283', ## Charleston, WV
+		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
+		# 'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO TOU residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
+
 		'year' : '2018',
-		'urdbLabel' : '5b311c595457a3496d8367be', #'612ff9c15457a3ec18a5f7d3' the commented URDB is Brighton, CO non-TOU residential rate
 		'fileName': 'utility_2018_kW_load.csv',
 		'tempFileName': 'open-meteo-denverCO-noheaders.csv',
 		'demandCurve': demand_curve,
