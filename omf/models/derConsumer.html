@@ -126,10 +126,6 @@
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Specify the demand charge you pay to the utility per kW during peak times (if any).</span></label>
-				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Electricity Cost ($/kWh)<span class="classic">Cost of energy purchased from the utility per kWh (residential retail rate).</span></label>
 				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
@@ -538,9 +534,9 @@
 						{"name":"TESS Consumption Savings", "data": allOutputData.savings_consumption_TESS_allyears, "color": "rgba(92,174,99,0.5)"},
 						//{"name":"Generator Demand Savings", "data": allOutputData.savings_peakDemand_GEN_allyears, "color": "rgba(139,195,27,1)"},
 						{"name":"Generator Consumption Savings", "data": allOutputData.savings_consumption_GEN_allyears, "color": "rgba(139,195,27,0.5)"},
-						{"name":"BESS Incentives", "data": allOutputData.totalCosts_BESS_allyears, "color": "rgb(116,40,129)"},
-						{"name":"TESS Incentives", "data": allOutputData.totalCosts_TESS_allyears, "color": "rgb(152,110,172)"},
-						{"name":"Generator Incentives", "data": allOutputData.totalCosts_GEN_allyears, "color": "rgb(195,164,207)"},
+						{"name":"BESS Costs", "data": allOutputData.totalCosts_BESS_allyears, "color": "rgb(116,40,129)"},
+						{"name":"TESS Costs", "data": allOutputData.totalCosts_TESS_allyears, "color": "rgb(152,110,172)"},
+						{"name":"Generator Costs", "data": allOutputData.totalCosts_GEN_allyears, "color": "rgb(195,164,207)"},
 						//{"name":"Peak Shift Savings", "data": allOutputData.timeshift_savings_allTech_allyears, "color": "rgb(152,251,152)"},
 						//{"name":"Total Demand Charge Savings", "data": allOutputData.totalPeakDemandSavings_allDER_allyears, "color": "rgb(152,251,152)"},
 						//{"name":"Startup Costs", "data": allOutputData.startupCosts_allyears, "color": "rgb(240,128,128)"},
