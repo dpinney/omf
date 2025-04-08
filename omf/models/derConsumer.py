@@ -500,8 +500,8 @@ def work(modelDir, inputDict):
 		energy_rate_curve = f.read()
 	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
 	demand_cost_array = [ float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
-	outData['monthlyEnergyConsumptionCost'] = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy kcost in $$ for each month	
-
+	outData['monthlyEnergyConsumption'] = [sum(demand[s:f]) for s, f in monthHours] ## The total energy in kWh for each month
+	outData['monthlyEnergyConsumptionCost'] = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy cost in $$ for each month	
 
 	## Calculate the monthly adjusted demand ("adjusted" = the demand curve including DERs)
 	outData['adjustedDemand'] = list(demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component)
@@ -686,8 +686,20 @@ def work(modelDir, inputDict):
 	initialInvestment = retrofit_cost_total
 	costs_allyears_array[0] += initialInvestment
 
+	## Calculate consumption costs for entire projectionLength
+	## TODO: Change naming convention from savings to costs 
+	costs_year1_BESS_consumption = sum(monthlyBESS_consumption_savings)
+	costs_allyears_BESS_consumption = np.full(projectionLength, costs_year1_BESS_consumption)
+	costs_year1_TESS_consumption = sum(monthlyTESS_consumption_savings)
+	costs_allyears_TESS_consumption = np.full(projectionLength, costs_year1_TESS_consumption)
+	costs_year1_GEN_consumption = sum(monthlyGEN_consumption_savings)
+	costs_allyears_GEN_consumption = np.full(projectionLength, costs_year1_GEN_consumption)
+
 	## Calculate cost array for year 1 only
 	## TODO: potentially add electricity cost for electricity bought from utility here
+	costs_year1_energyConsumption = np.sum(outData['monthlyEnergyConsumptionCost'])
+	costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_energyConsumption)
+	costs_allyears_array += costs_allyears_energyConsumption
 	costs_allyears_total = sum(costs_allyears_array)
 	costs_year1_array = np.zeros(12)
 	costs_year1_array[0] += initialInvestment
@@ -719,6 +731,8 @@ def work(modelDir, inputDict):
 	else: ## If the DER tech is disabled, then set all of their corresponding subsidies and compensation rates equal to zero.
 		BESS_subsidy_ongoing = 0
 		BESS_subsidy_onetime = 0
+		BESS_subsidy_year1_array = np.full(12, 0.0)
+		BESS_subsidy_allyears_array = np.full(projectionLength, 0.0)
 		BESS_compensation_year1_array = np.full(12, 0.)
 		BESS_compensation_year1_total = 0.
 		BESS_compensation_allyears_array = np.full(projectionLength, 0)
@@ -741,6 +755,8 @@ def work(modelDir, inputDict):
 	else:
 		GEN_subsidy_ongoing = 0
 		GEN_subsidy_onetime = 0
+		GEN_subsidy_year1_array = np.full(12, 0.0)
+		GEN_subsidy_allyears_array = np.full(projectionLength, 0.0)
 		GEN_compensation_year1_array = np.full(12, 0.)
 		GEN_compensation_year1_total = 0.
 		GEN_compensation_allyears_array = np.full(projectionLength, 0)
@@ -763,6 +779,8 @@ def work(modelDir, inputDict):
 	else:
 		TESS_subsidy_ongoing = 0
 		TESS_subsidy_onetime = 0
+		GEN_subsidy_year1_array = np.full(12, 0.0)
+		GEN_subsidy_allyears_array = np.full(projectionLength, 0.0)
 		TESS_compensation_year1_array = np.full(12, 0.)
 		TESS_compensation_year1_total = 0.
 		TESS_compensation_allyears_array = np.full(projectionLength, 0)
@@ -868,9 +886,9 @@ def work(modelDir, inputDict):
 	outData['savings_allyears_BESS'] = list(savings_allyears_BESS)
 	outData['savings_allyears_TESS'] = list(savings_allyears_TESS)
 	outData['savings_allyears_GEN'] = list(savings_allyears_GEN)
-	outData['totalCosts_BESS_allyears'] = list(-1.0*costs_allyears_BESS) ## Costs are negative for plotting purposes
-	outData['totalCosts_TESS_allyears'] = list(-1.0*costs_allyears_TESS) ## Costs are negative for plotting purposes
-	outData['totalCosts_GEN_allyears'] = list(-1.0*costs_allyears_GEN) ## Costs are negative for plotting purposes
+	outData['totalCosts_BESS_allyears'] = list(-1.0*(costs_allyears_BESS+costs_allyears_BESS_consumption)) ## Costs are negative for plotting purposes
+	outData['totalCosts_TESS_allyears'] = list(-1.0*(costs_allyears_TESS+costs_allyears_TESS_consumption)) ## Costs are negative for plotting purposes
+	outData['totalCosts_GEN_allyears'] = list(-1.0*(costs_allyears_GEN+costs_allyears_GEN_consumption)) ## Costs are negative for plotting purposes
 	outData['cumulativeSavings_total'] = list(np.cumsum(savings_allyears_array))
 
 	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
