@@ -458,7 +458,7 @@ def work(modelDir, inputDict):
 	
 	## Encode plot data as JSON for showing in the HTML side
 	outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)	
+	outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	################################################################################################################################################
 	## Create Chemical BESS State of Charge plot object 
@@ -780,6 +780,11 @@ def work(modelDir, inputDict):
 
 	## Calculate savings per tech
 	savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array
+	savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
+	savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array
+	savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array
+	savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array
+	savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
 	
 	## Calculate net savings = savings - costs
 	net_savings_year1_total = savings_year1_total - costs_year1_total
@@ -847,12 +852,12 @@ def work(modelDir, inputDict):
 	utilitySavings_allyears_array = np.full(projectionLength, utilitySavings_year1_total)
 	utilitySavings_allyears_total = np.sum(utilitySavings_allyears_array)
 
-	#outData['savings_peakDemand_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_peakDemand_savings)))
 	outData['savings_consumption_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_consumption_savings)))
-	#outData['savings_peakDemand_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_peakDemand_savings)))
 	outData['savings_consumption_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_consumption_savings)))
-	#outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_peakDemand_savings)))
 	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_consumption_savings)))
+	outData['savings_allyears_BESS'] = list(savings_allyears_BESS)
+	outData['savings_allyears_TESS'] = list(savings_allyears_TESS)
+	outData['savings_allyears_GEN'] = list(savings_allyears_GEN)
 	outData['totalCosts_BESS_allyears'] = list(-1.0*costs_allyears_BESS) ## Costs are negative for plotting purposes
 	outData['totalCosts_TESS_allyears'] = list(-1.0*costs_allyears_TESS) ## Costs are negative for plotting purposes
 	outData['totalCosts_GEN_allyears'] = list(-1.0*costs_allyears_GEN) ## Costs are negative for plotting purposes
