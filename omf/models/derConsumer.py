@@ -499,7 +499,11 @@ def work(modelDir, inputDict):
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
 		energy_rate_curve = f.read()
 	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
-	demand_cost_array = [ float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
+	demand_cost_array = [float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
+	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(BESS, energy_rate_array)]
+	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_discharge_component, energy_rate_array)]
+	demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
+
 	outData['monthlyEnergyConsumption'] = [sum(demand[s:f]) for s, f in monthHours] ## The total energy in kWh for each month
 	outData['monthlyEnergyConsumptionCost'] = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy cost in $$ for each month	
 
@@ -667,6 +671,9 @@ def work(modelDir, inputDict):
 	replacement_year_GEN = int(inputDict['generator_replacement_year'])
 	replacement_frequency_GEN = projectionLength/replacement_year_GEN
 	replacement_cost_GEN_total = replacement_cost_GEN * replacement_frequency_GEN
+
+	## GEN fuel cost
+	## TODO: Add generator fuel cost
 	
 	## Apply each replacement cost to the specified replacement years
 	for year in range(0, projectionLength):
@@ -688,11 +695,11 @@ def work(modelDir, inputDict):
 
 	## Calculate consumption costs for entire projectionLength
 	## TODO: Change naming convention from savings to costs 
-	costs_year1_BESS_consumption = sum(monthlyBESS_consumption_savings)
+	costs_year1_BESS_consumption = sum(demand_cost_array_BESS)*100
 	costs_allyears_BESS_consumption = np.full(projectionLength, costs_year1_BESS_consumption)
-	costs_year1_TESS_consumption = sum(monthlyTESS_consumption_savings)
+	costs_year1_TESS_consumption = sum(demand_cost_array_TESS)
 	costs_allyears_TESS_consumption = np.full(projectionLength, costs_year1_TESS_consumption)
-	costs_year1_GEN_consumption = sum(monthlyGEN_consumption_savings)
+	costs_year1_GEN_consumption = sum(demand_cost_array_GEN)
 	costs_allyears_GEN_consumption = np.full(projectionLength, costs_year1_GEN_consumption)
 
 	## Calculate cost array for year 1 only
@@ -886,9 +893,9 @@ def work(modelDir, inputDict):
 	outData['savings_allyears_BESS'] = list(savings_allyears_BESS)
 	outData['savings_allyears_TESS'] = list(savings_allyears_TESS)
 	outData['savings_allyears_GEN'] = list(savings_allyears_GEN)
-	outData['totalCosts_BESS_allyears'] = list(-1.0*(costs_allyears_BESS+costs_allyears_BESS_consumption)) ## Costs are negative for plotting purposes
-	outData['totalCosts_TESS_allyears'] = list(-1.0*(costs_allyears_TESS+costs_allyears_TESS_consumption)) ## Costs are negative for plotting purposes
-	outData['totalCosts_GEN_allyears'] = list(-1.0*(costs_allyears_GEN+costs_allyears_GEN_consumption)) ## Costs are negative for plotting purposes
+	outData['costs_allyears_BESS'] = list(-1.0*(costs_allyears_BESS+costs_allyears_BESS_consumption)) ## Costs are negative for plotting purposes
+	outData['costs_allyears_TESS'] = list(-1.0*(costs_allyears_TESS+costs_allyears_TESS_consumption)) ## Costs are negative for plotting purposes
+	outData['costs_allyears_GEN'] = list(-1.0*(costs_allyears_GEN+costs_allyears_GEN_consumption)) ## Costs are negative for plotting purposes
 	outData['cumulativeSavings_total'] = list(np.cumsum(savings_allyears_array))
 
 	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
@@ -904,7 +911,11 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load_tenX.csv')) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
+	## NOTE: The following temperature curve is for a residence in West Virginia area
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
+	#	temp_curve = f.read()
+	## NOTE: The following temperature curve is for a residence in Denver, CO
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
 		temp_curve = f.read()
 	## NOTE: Following line commented out because it was used for simulating outages in REopt.
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
@@ -931,7 +942,8 @@ def new(modelDir):
 
 		'year' : '2018',
 		'fileName': 'residential_PV_load_tenX.csv',
-		'tempFileName': 'residential_extended_temperature_data.csv',
+		#'tempFileName': 'residential_extended_temperature_data.csv',
+		'tempFileName': 'open-meteo-denverCO-noheaders.csv',
 		## NOTE: Following lines commented out because it was used for simulating outages in REopt.
 		#'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
 		#'criticalLoad': criticalLoad_curve,
