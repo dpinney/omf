@@ -708,14 +708,14 @@ def work(modelDir, inputDict):
 
 	## Calculate cost array for year 1 only
 	## TODO: potentially add electricity cost for electricity bought from utility here
-	costs_year1_adjustedEnergyConsumption = np.sum(outData['monthlyAdjustedEnergyConsumptionCost'])
-	costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_adjustedEnergyConsumption)
-	costs_allyears_array += costs_allyears_energyConsumption
+	#costs_year1_adjustedEnergyConsumption = np.sum(outData['monthlyAdjustedEnergyConsumptionCost'])
+	#costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_adjustedEnergyConsumption)
+	#costs_allyears_array += costs_allyears_energyConsumption
 	costs_allyears_total = sum(costs_allyears_array)
 	costs_year1_array = np.zeros(12)
 	costs_year1_array[0] += initialInvestment
 	costs_year1_total = sum(costs_year1_array)
-	costs_allyears_total_minus_initial_investment = costs_allyears_total - initialInvestment
+	#costs_allyears_total_minus_initial_investment = costs_allyears_total - initialInvestment
 
 
 	######################################################################################################################################################
@@ -808,11 +808,12 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_year1_total = allDevices_subsidy_onetime + (allDevices_subsidy_ongoing*12.0)
 	allDevices_subsidy_year1_array = np.full(12, allDevices_subsidy_ongoing)
 	allDevices_subsidy_year1_array[0] += allDevices_subsidy_onetime
+	outData['allDevices_subsidy_year1'] = list(allDevices_subsidy_year1_array)
 	allDevices_subsidy_allyears_array = np.full(projectionLength, allDevices_subsidy_ongoing*12.0)
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
 
 	## Calculate total savings
-	savings_year1_monthly_array = allDevices_subsidy_year1_array + allDevices_compensation_year1_array
+	savings_year1_monthly_array = np.array(outData['monthlyEnergyConsumptionSavings']) + allDevices_subsidy_year1_array + allDevices_compensation_year1_array
 	savings_year1_total = sum(savings_year1_monthly_array)
 	savings_allyears_array = np.full(projectionLength, savings_year1_total)
 	savings_allyears_total = sum(savings_allyears_array)
@@ -883,14 +884,6 @@ def work(modelDir, inputDict):
 	######################################################################################################################################################
 	## Savings Breakdown Per Technology Plot variables
 	######################################################################################################################################################
-	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
-	totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
-	totalCosts_TESS_allyears_array = TESS_subsidy_allyears_array + TESS_compensation_allyears_array
-	utilitySavings_year1_total = np.sum(outData['monthlyTotalSavingsAdjustedService'])
-	utilitySavings_year1_array = np.array(outData['monthlyTotalSavingsAdjustedService'])
-	utilitySavings_allyears_array = np.full(projectionLength, utilitySavings_year1_total)
-	utilitySavings_allyears_total = np.sum(utilitySavings_allyears_array)
-
 	outData['savings_consumption_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_consumption_savings)))
 	outData['savings_consumption_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_consumption_savings)))
 	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_consumption_savings)))
@@ -965,15 +958,15 @@ def new(modelDir):
 		'subsidyUpfront': '50',
 		'subsidyOngoing': '10',
 		'TESS_subsidy_onetime_ac': '25.0',
-		'TESS_subsidy_ongoing_ac': '0.0',
-		'TESS_subsidy_onetime_hp': '100.0',
-		'TESS_subsidy_ongoing_hp': '0.0',
+		'TESS_subsidy_ongoing_ac': '5.0',
+		'TESS_subsidy_onetime_hp': '25.0',
+		'TESS_subsidy_ongoing_hp': '5.0',
 		'TESS_subsidy_onetime_wh': '25.0',
-		'TESS_subsidy_ongoing_wh': '0.0',
+		'TESS_subsidy_ongoing_wh': '5.0',
 		'BESS_subsidy_onetime': '100.0',
-		'BESS_subsidy_ongoing': '0.0',
-		'GEN_subsidy_onetime': '0.0',
-		'GEN_subsidy_ongoing': '0.0',
+		'BESS_subsidy_ongoing': '55.0',
+		'GEN_subsidy_onetime': '25.0',
+		'GEN_subsidy_ongoing': '5.0',
 
 		## Chemical Battery Inputs
 		## Modeled after residential Tesla Powerwall 3 battery specs
