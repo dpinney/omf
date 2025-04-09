@@ -673,8 +673,12 @@ def work(modelDir, inputDict):
 	replacement_cost_GEN_total = replacement_cost_GEN * replacement_frequency_GEN
 
 	## GEN fuel cost
-	## TODO: Add generator fuel cost
-	
+	gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
+	gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
+	costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
+	costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
+	costs_allyears_GEN += costs_allyears_gen_fuel
+
 	## Apply each replacement cost to the specified replacement years
 	for year in range(0, projectionLength):
 		if year % replacement_year_BESS == 0 and year != 0:
