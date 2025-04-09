@@ -521,8 +521,8 @@ def work(modelDir, inputDict):
 	outData['monthlyTotalSavingsAdjustedService'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService'])] ## total savings from all DERs
 
 	## Calculate the individual DER demand costs using the TOU rate schedule
-	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(BESS, energy_rate_array)]
-	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_discharge_component, energy_rate_array)]
+	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(BESS-grid_charging_BESS, energy_rate_array)]
+	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_discharge_component-vbat_charge_component, energy_rate_array)]
 	demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
 
 	#########################################################################################################################################################
@@ -675,12 +675,13 @@ def work(modelDir, inputDict):
 	replacement_cost_GEN_total = replacement_cost_GEN * replacement_frequency_GEN
 
 	## GEN fuel cost
-	gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
-	gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
-	costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
-	costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
-	costs_allyears_GEN += costs_allyears_gen_fuel
-	costs_allyears_array += costs_allyears_gen_fuel
+	if 'Generator' in reoptResults:
+		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
+		gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
+		costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
+		costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
+		costs_allyears_GEN += costs_allyears_gen_fuel
+		costs_allyears_array += costs_allyears_gen_fuel
 
 	## Apply each replacement cost to the specified replacement years
 	for year in range(0, projectionLength):
