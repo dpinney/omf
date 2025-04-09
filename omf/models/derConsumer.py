@@ -488,7 +488,6 @@ def work(modelDir, inputDict):
 	demandCost = 0.0
 	rateCompensation = float(inputDict['rateCompensation'])
 
-
 	## Calculate the monthly demand and energy consumption (for the demand curve without DERs)
 	demandCost = 0
 	outData['monthlyPeakDemand'] = [max(demand[s:f]) for s, f in monthHours] ## The maximum peak kW for each month
@@ -500,32 +499,31 @@ def work(modelDir, inputDict):
 		energy_rate_curve = f.read()
 	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
 	demand_cost_array = [float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
-	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(BESS, energy_rate_array)]
-	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_discharge_component, energy_rate_array)]
-	demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
-
 	outData['monthlyEnergyConsumption'] = [sum(demand[s:f]) for s, f in monthHours] ## The total energy in kWh for each month
 	outData['monthlyEnergyConsumptionCost'] = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy cost in $$ for each month	
 
 	## Calculate the monthly adjusted demand ("adjusted" = the demand curve including DERs)
-	outData['adjustedDemand'] = list(demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component)
-	outData['monthlyAdjustedEnergyConsumption'] = [sum(outData['adjustedDemand'][s:f]) for s, f in monthHours]
-	outData['monthlyAdjustedEnergyConsumptionCost'] = [eam*consumptionCost for eam in outData['monthlyAdjustedEnergyConsumption']]
-	outData['monthlyAdjustedPeakDemand'] = [max(outData['adjustedDemand'][s:f]) for s, f in monthHours] ## monthly peak demand hours (including DERs)
+	adjusted_demand = demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component
+	outData['adjustedDemand'] = list(adjusted_demand)
+	outData['monthlyAdjustedEnergyConsumption'] = [sum(adjusted_demand[s:f]) for s, f in monthHours] ## The total adjusted energy in kWh for each month
+	adjusted_demand_cost_array = [float(a) * float(b) for a, b in zip(adjusted_demand, energy_rate_array)]
+	outData['monthlyAdjustedEnergyConsumptionCost'] = [sum(adjusted_demand_cost_array[s:f]) for s, f in monthHours] ## The total adjusted energy cost in $$ for each month	
+	outData['monthlyAdjustedPeakDemand'] = [max(adjusted_demand[s:f]) for s, f in monthHours] ## monthly peak demand hours (including DERs)
 	outData['monthlyAdjustedPeakDemandCost'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand']] ## peak demand charge after including all DERs
 
 	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyPeakDemandSavings'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost'])) ## total demand charge savings from all DERs
-	#print('Monthly Peak Demand cost (baseline demand): \n', np.array(outData['monthlyPeakDemandCost']))
-	#print('Monthly Adjusted Peak Demand cost: \n', np.array(outData['monthlyAdjustedPeakDemandCost']))
-	#print('Monthly Peak Demand Savings Dcost x (D-Dadj): \n', outData['monthlyPeakDemandSavings'])
-
 	outData['monthlyEnergyConsumptionSavings'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost'])) ## total consumption savings from BESS only
-	
+
 	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(outData['monthlyEnergyConsumptionCost'], outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
 	outData['monthlyTotalCostAdjustedService'] = [eca+dca for eca, dca in zip(outData['monthlyAdjustedEnergyConsumptionCost'], outData['monthlyAdjustedPeakDemandCost'])] ## total cost of energy and peak demand from including DERs
 	outData['monthlyTotalSavingsAdjustedService'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService'])] ## total savings from all DERs
+
+	## Calculate the individual DER demand costs using the TOU rate schedule
+	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(BESS, energy_rate_array)]
+	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_discharge_component, energy_rate_array)]
+	demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
 
 	#########################################################################################################################################################
 	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption and peak demand savings
@@ -650,6 +648,10 @@ def work(modelDir, inputDict):
 	costs_allyears_TESS[0] += retrofit_cost_TESS
 	costs_allyears_GEN[0] += retrofit_cost_GEN
 
+	## Initial Investment
+	initialInvestment = retrofit_cost_total
+	costs_allyears_array[0] += initialInvestment
+
 	## BESS replacement cost
 	replacement_cost_BESS_kw = float(inputDict['replace_cost_per_kw']) ## units: $
 	replacement_cost_BESS_kwh = float(inputDict['replace_cost_per_kwh']) ## units: $
@@ -678,6 +680,7 @@ def work(modelDir, inputDict):
 	costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
 	costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
 	costs_allyears_GEN += costs_allyears_gen_fuel
+	costs_allyears_array += costs_allyears_gen_fuel
 
 	## Apply each replacement cost to the specified replacement years
 	for year in range(0, projectionLength):
@@ -693,10 +696,6 @@ def work(modelDir, inputDict):
 
 	## TODO: Later, maybe add each costs_allyears_X together to form costs_allyears_array instead of doubling in the for/if statements above
 
-	## Initial Investment
-	initialInvestment = retrofit_cost_total
-	costs_allyears_array[0] += initialInvestment
-
 	## Calculate consumption costs for entire projectionLength
 	## TODO: Change naming convention from savings to costs 
 	costs_year1_BESS_consumption = sum(demand_cost_array_BESS)*100
@@ -708,8 +707,8 @@ def work(modelDir, inputDict):
 
 	## Calculate cost array for year 1 only
 	## TODO: potentially add electricity cost for electricity bought from utility here
-	costs_year1_energyConsumption = np.sum(outData['monthlyEnergyConsumptionCost'])
-	costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_energyConsumption)
+	costs_year1_adjustedEnergyConsumption = np.sum(outData['monthlyAdjustedEnergyConsumptionCost'])
+	costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_adjustedEnergyConsumption)
 	costs_allyears_array += costs_allyears_energyConsumption
 	costs_allyears_total = sum(costs_allyears_array)
 	costs_year1_array = np.zeros(12)
@@ -986,7 +985,7 @@ def new(modelDir):
 		'replace_cost_per_kw': '324.0', 
 		'replace_cost_per_kwh': '351.0', 
 		'battery_replacement_year': '10',  
-		'BESS_installed_cost': '0', 
+		'BESS_installed_cost': '0.0', 
 		'total_itc_fraction': '0.0', ## No ITC
 		'inverter_replacement_year': '10',
 		'replace_cost_inverter': '2400',
@@ -995,7 +994,7 @@ def new(modelDir):
 		## Modeled after Generac Guardian 5 kW model ## NOTE: For liquid propane: 3.56 gal/hr
 		'fossilGenerator': 'Yes',
 		'existing_gen_kw': '5',
-		'gen_retrofit_cost': '0',
+		'gen_retrofit_cost': '0.0',
 		'fuel_available_gal': '1000', 
 		'fuel_cost_per_gal': '1.00',
 		'replace_cost_generator_per_kw': '450',
