@@ -149,11 +149,7 @@ def hosting_cap_tchc(
             df_xfmr_info['nearby_idx'] = df_nearby_xfmrs['nearby_idx'].copy()
 
         else:
-            # use nighttime voltage magnitudes or voltage correlations
-            # to create nearby xfmrs list
-            # df_nearby_xfmrs = get_nearby_xfmr_idx_volt_based()
-
-            # temporarily just use all:
+            # use all:
             df_nearby_xfmrs = get_nearby_xfmr_idx_all(df_xfmr_info)
             df_xfmr_info['nearby_idx'] = df_nearby_xfmrs['nearby_idx'].copy()
 
@@ -190,13 +186,10 @@ def get_nearby_xfmr_idx_all(df_xfmr_info):
     """
     df_nearby_xfmrs = pd.DataFrame(columns=['nearby_idx'])
     xfmr_idx_all = df_xfmr_info['Transformer Index'].values
-    df_xfmr_all = df_xfmr_info['Transformer Index'].copy()
 
     for ii in range(len(xfmr_idx_all)):
         idx_now = xfmr_idx_all[ii]
         idx_nearby = xfmr_idx_all[xfmr_idx_all != idx_now]
-        xfmr_idx_nearby = df_xfmr_all[idx_nearby]
-        xfmr_idx_nearby = xfmr_idx_nearby.values
         df_nearby_xfmrs.at[ii, 'nearby_idx'] = idx_nearby
 
     return df_nearby_xfmrs
@@ -669,9 +662,15 @@ def get_customer_tchc(
         kva_limit_ts = kva_limit_val * np.ones(np.shape(s1_kva))
 
         # calculate the thermal headroom for reverse power flow, using der_pf
-        if der_pf == 1:
-            p_pv_max_ts = q1_kvar/np.tan(np.arcsin(q1_kvar/kva_limit_ts))-p1_kw
-            p_pv_max_ts = np.abs(p_pv_max_ts)
+        if der_pf == 1:           
+            # Check for negative values and handle them
+            q1_temp = np.copy(q1_kvar)
+            filter_neg_sqrt = np.abs(q1_temp) > np.abs(kva_limit_ts)
+            q1_temp[filter_neg_sqrt] = np.nan
+            
+            # p_pv_max_ts = np.sqrt((kva_limit_ts**2) - (q1_kvar**2)) + p1_kw
+            p_pv_max_ts = np.sqrt((kva_limit_ts**2) - (q1_temp**2)) + p1_kw
+            p_pv_max_ts[np.isnan(p_pv_max_ts)] = 0
             s_pv_max_ts = p_pv_max_ts
         else:
             k_pf = der_pf/np.sin(np.arccos(der_pf))
