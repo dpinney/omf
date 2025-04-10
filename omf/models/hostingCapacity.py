@@ -270,6 +270,10 @@ def run_AMIAlgorithm( modelDir, inputDict, outData ):
 	amiStartTime = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		if inputDict["dgInverterSetting"] == 'constantPF':
+			valueDerPF = float(inputDict['derPF'])
+			if valueDerPF > 1.0 or valueDerPF < 0:
+				errorMessage = "DG Power Factor must be between 0 and 1"
+				raise Exception(errorMessage)
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPathAMIData, out_path=outputPathVoltageHC, der_pf= float(inputDict['derPF']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
 			# Temp warning and catching if statement until fixed
