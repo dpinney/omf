@@ -488,12 +488,13 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.monthlyAdjustedEnergyConsumption)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.monthlyEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
-					//insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.monthlyPeakDemandCost)
-					//insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost)
-					//insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.monthlyTotalCostService)
+					insertMetric("monthlySummaryTable","Energy Cost Savings ($)", allOutputData.monthlyEnergyConsumptionSavings)
 					insertMetric("monthlySummaryTable","Utility Subsidies ($)", allOutputData.allDevices_subsidy_year1)
-					//insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.monthlyTotalCostAdjustedService)
-					insertMetric("monthlySummaryTable","Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
+					insertMetric("monthlySummaryTable","Compensation for DERs ($)", allOutputData.allDevices_compensation_year1)
+					insertMetric("monthlySummaryTable","Total Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
+					//insertMetric("monthlySummaryTable","Replacement Costs ($)", allOutputData.savings_year1_monthly_array)
+					//insertMetric("monthlySummaryTable","Generator Fuel Costs ($)", allOutputData.savings_year1_monthly_array)
+					//insertMetric("monthlySummaryTable","Total Consumer Costs ($)", allOutputData.savings_year1_monthly_array)
 				</script>
 			</div>
 		</div>

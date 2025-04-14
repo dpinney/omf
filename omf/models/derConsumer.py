@@ -791,6 +791,7 @@ def work(modelDir, inputDict):
 	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
 	allDevices_compensation_year1_total = np.sum(allDevices_compensation_year1_array)
 	allDevices_compensation_allyears_array = BESS_compensation_allyears_array + GEN_compensation_allyears_array + TESS_compensation_allyears_array
+	outData['allDevices_compensation_year1'] = list(allDevices_compensation_year1_array)
 
 	## Calculate the total TESS+BESS+generator subsidies for year 1 and the projection length (all years)
 	## The first month of Year 1 includes the onetime subsidy, but subsequent months and years only include the ongoing subsidies.
