@@ -124,7 +124,7 @@ def work(modelDir, inputDict):
 	outData.update(reoptResults) ## Update output file outData with REopt results data
 
 	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
+	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	## Create timestamp array from REopt input information
@@ -151,13 +151,13 @@ def work(modelDir, inputDict):
 		'unitDeviceCost': '', 
 		'unitUpkeepCost':  '', 
 		'demandChargeCost': '0.0',
-		'electricityCost': inputDict['electricityCost'],
+		'electricityCost': '0.16',
 		'projectionLength': inputDict['projectionLength'],
 		'discountRate': inputDict['discountRate'],
-		'fileName': inputDict['fileName'],
-		'tempFileName':  inputDict['tempFileName'],
+		'fileName': inputDict['demandFileName'],
+		'tempFileName':  inputDict['temperatureFileName'],
 		'demandCurve':  inputDict['demandCurve'],
-		'tempCurve': inputDict['tempCurve'],
+		'tempCurve': inputDict['temperatureCurve'],
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -484,7 +484,7 @@ def work(modelDir, inputDict):
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	consumptionCost = float(inputDict['electricityCost'])
+	#consumptionCost = float(inputDict['electricityCost'])
 	demandCost = 0.0
 	rateCompensation = float(inputDict['rateCompensation'])
 
@@ -565,15 +565,6 @@ def work(modelDir, inputDict):
 		TESSpeakDemand_baseP[s:f] = TESSdemand[s:f] * peak_mask_baseP ## TESS demand at the monthly baseline peak
 		GENpeakDemand_baseP[s:f] = GENdemand[s:f] * peak_mask_baseP ## GEN demand at the monthly baseline peak
 		peakDemand_baseP[s:f] = demand[s:f] * peak_mask_baseP ## demand at the monthly baseline demand peak
-
-	## Monthly BESS, TESS, and GEN energy consumption savings
-	monthlyBESS_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyBESSconsumption]
-	monthlyTESS_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyTESSconsumption]
-	monthlyGEN_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyGENconsumption]
-	monthlyAllDER_consumption_savings = [a+b+c for a,b,c in zip(monthlyBESS_consumption_savings,monthlyTESS_consumption_savings,monthlyGEN_consumption_savings)]
-	totalAllDER_consumption_savings = sum(monthlyAllDER_consumption_savings)
-	#print('total consumption savings when adding up individual DERs: ', totalAllDER_consumption_savings)
-	#print('total consumption savings (D-Dadj)*Ecost: ', consumptionCost*(sum(demand)-sum(outData['adjustedDemand']))) NOTE: These agree, yay!
 
 	## Monthly BESS, TESS, and GEN peak demand savings
 	## NOTE: The sum is done over the entire month's DER contribution because the contribution arrays have zeroes everywhere except for the peak hour per month
@@ -884,9 +875,6 @@ def work(modelDir, inputDict):
 	######################################################################################################################################################
 	## Savings Breakdown Per Technology Plot variables
 	######################################################################################################################################################
-	outData['savings_consumption_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_consumption_savings)))
-	outData['savings_consumption_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_consumption_savings)))
-	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_consumption_savings)))
 	outData['savings_allyears_BESS'] = list(savings_allyears_BESS)
 	outData['savings_allyears_TESS'] = list(savings_allyears_TESS)
 	outData['savings_allyears_GEN'] = list(savings_allyears_GEN)
@@ -913,7 +901,7 @@ def new(modelDir):
 	#	temp_curve = f.read()
 	## NOTE: The following temperature curve is for a residence in Denver, CO
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
-		temp_curve = f.read()
+		temperature_curve = f.read()
 	## NOTE: Following line commented out because it was used for simulating outages in REopt.
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
 	#	criticalLoad_curve = f.read()
@@ -936,23 +924,16 @@ def new(modelDir):
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'latitude' : '39.969753', ## Brighton, CO
-
 		'year' : '2018',
-		'fileName': 'residential_PV_load_tenX.csv',
-		#'tempFileName': 'residential_extended_temperature_data.csv',
-		'tempFileName': 'open-meteo-denverCO-noheaders.csv',
-		## NOTE: Following lines commented out because it was used for simulating outages in REopt.
-		#'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
-		#'criticalLoad': criticalLoad_curve,
-		#'criticalLoadSwitch': 'Yes',
-		#'criticalLoadFactor': '0.50',
+		'demandFileName': 'residential_PV_load_tenX.csv',
 		'demandCurve': demand_curve,
-		'tempCurve': temp_curve,
+		'temperatureFileName': 'open-meteo-denverCO-noheaders.csv',
+		'temperatureCurve': temperature_curve,
+		'energyRateFileName': 'TOU_rate_schedule.csv',
 		'energyRateCurve': energy_rate_curve,
 
 		## Financial Inputs
 		'projectionLength': '25',
-		'electricityCost': '0.16',
 		'discountRate': '1',
 		'rateCompensation': '0.1', ## unit: $/kWh
 		'subsidyUpfront': '50',
