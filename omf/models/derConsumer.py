@@ -972,7 +972,7 @@ def new(modelDir):
 		'existing_gen_kw': '5',
 		'gen_retrofit_cost': '0.0',
 		'fuel_available_gal': '1000', 
-		'fuel_cost_per_gal': '1.00',
+		'fuel_cost_per_gal': '3.75',
 		'replace_cost_generator_per_kw': '450',
 		'generator_replacement_year': '15',
 
