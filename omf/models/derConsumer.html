@@ -196,8 +196,39 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Fuel Type<span class="classic">Type of fossil fuel used for the generator.</span></label>
+				<select id="fuel_type" onchange="loadDefaultParameters()" name="fuel_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('fuel_type').value;
+						if (x == 1){ // Natural Gas
+							gebi('fuel_cost_per_gal').value = '2';
+							gebi('gen_efficiency').value = '35';
+						} else if (x == 2){ // Propane
+							gebi('fuel_cost_per_gal').value = '2.70';
+							gebi('gen_efficiency').value = '22';
+						} else if (x == 3) { // Diesel
+							gebi('fuel_cost_per_gal').value = '3.80';
+							gebi('gen_efficiency').value = '35';
+						} else { // Gasoline
+							gebi('fuel_cost_per_gal').value = '3.17';
+							gebi('gen_efficiency').value = '25';
+						}
+					}
+				</script>
+					<option value="1" {{ 'selected' if allInputDataDict.fuel_type == '1' }}>Natural Gas</option>
+					<option value="2" {{ 'selected' if allInputDataDict.fuel_type == '2' }}>Propane</option>
+					<option value="3" {{ 'selected' if allInputDataDict.fuel_type == '3' }}>Diesel</option>
+					<option value="4" {{ 'selected' if allInputDataDict.fuel_type == '4' }}>Gasoline</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Rated Power Capacity (kW)<span class="classic">Specify the operating power of the fossil fuel generator.</span></label>
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generator Efficiency (%)<span class="classic">Specify the efficiency of the generator.</span></label>
+				<input type="text" id="gen_efficiency" name="gen_efficiency" value="{{allInputDataDict.gen_efficiency}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retrofit Cost ($)<span class="classic">Specify the cost to enable the generator for utility control.</span></label>
@@ -490,6 +521,7 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Energy Cost Savings ($)", allOutputData.monthlyEnergyConsumptionSavings)
 					insertMetric("monthlySummaryTable","Utility Subsidies ($)", allOutputData.allDevices_subsidy_year1)
+					insertMetric("monthlySummaryTable","Generator Fuel Cost ($)", allOutputData.monthly_gen_fuel_cost)
 					insertMetric("monthlySummaryTable","Compensation for DERs ($)", allOutputData.allDevices_compensation_year1)
 					insertMetric("monthlySummaryTable","Total Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
 					//insertMetric("monthlySummaryTable","Replacement Costs ($)", allOutputData.savings_year1_monthly_array)

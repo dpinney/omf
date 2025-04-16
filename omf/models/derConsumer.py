@@ -669,6 +669,35 @@ def work(modelDir, inputDict):
 	if 'Generator' in reoptResults:
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
 		gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
+		btu_per_kwh = 3412.0 ## constant
+		gen_efficiency = float(inputDict['gen_efficiency'])/100.
+		monthlyGENconsumption = np.array(monthlyGENconsumption)
+
+		fuel_type = int(inputDict['fuel_type'])
+		if fuel_type == 1: ## Natural Gas
+			## There is no btu per gal for natural gas since it's, well, a gas
+			## Assume the fuel cost per gallon is cost per million BTU
+			price_per_mmbtu = gen_fuel_cost_per_gal
+			btu_per_cubic_ft = 1030.0
+			price_per_cubic_foot = price_per_mmbtu * btu_per_cubic_ft/1.e6
+			monthly_fuel_cost = (monthlyGENconsumption * btu_per_kwh) * 1.e6 * price_per_mmbtu
+
+		if fuel_type == 2: ## Propane
+			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost_per_gal
+
+		if fuel_type == 3:  # Diesel
+			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost_per_gal
+
+		if fuel_type == 4: ## Gasoline
+			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost_per_gal
+
+		outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
 		costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
 		costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
 		costs_allyears_GEN += costs_allyears_gen_fuel
@@ -969,10 +998,12 @@ def new(modelDir):
 		## Fossil Fuel Generator
 		## Modeled after Generac Guardian 5 kW model ## NOTE: For liquid propane: 3.56 gal/hr
 		'fossilGenerator': 'Yes',
+		'fuel_type': '3', 
 		'existing_gen_kw': '5',
+		'gen_efficiency': '35',
 		'gen_retrofit_cost': '0.0',
 		'fuel_available_gal': '1000', 
-		'fuel_cost_per_gal': '3.75',
+		'fuel_cost_per_gal': '3.80',
 		'replace_cost_generator_per_kw': '450',
 		'generator_replacement_year': '15',
 
