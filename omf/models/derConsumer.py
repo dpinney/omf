@@ -90,16 +90,20 @@ def work(modelDir, inputDict):
 	## Add fossil fuel (diesel) generator to input scenario (if enabled)
 	if inputDict['fossilGenerator'] == 'Yes':
 		GENcheck = 'enabled'
+
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']), ## Existing generator
 			'max_kw': 0.0, ## New generator minumum
 			'min_kw': 0.0, ## New generator maximum
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
-			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 			'replacement_year': int(inputDict['generator_replacement_year']),
 			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw'])
 		}
+
+		if int(inputDict['fuel_type']) != 1: ## If fuel type is not natural gas
+			scenario['Generator']['fuel_avail_gal'] = float(inputDict['fuel_avail'])
+			scenario['Generator']['fuel_cost_per_gallon'] = float(inputDict['fuel_cost'])
+
 	else:
 		GENcheck = 'disabled'
 
@@ -668,7 +672,7 @@ def work(modelDir, inputDict):
 	## GEN fuel cost
 	if 'Generator' in reoptResults:
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
-		gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
+		gen_fuel_cost_per_gal = float(inputDict['fuel_cost'])
 		btu_per_kwh = 3412.0 ## constant
 		gen_efficiency = float(inputDict['gen_efficiency'])/100.
 		monthlyGENconsumption = np.array(monthlyGENconsumption)
@@ -996,19 +1000,19 @@ def new(modelDir):
 		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
-		## Modeled after Generac Guardian 5 kW model ## NOTE: For liquid propane: 3.56 gal/hr
+		## Modeled after Generac Guardian 5 kW model
 		'fossilGenerator': 'Yes',
 		'fuel_type': '3', 
 		'existing_gen_kw': '5',
 		'gen_efficiency': '35',
 		'gen_retrofit_cost': '0.0',
-		'fuel_available_gal': '1000', 
-		'fuel_cost_per_gal': '3.80',
+		'fuel_avail': '1000', 
+		'fuel_cost': '3.80',
 		'replace_cost_generator_per_kw': '450',
 		'generator_replacement_year': '15',
 
 		## Home Air Conditioner inputs (vbatDispatch):
-		'load_type_ac': '1', 
+		'load_type_ac': '1',
 		'unitDeviceCost_ac': '8', #a cheap wifi-enabled smart outlet to plug the AC into tis about $8
 		'unitUpkeepCost_ac': '0',
 		'power_ac': '5.6',

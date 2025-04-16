@@ -202,16 +202,17 @@
 					function loadDefaultParameters(){
 						var x = gebi('fuel_type').value;
 						if (x == 1){ // Natural Gas
-							gebi('fuel_cost_per_gal').value = '2';
+							gebi('fuel_cost').value = '2';
 							gebi('gen_efficiency').value = '35';
+							gebi('fuel_avail').value = '2';
 						} else if (x == 2){ // Propane
-							gebi('fuel_cost_per_gal').value = '2.70';
+							gebi('fuel_cost').value = '2.70';
 							gebi('gen_efficiency').value = '22';
 						} else if (x == 3) { // Diesel
-							gebi('fuel_cost_per_gal').value = '3.80';
+							gebi('fuel_cost').value = '3.80';
 							gebi('gen_efficiency').value = '35';
 						} else { // Gasoline
-							gebi('fuel_cost_per_gal').value = '3.17';
+							gebi('fuel_cost').value = '3.17';
 							gebi('gen_efficiency').value = '25';
 						}
 					}
@@ -235,12 +236,12 @@
 				<input type="text" id="gen_retrofit_cost" name="gen_retrofit_cost" value="{{allInputDataDict.gen_retrofit_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Fuel (gal)<span class="classic">Specify the annual amount of generator fuel available.</span></label>
-				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this is in units of cubic feet. For all other liquid fuels, use units of gallons.</span></label>
+				<input type="text" id="fuel_avail" name="fuel_avail" value="{{allInputDataDict.fuel_avail}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, use units of $/cubic foot. For all other liquid fuels, use units of $/gallon.</span></label>
+				<input type="text" id="fuel_cost" name="fuel_cost" value="{{allInputDataDict.fuel_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Replacement Cost ($/kW)<span class="classic">Specify the cost of replacing the generator in the specified year in $/kW.</span></label>
