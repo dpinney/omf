@@ -196,20 +196,52 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Fuel Type<span class="classic">Type of fossil fuel used for the generator.</span></label>
+				<select id="fuel_type" onchange="loadDefaultParameters()" name="fuel_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('fuel_type').value;
+						if (x == 1){ // Natural Gas
+							gebi('fuel_cost').value = '0.00386'; // units: $/cubic ft
+							gebi('thermal_efficiency').value = '30';
+							gebi('fuel_avail').value = '1000'; // units: cubic ft
+						} else if (x == 2){ // Propane
+							gebi('fuel_cost').value = '2.70'; // units: $/gal
+							gebi('thermal_efficiency').value = '25';
+						} else if (x == 3) { // Diesel
+							gebi('fuel_cost').value = '3.80'; // units: $/gal
+							gebi('thermal_efficiency').value = '35';
+						} else { // Gasoline
+							gebi('fuel_cost').value = '3.17'; // units: $/gal
+							gebi('thermal_efficiency').value = '25';
+						}
+					}
+				</script>
+					<option value="1" {{ 'selected' if allInputDataDict.fuel_type == '1' }}>Natural Gas</option>
+					<option value="2" {{ 'selected' if allInputDataDict.fuel_type == '2' }}>Propane</option>
+					<option value="3" {{ 'selected' if allInputDataDict.fuel_type == '3' }}>Diesel</option>
+					<option value="4" {{ 'selected' if allInputDataDict.fuel_type == '4' }}>Gasoline</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Rated Power Capacity (kW)<span class="classic">Specify the operating power of the fossil fuel generator.</span></label>
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Efficiency (%)<span class="classic">Specify the thermal efficiency of the generator fuel.</span></label>
+				<input type="text" id="thermal_efficiency" name="thermal_efficiency" value="{{allInputDataDict.thermal_efficiency}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retrofit Cost ($)<span class="classic">Specify the cost to enable the generator for utility control.</span></label>
 				<input type="text" id="gen_retrofit_cost" name="gen_retrofit_cost" value="{{allInputDataDict.gen_retrofit_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Fuel (gal)<span class="classic">Specify the annual amount of generator fuel available.</span></label>
-				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this is in units of cubic feet. For all other liquid fuels, use units of gallons.</span></label>
+				<input type="text" id="fuel_avail" name="fuel_avail" value="{{allInputDataDict.fuel_avail}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, use units of $/cubic foot. For all other liquid fuels, use units of $/gallon.</span></label>
+				<input type="text" id="fuel_cost" name="fuel_cost" value="{{allInputDataDict.fuel_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Replacement Cost ($/kW)<span class="classic">Specify the cost of replacing the generator in the specified year in $/kW.</span></label>
@@ -490,6 +522,7 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Energy Cost Savings ($)", allOutputData.monthlyEnergyConsumptionSavings)
 					insertMetric("monthlySummaryTable","Utility Subsidies ($)", allOutputData.allDevices_subsidy_year1)
+					insertMetric("monthlySummaryTable","Generator Fuel Cost ($)", allOutputData.monthly_gen_fuel_cost)
 					insertMetric("monthlySummaryTable","Compensation for DERs ($)", allOutputData.allDevices_compensation_year1)
 					insertMetric("monthlySummaryTable","Total Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
 					//insertMetric("monthlySummaryTable","Replacement Costs ($)", allOutputData.savings_year1_monthly_array)

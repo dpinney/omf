@@ -90,16 +90,18 @@ def work(modelDir, inputDict):
 	## Add fossil fuel (diesel) generator to input scenario (if enabled)
 	if inputDict['fossilGenerator'] == 'Yes':
 		GENcheck = 'enabled'
+
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']), ## Existing generator
 			'max_kw': 0.0, ## New generator minumum
 			'min_kw': 0.0, ## New generator maximum
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
-			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 			'replacement_year': int(inputDict['generator_replacement_year']),
-			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw'])
+			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw']),
+			'fuel_avail_gal': float(inputDict['fuel_avail']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost']),
 		}
+
 	else:
 		GENcheck = 'disabled'
 
@@ -668,8 +670,45 @@ def work(modelDir, inputDict):
 	## GEN fuel cost
 	if 'Generator' in reoptResults:
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
-		gen_fuel_cost_per_gal = float(inputDict['fuel_cost_per_gal'])
-		costs_year1_gen_fuel = gen_fuel_cost_per_gal * gen_annual_fuel_consumption_gal
+		gen_fuel_cost = float(inputDict['fuel_cost'])
+		btu_per_kwh = 3412.0 ## constant
+		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
+		monthlyGENconsumption = np.array(monthlyGENconsumption)
+
+		fuel_type = int(inputDict['fuel_type'])
+		if fuel_type == 1: ## Natural Gas
+			## Assume the fuel cost input is given in units of $/cubic foot
+			price_per_cubic_foot = gen_fuel_cost
+			btu_per_cubic_ft = 1030.0
+
+			## Convert the monthly GEN energy consumption from kWh to BTU
+			monthlyGENconsumption_btu = monthlyGENconsumption * btu_per_kwh 
+
+			## Calculate the amount of natural gas needed per cubic foot
+			## = BTUs required / (BTUs per cubic foot * thermal efficiency)
+			monthly_gas_needed_cubic_ft = monthlyGENconsumption_btu / (btu_per_cubic_ft * thermal_efficiency)
+
+			## Total monthly fuel cost
+			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
+			annual_fuel_cost = np.sum(monthly_fuel_cost)
+
+		if fuel_type == 2: ## Propane
+			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		if fuel_type == 3:  # Diesel
+			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		if fuel_type == 4: ## Gasoline
+			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
+		costs_year1_gen_fuel = gen_fuel_cost * gen_annual_fuel_consumption_gal
 		costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
 		costs_allyears_GEN += costs_allyears_gen_fuel
 		costs_allyears_array += costs_allyears_gen_fuel
@@ -967,17 +1006,19 @@ def new(modelDir):
 		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
-		## Modeled after Generac Guardian 5 kW model ## NOTE: For liquid propane: 3.56 gal/hr
+		## NOTE: Generac Guardian models range from 10-26 kW
 		'fossilGenerator': 'Yes',
+		'fuel_type': '3', 
 		'existing_gen_kw': '5',
+		'thermal_efficiency': '35',
 		'gen_retrofit_cost': '0.0',
-		'fuel_available_gal': '1000', 
-		'fuel_cost_per_gal': '3.75',
+		'fuel_avail': '1000', 
+		'fuel_cost': '3.80',
 		'replace_cost_generator_per_kw': '450',
 		'generator_replacement_year': '15',
 
 		## Home Air Conditioner inputs (vbatDispatch):
-		'load_type_ac': '1', 
+		'load_type_ac': '1',
 		'unitDeviceCost_ac': '8', #a cheap wifi-enabled smart outlet to plug the AC into tis about $8
 		'unitUpkeepCost_ac': '0',
 		'power_ac': '5.6',
