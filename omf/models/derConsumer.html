@@ -203,11 +203,11 @@
 						var x = gebi('fuel_type').value;
 						if (x == 1){ // Natural Gas
 							gebi('fuel_cost').value = '2';
-							gebi('gen_efficiency').value = '35';
+							gebi('gen_efficiency').value = '30';
 							gebi('fuel_avail').value = '2';
 						} else if (x == 2){ // Propane
 							gebi('fuel_cost').value = '2.70';
-							gebi('gen_efficiency').value = '22';
+							gebi('gen_efficiency').value = '25';
 						} else if (x == 3) { // Diesel
 							gebi('fuel_cost').value = '3.80';
 							gebi('gen_efficiency').value = '35';
@@ -228,7 +228,7 @@
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Generator Efficiency (%)<span class="classic">Specify the efficiency of the generator.</span></label>
+				<label class="tooltip">Generator Efficiency (%)<span class="classic">Specify the thermal efficiency of the generator fuel.</span></label>
 				<input type="text" id="gen_efficiency" name="gen_efficiency" value="{{allInputDataDict.gen_efficiency}}" required="required"/>
 			</div>
 			<div class="shortInput">

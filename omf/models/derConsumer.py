@@ -1000,7 +1000,7 @@ def new(modelDir):
 		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
-		## Modeled after Generac Guardian 5 kW model
+		## NOTE: Generac Guardian models range from 10-26 kW
 		'fossilGenerator': 'Yes',
 		'fuel_type': '3', 
 		'existing_gen_kw': '5',
