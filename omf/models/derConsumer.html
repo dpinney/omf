@@ -202,17 +202,17 @@
 					function loadDefaultParameters(){
 						var x = gebi('fuel_type').value;
 						if (x == 1){ // Natural Gas
-							gebi('fuel_cost').value = '2';
+							gebi('fuel_cost').value = '0.00386'; // units: $/cubic ft
 							gebi('gen_efficiency').value = '30';
-							gebi('fuel_avail').value = '2';
+							gebi('fuel_avail').value = '1000'; // units: cubic ft
 						} else if (x == 2){ // Propane
-							gebi('fuel_cost').value = '2.70';
+							gebi('fuel_cost').value = '2.70'; // units: $/gal
 							gebi('gen_efficiency').value = '25';
 						} else if (x == 3) { // Diesel
-							gebi('fuel_cost').value = '3.80';
+							gebi('fuel_cost').value = '3.80'; // units: $/gal
 							gebi('gen_efficiency').value = '35';
 						} else { // Gasoline
-							gebi('fuel_cost').value = '3.17';
+							gebi('fuel_cost').value = '3.17'; // units: $/gal
 							gebi('gen_efficiency').value = '25';
 						}
 					}
