@@ -54,8 +54,7 @@ def hosting_cap(
     """
 
     # logging Setup
-    logging.basicConfig(
-        filename=Path(input_csv_path).parent.absolute() / 'mohca_sandia.log',
+    logging.basicConfig(filename=Path(input_csv_path).parent.absolute() / 'mohca_sandia.log',
         encoding="utf-8",
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(message)s')
@@ -155,6 +154,8 @@ def hosting_cap(
             )
             logger.warning(warning_str)
             n_skipped += 1
+            data_single = [bus_name, 'E01']
+            data_all.append(data_single)
             continue
 
         # print warning if time index was corrected.
@@ -212,14 +213,16 @@ def hosting_cap(
             )
             logger.warning(warning_str)
 
-            nan_str = 'bad data at index ['
-            for _, row, in single_fix_report.iterrows():
-                if row['action'] == 'nand':
-                    nan_str += f"{row['start_ndx']}:{row['end_ndx']}, "
+            #nan_str = 'bad data at index ['
+            #for _, row, in single_fix_report.iterrows():
+            #    if row['action'] == 'nand':
+            #        nan_str += f"{row['start_ndx']}:{row['end_ndx']}, "
 
-            nan_str = '* ' + nan_str[:-2] + ']'
-            logger.info(nan_str)
+            #nan_str = '* ' + nan_str[:-2] + ']'
+            #logger.info(nan_str)  # NOTE: removed logging of skipped data rows
             n_skipped += 1
+            data_single = [bus_name, 'E02']
+            data_all.append(data_single)
             continue
 
         # check for PV via kw injections and set has_pv flag
@@ -254,12 +257,11 @@ def hosting_cap(
                 has_static_pf = True
                 # skip processing
                 warning_str = (
-                    f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
-                    "- Power Factor too constant - " +
+                    f"Warning in hosting_cap():  busname '{bus_name}' " +
+                    "- has static PF - " +
                     f"maximum abs dif doesn't exceed {max_pf_dif}"
                 )
                 logger.warning(warning_str)
-                n_skipped += 1
 
         remaining_bad_data_mask = get_nan_mask(fixed_data)
 
@@ -273,8 +275,8 @@ def hosting_cap(
 
             # skip processing
             warning_str = (
-                f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
-                "- Process for no input Q or static PF"
+                f"Warning in hosting_cap():  busname '{bus_name}' " +
+                "- Processing as no input Q or static PF"
             )
             logger.warning(warning_str)
 
