@@ -672,7 +672,7 @@ def work(modelDir, inputDict):
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
 		gen_fuel_cost = float(inputDict['fuel_cost'])
 		btu_per_kwh = 3412.0 ## constant
-		gen_efficiency = float(inputDict['gen_efficiency'])/100.
+		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
 		monthlyGENconsumption = np.array(monthlyGENconsumption)
 
 		fuel_type = int(inputDict['fuel_type'])
@@ -686,7 +686,7 @@ def work(modelDir, inputDict):
 
 			## Calculate the amount of natural gas needed per cubic foot
 			## = BTUs required / (BTUs per cubic foot * thermal efficiency)
-			monthly_gas_needed_cubic_ft = monthlyGENconsumption_btu / (btu_per_cubic_ft * gen_efficiency)
+			monthly_gas_needed_cubic_ft = monthlyGENconsumption_btu / (btu_per_cubic_ft * thermal_efficiency)
 
 			## Total monthly fuel cost
 			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
@@ -694,17 +694,17 @@ def work(modelDir, inputDict):
 
 		if fuel_type == 2: ## Propane
 			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
-			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 3:  # Diesel
 			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
-			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 4: ## Gasoline
 			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
-			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (gen_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthlyGENconsumption * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
@@ -1010,7 +1010,7 @@ def new(modelDir):
 		'fossilGenerator': 'Yes',
 		'fuel_type': '3', 
 		'existing_gen_kw': '5',
-		'gen_efficiency': '35',
+		'thermal_efficiency': '35',
 		'gen_retrofit_cost': '0.0',
 		'fuel_avail': '1000', 
 		'fuel_cost': '3.80',

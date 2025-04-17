@@ -203,17 +203,17 @@
 						var x = gebi('fuel_type').value;
 						if (x == 1){ // Natural Gas
 							gebi('fuel_cost').value = '0.00386'; // units: $/cubic ft
-							gebi('gen_efficiency').value = '30';
+							gebi('thermal_efficiency').value = '30';
 							gebi('fuel_avail').value = '1000'; // units: cubic ft
 						} else if (x == 2){ // Propane
 							gebi('fuel_cost').value = '2.70'; // units: $/gal
-							gebi('gen_efficiency').value = '25';
+							gebi('thermal_efficiency').value = '25';
 						} else if (x == 3) { // Diesel
 							gebi('fuel_cost').value = '3.80'; // units: $/gal
-							gebi('gen_efficiency').value = '35';
+							gebi('thermal_efficiency').value = '35';
 						} else { // Gasoline
 							gebi('fuel_cost').value = '3.17'; // units: $/gal
-							gebi('gen_efficiency').value = '25';
+							gebi('thermal_efficiency').value = '25';
 						}
 					}
 				</script>
@@ -228,8 +228,8 @@
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Generator Efficiency (%)<span class="classic">Specify the thermal efficiency of the generator fuel.</span></label>
-				<input type="text" id="gen_efficiency" name="gen_efficiency" value="{{allInputDataDict.gen_efficiency}}" required="required"/>
+				<label class="tooltip">Thermal Efficiency (%)<span class="classic">Specify the thermal efficiency of the generator fuel.</span></label>
+				<input type="text" id="thermal_efficiency" name="thermal_efficiency" value="{{allInputDataDict.thermal_efficiency}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retrofit Cost ($)<span class="classic">Specify the cost to enable the generator for utility control.</span></label>
