@@ -558,12 +558,13 @@ def work(modelDir, inputDict):
 	costs_allyears_GEN = np.zeros(projectionLength)
 	costs_allyears_TESS = np.zeros(projectionLength)
 	costs_allyears_array = np.zeros(projectionLength) ## includes all costs for all tech
+	costs_year1_array = np.zeros(12)
 
 	## Retrofit costs
 	retrofit_cost_BESS = float(inputDict['BESS_retrofit_cost'])
 	retrofit_cost_wh = float(inputDict['unitDeviceCost_wh'])
-	retrofit_cost_ac = float(inputDict['unitDeviceCost_wh'])
-	retrofit_cost_hp = float(inputDict['unitDeviceCost_wh'])
+	retrofit_cost_ac = float(inputDict['unitDeviceCost_ac'])
+	retrofit_cost_hp = float(inputDict['unitDeviceCost_hp'])
 	retrofit_cost_TESS = retrofit_cost_wh + retrofit_cost_ac + retrofit_cost_hp
 	retrofit_cost_GEN = float(inputDict['gen_retrofit_cost'])
 	retrofit_cost_total = retrofit_cost_BESS + retrofit_cost_TESS + retrofit_cost_GEN
@@ -639,6 +640,7 @@ def work(modelDir, inputDict):
 
 		outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
 		costs_year1_gen_fuel = gen_fuel_cost * gen_annual_fuel_consumption_gal
+		costs_year1_array += monthly_fuel_cost
 		costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
 		costs_allyears_GEN += costs_allyears_gen_fuel
 		costs_allyears_array += costs_allyears_gen_fuel
@@ -671,9 +673,9 @@ def work(modelDir, inputDict):
 	#costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_adjustedEnergyConsumption)
 	#costs_allyears_array += costs_allyears_energyConsumption
 	costs_allyears_total = sum(costs_allyears_array)
-	costs_year1_array = np.zeros(12)
 	costs_year1_array[0] += initialInvestment
 	costs_year1_total = sum(costs_year1_array)
+	outData['costs_year1_array'] = list(costs_year1_array)
 	#costs_allyears_total_minus_initial_investment = costs_allyears_total - initialInvestment
 
 
@@ -771,7 +773,7 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_year1_array = allDevices_subsidy_ongoing_year1_array.copy()
 	allDevices_subsidy_year1_array[0] += allDevices_subsidy_onetime
 	outData['allDevices_subsidy_year1'] = list(allDevices_subsidy_year1_array)
-	
+
 	allDevices_subsidy_ongoing_allyears_array = np.full(projectionLength, sum(allDevices_subsidy_ongoing_year1_array))
 	allDevices_subsidy_allyears_array = allDevices_subsidy_ongoing_allyears_array
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
@@ -793,8 +795,10 @@ def work(modelDir, inputDict):
 
 	## Calculate net savings = savings - costs
 	net_savings_year1_total = savings_year1_total - costs_year1_total
+	net_savings_year1_array = savings_year1_monthly_array - costs_year1_array
 	net_savings_allyears_array = savings_allyears_array - costs_allyears_array
 	net_savings_allyears_total = savings_allyears_total - costs_allyears_total
+	outData['net_savings_year1_array'] = list(net_savings_year1_array)
 
 	######################################################################################################################################################
 	## MONTHLY COST COMPARISON PLOT VARIABLES
