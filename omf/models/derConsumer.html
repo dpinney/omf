@@ -228,7 +228,7 @@
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Efficiency (%)<span class="classic">Specify the thermal efficiency of the generator fuel.</span></label>
+				<label class="tooltip">Efficiency (%)<span class="classic">Specify the efficiency of the generator.</span></label>
 				<input type="text" id="thermal_efficiency" name="thermal_efficiency" value="{{allInputDataDict.thermal_efficiency}}" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -236,11 +236,11 @@
 				<input type="text" id="gen_retrofit_cost" name="gen_retrofit_cost" value="{{allInputDataDict.gen_retrofit_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this is in units of cubic feet. For all other liquid fuels, use units of gallons.</span></label>
+				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this input expects units of cubic feet. For all other liquid fuels, the expected units are gallons.</span></label>
 				<input type="text" id="fuel_avail" name="fuel_avail" value="{{allInputDataDict.fuel_avail}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, use units of $/cubic foot. For all other liquid fuels, use units of $/gallon.</span></label>
+				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, this input expects units of $/cubic foot. For all other liquid fuels, the expected units are $/gallon.</span></label>
 				<input type="text" id="fuel_cost" name="fuel_cost" value="{{allInputDataDict.fuel_cost}}" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -520,8 +520,8 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Energy Cost Savings ($)", allOutputData.monthlyEnergyConsumptionSavings)
 					insertMetric("monthlySummaryTable","Generator Fuel Cost ($)", allOutputData.monthly_gen_fuel_cost)
-					insertMetric("monthlySummaryTable","Utility Subsidies ($)", allOutputData.allDevices_subsidy_year1)
-					insertMetric("monthlySummaryTable","Compensation for DERs ($)", allOutputData.allDevices_compensation_year1)
+					insertMetric("monthlySummaryTable","Utility Subsidies Paid ($)", allOutputData.allDevices_subsidy_year1)
+					insertMetric("monthlySummaryTable","Per-kWh Compensation ($)", allOutputData.allDevices_compensation_year1)
 					insertMetric("monthlySummaryTable","Total Consumer Savings ($)", allOutputData.savings_year1_monthly_array)
 					insertMetric("monthlySummaryTable","Total Consumer Costs ($)", allOutputData.costs_year1_array)
 					insertMetric("monthlySummaryTable","Net Consumer Savings ($)", allOutputData.net_savings_year1_array)
@@ -569,7 +569,7 @@
 						{"name":"BESS Costs", "data": allOutputData.costs_allyears_BESS, "color": "rgb(116,40,129)"},
 						{"name":"TESS Costs", "data": allOutputData.costs_allyears_TESS, "color": "rgb(152,110,172)"},
 						{"name":"Generator Costs", "data": allOutputData.costs_allyears_GEN, "color": "rgb(195,164,207)"},
-						{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black"}
+						{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black", "visible": false}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
