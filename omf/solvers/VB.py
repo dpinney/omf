@@ -2,6 +2,7 @@ import pandas as pd
 import pulp
 import numpy as np
 from numpy import *
+import math
 
 class VirtualBattery(object):
     """ Base class for abstraction. """
