@@ -439,10 +439,10 @@ def work(modelDir, inputDict):
 	colors = ['green', 'blue', 'black']
 	titles = ['Minimum Calculated Power Capacity', 'Maximum Calculated Power Capacity', 'Actual Power Utilized']
 
-	dataCheckList = []
+	thermalDataCheckList = []
 	for data_name, color, title in zip(data_names, colors, titles):
-		dataCheck = np.sum(combined_device_results[data_name])
-		dataCheckList.append(dataCheck)
+		thermalDataCheck = np.sum(combined_device_results[data_name])
+		thermalDataCheckList.append(thermalDataCheck)
 		fig.add_trace(go.Scatter(
 			x=timestamps, 
 			y=np.array(combined_device_results[data_name])*1000., ## convert from kW to W
@@ -457,7 +457,7 @@ def work(modelDir, inputDict):
 		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
 	
 	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
-	outData['thermalDataCheck'] = float(sum(np.array(dataCheckList)))
+	outData['thermalDataCheck'] = float(sum(np.array(thermalDataCheckList)))
 	
 	## Encode plot data as JSON for showing in the HTML side
 	outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -517,10 +517,19 @@ def work(modelDir, inputDict):
 	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(outData['monthlyEnergyConsumptionCost'], outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
 
-	## Calculate the individual DER demand costs using the TOU rate schedule
+	## Calculate the individual DER consumption costs using the TOU rate schedule
+	## BESS
 	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(grid_charging_BESS, energy_rate_array)]
+	costs_year1_BESS_consumption = sum(demand_cost_array_BESS)
+	costs_allyears_BESS_consumption = np.full(projectionLength, costs_year1_BESS_consumption)
+	## TESS
 	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_charge_component, energy_rate_array)]
+	costs_year1_TESS_consumption = sum(demand_cost_array_TESS)
+	costs_allyears_TESS_consumption = np.full(projectionLength, costs_year1_TESS_consumption)
+	## GEN
 	#demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
+	#costs_year1_GEN_consumption = sum(demand_cost_array_GEN)
+	#costs_allyears_GEN_consumption = np.full(projectionLength, costs_year1_GEN_consumption)
 
 	#########################################################################################################################################################
 	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption cost/savings
@@ -559,53 +568,15 @@ def work(modelDir, inputDict):
 	costs_allyears_TESS = np.zeros(projectionLength)
 	costs_allyears_array = np.zeros(projectionLength) ## includes all costs for all tech
 	costs_year1_array = np.zeros(12)
+	retrofit_cost_total = 0.
 
-	## Retrofit costs
-	retrofit_cost_BESS = float(inputDict['BESS_retrofit_cost'])
-	retrofit_cost_wh = float(inputDict['unitDeviceCost_wh'])
-	retrofit_cost_ac = float(inputDict['unitDeviceCost_ac'])
-	retrofit_cost_hp = float(inputDict['unitDeviceCost_hp'])
-	retrofit_cost_TESS = retrofit_cost_wh + retrofit_cost_ac + retrofit_cost_hp
-	retrofit_cost_GEN = float(inputDict['gen_retrofit_cost'])
-	retrofit_cost_total = retrofit_cost_BESS + retrofit_cost_TESS + retrofit_cost_GEN
-	costs_allyears_BESS[0] += retrofit_cost_BESS
-	costs_allyears_TESS[0] += retrofit_cost_TESS
-	costs_allyears_GEN[0] += retrofit_cost_GEN
-
-	## Initial Investment
-	initialInvestment = retrofit_cost_total
-	costs_allyears_array[0] += initialInvestment
-
-	## BESS replacement cost
-	replacement_cost_BESS_kw = float(inputDict['replace_cost_per_kw']) ## units: $
-	replacement_cost_BESS_kwh = float(inputDict['replace_cost_per_kwh']) ## units: $
-	BESS_kw = float(inputDict['BESS_kw'])
-	BESS_kwh = float(inputDict['BESS_kwh'])
-	replacement_cost_BESS = BESS_kw * replacement_cost_BESS_kw + BESS_kwh * replacement_cost_BESS_kwh
-	replacement_year_BESS = int(inputDict['battery_replacement_year'])
-	replacement_frequency_BESS = projectionLength/replacement_year_BESS
-	replacement_cost_BESS_total = replacement_cost_BESS * replacement_frequency_BESS
-
-	## Inverter replacement cost
-	replacement_cost_inverter = float(inputDict['replace_cost_inverter'])
-	replacement_year_inverter = int(inputDict['inverter_replacement_year'])
-	replacement_frequency_inverter = projectionLength/replacement_year_inverter 
-	replacement_cost_inverter_total = replacement_cost_inverter * replacement_frequency_inverter
-
-	## GEN replacement cost
-	replacement_cost_GEN = float(inputDict['replace_cost_generator_per_kw']) * float(inputDict['existing_gen_kw']) ## units: $
-	replacement_year_GEN = int(inputDict['generator_replacement_year'])
-	replacement_frequency_GEN = projectionLength/replacement_year_GEN
-	replacement_cost_GEN_total = replacement_cost_GEN * replacement_frequency_GEN
-
-	## GEN fuel cost
 	if 'Generator' in reoptResults:
+		## GEN fuel cost
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
 		gen_fuel_cost = float(inputDict['fuel_cost'])
 		btu_per_kwh = 3412.0 ## constant
 		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
 		monthlyGENconsumption_total = np.array(monthlyGENconsumption_total)
-
 		fuel_type = int(inputDict['fuel_type'])
 		if fuel_type == 1: ## Natural Gas
 			## Assume the fuel cost input is given in units of $/cubic foot
@@ -645,28 +616,56 @@ def work(modelDir, inputDict):
 		costs_allyears_GEN += costs_allyears_gen_fuel
 		costs_allyears_array += costs_allyears_gen_fuel
 
-	## Apply each replacement cost to the specified replacement years
-	for year in range(0, projectionLength):
-		if year % replacement_year_BESS == 0 and year != 0:
-			costs_allyears_array[year] += replacement_cost_BESS
-			costs_allyears_BESS[year] += replacement_cost_BESS
-		if year % replacement_year_GEN == 0 and year != 0:
-			costs_allyears_array[year] += replacement_cost_GEN
-			costs_allyears_GEN[year] += replacement_cost_GEN
-		if year % replacement_year_inverter == 0 and year != 0:
-			costs_allyears_array[year] += replacement_cost_inverter
-			costs_allyears_BESS[year] += replacement_cost_inverter
+		## GEN replacement cost
+		replacement_cost_GEN = float(inputDict['replace_cost_generator_per_kw']) * float(inputDict['existing_gen_kw']) ## units: $
+		replacement_year_GEN = int(inputDict['generator_replacement_year'])
+		for year in range(0, projectionLength): ## Apply the replacement costs for the specified replacement years
+			if year % replacement_year_GEN == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_GEN
+				costs_allyears_GEN[year] += replacement_cost_GEN
 
-	## TODO: Later, maybe add each costs_allyears_X together to form costs_allyears_array instead of doubling in the for/if statements above
+		## GEN retrofit cost
+		retrofit_cost_GEN = float(inputDict['gen_retrofit_cost'])
+		costs_allyears_GEN[0] += retrofit_cost_GEN
+		retrofit_cost_total += retrofit_cost_GEN
 
-	## Calculate consumption costs for entire projectionLength
-	costs_year1_BESS_consumption = sum(demand_cost_array_BESS)
-	costs_allyears_BESS_consumption = np.full(projectionLength, costs_year1_BESS_consumption)
-	costs_year1_TESS_consumption = sum(demand_cost_array_TESS)
-	costs_allyears_TESS_consumption = np.full(projectionLength, costs_year1_TESS_consumption)
-	#costs_year1_GEN_consumption = sum(demand_cost_array_GEN)
-	#costs_allyears_GEN_consumption = np.full(projectionLength, costs_year1_GEN_consumption)
+	## Thermal retrofit costs (TODO: Add replacement costs later?)
+	if sum(np.array(vbat_discharge_component)) != 0:
+		## Retrofit costs
+		retrofit_cost_wh = float(inputDict['unitDeviceCost_wh'])
+		retrofit_cost_ac = float(inputDict['unitDeviceCost_ac'])
+		retrofit_cost_hp = float(inputDict['unitDeviceCost_hp'])
+		retrofit_cost_TESS = retrofit_cost_wh + retrofit_cost_ac + retrofit_cost_hp
+		costs_allyears_TESS[0] += retrofit_cost_TESS
+		retrofit_cost_total += retrofit_cost_TESS
 
+	## BESS retrofit and replacement costs
+	if BESScheck == 'enabled':
+		## BESS retrofit cost
+		retrofit_cost_BESS = float(inputDict['BESS_retrofit_cost'])
+		costs_allyears_BESS[0] += retrofit_cost_BESS
+
+		## BESS replacement cost
+		replacement_cost_BESS_kw = float(inputDict['replace_cost_per_kw']) ## units: $
+		replacement_cost_BESS_kwh = float(inputDict['replace_cost_per_kwh']) ## units: $
+		BESS_kw = float(inputDict['BESS_kw'])
+		BESS_kwh = float(inputDict['BESS_kwh'])
+		replacement_cost_BESS = BESS_kw * replacement_cost_BESS_kw + BESS_kwh * replacement_cost_BESS_kwh
+		replacement_cost_inverter = float(inputDict['replace_cost_inverter'])
+		replacement_year_BESS = int(inputDict['battery_replacement_year'])
+		replacement_year_inverter = int(inputDict['inverter_replacement_year'])
+		for year in range(0, projectionLength): ## Apply the replacement costs for the specified replacement years
+			if year % replacement_year_BESS == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_BESS
+				costs_allyears_BESS[year] += replacement_cost_BESS
+			if year % replacement_year_inverter == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_inverter
+				costs_allyears_BESS[year] += replacement_cost_inverter
+
+	## Initial Investment
+	initialInvestment = retrofit_cost_total
+	costs_allyears_array[0] += initialInvestment
+	
 	## Calculate cost array for year 1 only
 	## TODO: potentially add electricity cost for electricity bought from utility here
 	#costs_year1_adjustedEnergyConsumption = np.sum(outData['monthlyAdjustedEnergyConsumptionCost'])
@@ -701,7 +700,11 @@ def work(modelDir, inputDict):
 		BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
 		BESS_compensation_year1_total = np.sum(BESS_compensation_year1_array)
 		BESS_compensation_allyears_array = np.full(projectionLength, BESS_compensation_year1_total)
-	else: ## If the DER tech is disabled, then set all of their corresponding subsidies and compensation rates equal to zero.
+
+		## Calculate total BESS savings
+		savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array + BESSconsumption_cost_monthly_array
+		savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array + BESSconsumption_cost_allyears_array
+	else: ## If the DER tech is disabled, then set all of the corresponding subsidies and compensation rates equal to zero.
 		BESS_subsidy_ongoing = 0
 		BESS_subsidy_onetime = 0
 		BESS_subsidy_year1_array = np.full(12, 0.0)
@@ -709,6 +712,8 @@ def work(modelDir, inputDict):
 		BESS_compensation_year1_array = np.full(12, 0.)
 		BESS_compensation_year1_total = 0.
 		BESS_compensation_allyears_array = np.full(projectionLength, 0)
+		savings_year1_monthly_BESS = np.zeros(12)
+		savings_allyears_BESS = np.zeros(projectionLength)
 
 	## If generator is enabled
 	if GENcheck == 'enabled':
@@ -721,10 +726,15 @@ def work(modelDir, inputDict):
 		GEN_subsidy_year1_array[0] += GEN_subsidy_onetime
 		GEN_subsidy_allyears_array = np.full(projectionLength, GEN_subsidy_ongoing*12.0)
 		GEN_subsidy_allyears_array[0] += GEN_subsidy_onetime
+		
 		## Calculate GEN compensation
 		GEN_compensation_year1_array = np.array([sum(generator[s:f])*rateCompensation for s, f in monthHours])
 		GEN_compensation_year1_total = np.sum(GEN_compensation_year1_array)
 		GEN_compensation_allyears_array = np.full(projectionLength, GEN_compensation_year1_total)
+		
+		## Calculate total GEN savings
+		savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array + GENconsumption_cost_monthly_array
+		savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array + GENconsumption_cost_allyears_array
 	else:
 		GEN_subsidy_ongoing = 0
 		GEN_subsidy_onetime = 0
@@ -733,8 +743,10 @@ def work(modelDir, inputDict):
 		GEN_compensation_year1_array = np.full(12, 0.)
 		GEN_compensation_year1_total = 0.
 		GEN_compensation_allyears_array = np.full(projectionLength, 0)
+		savings_year1_monthly_GEN = np.zeros(12)
+		savings_allyears_GEN = np.zeros(projectionLength)
 
-	## If any TESS tech is enabled
+	## If TESS tech is enabled
 	if sum(np.array(vbat_discharge_component)) != 0:
 		## Calculate the total TESS subsidies for year 1 and the projection length (all years)
 		## Year 1 includes the onetime subsidy, but subsequent years only include the ongoing subsidies.
@@ -745,10 +757,15 @@ def work(modelDir, inputDict):
 		TESS_subsidy_year1_array[0] += TESS_subsidy_onetime
 		TESS_subsidy_allyears_array = np.full(projectionLength, TESS_subsidy_ongoing*12.0)
 		TESS_subsidy_allyears_array[0] += TESS_subsidy_onetime
+		
 		## Calculate TESS compensation
 		TESS_compensation_year1_array = np.array([sum(vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
 		TESS_compensation_year1_total = np.sum(TESS_compensation_year1_array)
 		TESS_compensation_allyears_array = np.full(projectionLength, TESS_compensation_year1_total)
+		
+		## Calculate total TESS savings
+		savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array + TESSconsumption_cost_monthly_array
+		savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array + TESSconsumption_cost_allyears_array
 	else:
 		TESS_subsidy_ongoing = 0
 		TESS_subsidy_onetime = 0
@@ -757,6 +774,8 @@ def work(modelDir, inputDict):
 		TESS_compensation_year1_array = np.full(12, 0.)
 		TESS_compensation_year1_total = 0.
 		TESS_compensation_allyears_array = np.full(projectionLength, 0)
+		savings_year1_monthly_TESS = np.zeros(12)
+		savings_allyears_TESS = np.zeros(projectionLength)
 
 	## Combine all tech device compensations
 	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
@@ -784,14 +803,6 @@ def work(modelDir, inputDict):
 	savings_consumption_allyears_array = np.full(projectionLength, sum(outData['monthlyEnergyConsumptionSavings']))
 	savings_allyears_array = savings_consumption_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array
 	savings_allyears_total = sum(savings_allyears_array)
-
-	## Calculate savings per tech
-	savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array + BESSconsumption_cost_monthly_array
-	savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array + BESSconsumption_cost_allyears_array
-	savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array + TESSconsumption_cost_monthly_array
-	savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array + TESSconsumption_cost_allyears_array
-	savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array + GENconsumption_cost_monthly_array
-	savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array + GENconsumption_cost_allyears_array
 
 	## Calculate net savings = savings - costs
 	net_savings_year1_total = savings_year1_total - costs_year1_total
