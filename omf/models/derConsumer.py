@@ -539,24 +539,24 @@ def work(modelDir, inputDict):
 	BESSdemand = np.array(BESS)-np.array(grid_charging_BESS)
 	TESSdemand = np.array(vbat_discharge_component)-np.array(vbat_charge_component)
 	GENdemand = np.array(generator)
-	monthlyBESSconsumption_total = [sum(BESSdemand[s:f]) for s, f in monthHours]
-	monthlyTESSconsumption_total = [sum(TESSdemand[s:f]) for s, f in monthHours]
-	monthlyGENconsumption_total = [sum(GENdemand[s:f]) for s, f in monthHours]
+	monthly_BESS_consumption_total = [sum(BESSdemand[s:f]) for s, f in monthHours]
+	monthly_TESS_consumption_total = [sum(TESSdemand[s:f]) for s, f in monthHours]
+	monthly_GEN_consumption_total = [sum(GENdemand[s:f]) for s, f in monthHours]
 
 	## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
-	BESSconsumption_cost_year1_array = [float(a) * float(b) for a, b in zip(BESSdemand, energy_rate_array)]
-	TESSconsumption_cost_year1_array = [float(a) * float(b) for a, b in zip(TESSdemand, energy_rate_array)]
-	GENconsumption_cost_year1_array = [float(a) * float(b) for a, b in zip(GENdemand, energy_rate_array)]
+	BESS_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(BESSdemand, energy_rate_array)]
+	TESS_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(TESSdemand, energy_rate_array)]
+	GEN_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(GENdemand, energy_rate_array)]
 
 	## Calculate the consumption cost saved by each DER tech using the input rate structure (monthly data for the whole year)
-	BESSconsumption_cost_monthly_array = [sum(BESSconsumption_cost_year1_array[s:f]) for s, f in monthHours]
-	TESSconsumption_cost_monthly_array = [sum(TESSconsumption_cost_year1_array[s:f]) for s, f in monthHours]
-	GENconsumption_cost_monthly_array = [sum(GENconsumption_cost_year1_array[s:f]) for s, f in monthHours]
+	BESS_consumption_cost_monthly_array = [sum(BESS_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+	TESS_consumption_cost_monthly_array = [sum(TESS_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+	GEN_consumption_cost_monthly_array = [sum(GEN_consumption_cost_year1_array[s:f]) for s, f in monthHours]
 
 	## Calculate the consumption cost saved by each DER tech using the input rate structure (yearly data for the entire projection length)
-	BESSconsumption_cost_allyears_array = np.full(projectionLength, sum(BESSconsumption_cost_year1_array))
-	TESSconsumption_cost_allyears_array = np.full(projectionLength, sum(TESSconsumption_cost_year1_array))
-	GENconsumption_cost_allyears_array = np.full(projectionLength, sum(GENconsumption_cost_year1_array))
+	BESS_consumption_cost_allyears_array = np.full(projectionLength, sum(BESS_consumption_cost_year1_array))
+	TESS_consumption_cost_allyears_array = np.full(projectionLength, sum(TESS_consumption_cost_year1_array))
+	GEN_consumption_cost_allyears_array = np.full(projectionLength, sum(GEN_consumption_cost_year1_array))
 
 	######################################################################################################################################################
 	## COSTS
@@ -578,7 +578,7 @@ def work(modelDir, inputDict):
 		gen_fuel_cost = float(inputDict['fuel_cost'])
 		btu_per_kwh = 3412.0 ## constant
 		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
-		monthlyGENconsumption_total = np.array(monthlyGENconsumption_total)
+		monthly_GEN_consumption_total = np.array(monthly_GEN_consumption_total)
 		fuel_type = int(inputDict['fuel_type'])
 		if fuel_type == 1: ## Natural Gas
 			## Assume the fuel cost input is given in units of $/cubic foot
@@ -586,11 +586,11 @@ def work(modelDir, inputDict):
 			btu_per_cubic_ft = 1030.0
 
 			## Convert the monthly GEN energy consumption from kWh to BTU
-			monthlyGENconsumption_total_btu = monthlyGENconsumption_total * btu_per_kwh 
+			monthly_GEN_consumption_total_btu = monthly_GEN_consumption_total * btu_per_kwh 
 
 			## Calculate the amount of natural gas needed per cubic foot
 			## = BTUs required / (BTUs per cubic foot * thermal efficiency)
-			monthly_gas_needed_cubic_ft = monthlyGENconsumption_total_btu / (btu_per_cubic_ft * thermal_efficiency)
+			monthly_gas_needed_cubic_ft = monthly_GEN_consumption_total_btu / (btu_per_cubic_ft * thermal_efficiency)
 
 			## Total monthly fuel cost
 			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
@@ -598,17 +598,17 @@ def work(modelDir, inputDict):
 
 		if fuel_type == 2: ## Propane
 			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
-			monthly_gallons_used = (monthlyGENconsumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 3:  # Diesel
 			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
-			monthly_gallons_used = (monthlyGENconsumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 4: ## Gasoline
 			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
-			monthly_gallons_used = (monthlyGENconsumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
 			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
 
 		outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
@@ -704,8 +704,8 @@ def work(modelDir, inputDict):
 		BESS_compensation_allyears_array = np.full(projectionLength, BESS_compensation_year1_total)
 
 		## Calculate total BESS savings
-		savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array + BESSconsumption_cost_monthly_array
-		savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array + BESSconsumption_cost_allyears_array
+		savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array + BESS_consumption_cost_monthly_array
+		savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array + BESS_consumption_cost_allyears_array
 	else: ## If the DER tech is disabled, then set all of the corresponding subsidies and compensation rates equal to zero.
 		BESS_subsidy_ongoing = 0
 		BESS_subsidy_onetime = 0
@@ -735,8 +735,8 @@ def work(modelDir, inputDict):
 		GEN_compensation_allyears_array = np.full(projectionLength, GEN_compensation_year1_total)
 		
 		## Calculate total GEN savings
-		savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array + GENconsumption_cost_monthly_array
-		savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array + GENconsumption_cost_allyears_array
+		savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array + GEN_consumption_cost_monthly_array
+		savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array + GEN_consumption_cost_allyears_array
 	else:
 		GEN_subsidy_ongoing = 0
 		GEN_subsidy_onetime = 0
@@ -766,8 +766,8 @@ def work(modelDir, inputDict):
 		TESS_compensation_allyears_array = np.full(projectionLength, TESS_compensation_year1_total)
 		
 		## Calculate total TESS savings
-		savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array + TESSconsumption_cost_monthly_array
-		savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array + TESSconsumption_cost_allyears_array
+		savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array + TESS_consumption_cost_monthly_array
+		savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array + TESS_consumption_cost_allyears_array
 	else:
 		TESS_subsidy_ongoing = 0
 		TESS_subsidy_onetime = 0
@@ -785,6 +785,8 @@ def work(modelDir, inputDict):
 		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
 		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
 		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
+		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+
 		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
 		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
@@ -796,8 +798,8 @@ def work(modelDir, inputDict):
 		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
 		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
 
-		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component)
-		single_device_monthlyTESSconsumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
+		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
 
 		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
 		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
@@ -810,8 +812,8 @@ def work(modelDir, inputDict):
 		savings_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array + single_device_consumption_cost_allyears_array
 
 		print('device: ', device_result)
-		print('compensation all years = ', single_device_compensation_allyears_array)
-		print('sum compensation all years = ', sum(single_device_compensation_allyears_array))
+		print('device consumption cost all years = ', single_device_consumption_cost_allyears_array)
+		print('device consumption cost all years sum = ', sum(single_device_consumption_cost_allyears_array))
 
 		outData[device_result+'_savings_allyears'] = list(savings_allyears_single_device)
 		outData[device_result+'_check'] = 'enabled'
@@ -836,8 +838,8 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_allyears_array = allDevices_subsidy_ongoing_allyears_array
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
 
-	print('all tess devices allyears array: ', TESS_compensation_allyears_array)
-	print('all tess devices sum up to: ', sum(TESS_compensation_allyears_array))
+	print('all tess devices allyears array: ', TESS_consumption_cost_allyears_array)
+	print('all tess devices sum up to: ', sum(TESS_consumption_cost_allyears_array))
 
 	## Calculate total savings
 	savings_year1_monthly_array = np.array(outData['monthlyEnergyConsumptionSavings']) + allDevices_subsidy_year1_array + allDevices_compensation_year1_array
