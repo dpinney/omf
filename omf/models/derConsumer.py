@@ -170,7 +170,7 @@ def work(modelDir, inputDict):
 	single_device_results = {} 
 	for suffix in thermal_suffixes:
 		## Include only the thermal devices specified by the user
-		if float(inputDict['load_type'+suffix]) > 0:
+		if float(inputDict['load_type'+suffix]) > 0: ## NOTE: If thermal tech is not enabled by the user, the load_type_X variable will be set to 0 in derConsumer.html
 			all_device_suffixes.append(suffix)
 
 			## Add the appropriate thermal device variables to the inputDict_vbatDispatch
@@ -223,12 +223,15 @@ def work(modelDir, inputDict):
 
 	## Combine all thermal device variable data for plotting
 	for device_result in single_device_results:
-		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_results[device_result]['VBpower'])]
-		vbatPower_series = pd.Series(combined_device_results['vbatPower'])
+		single_device_vbatPower = single_device_results[device_result]['VBpower']
+		vbatPower_series = pd.Series(single_device_vbatPower)
+		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
 		combined_device_results['vbatPower_series'] = vbatPower_series
-		combined_device_results['vbat_discharge'] = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = discharging
-		combined_device_results['vbat_charge'] = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = charging
-		combined_device_results['vbat_charge_flipsign'] = combined_device_results['vbat_charge'].mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+		vbatPower_series_discharge = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = discharging
+		vbatPower_series_charge = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = charging
+		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], vbatPower_series_discharge)]
+		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], vbatPower_series_charge)]
+		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
 		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
 		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
 		combined_device_results['vbatEnergy'] = [sum(x) for x in zip(combined_device_results['vbatEnergy'], single_device_results[device_result]['VBenergy'])]
@@ -243,7 +246,6 @@ def work(modelDir, inputDict):
 		combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'] = [sum(x) for x in zip(combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'], single_device_results[device_result]['energyCostAdjusted'])]
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
-
 
 	########################################################################################################################################################
 	## DER Serving Load Overview plot 
@@ -777,6 +779,43 @@ def work(modelDir, inputDict):
 		savings_year1_monthly_TESS = np.zeros(12)
 		savings_allyears_TESS = np.zeros(projectionLength)
 
+	## Calculate total savings for each individual thermal technology
+	for device_result in single_device_results:
+		single_device_vbatPower = single_device_results[device_result]['VBpower']
+		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
+		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
+		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
+		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
+		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
+		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
+		single_device_subsidy_year1_array[0] += single_device_subsidy_onetime
+		single_device_subsidy_allyears_array = np.full(projectionLength, single_device_subsidy_ongoing*12.0)
+		single_device_subsidy_allyears_array[0] += single_device_subsidy_onetime
+
+		single_device_compensation_year1_array = np.array([sum(single_device_vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
+		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
+		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
+
+		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component)
+		single_device_monthlyTESSconsumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
+		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure
+		single_device_consumption_cost_monthly_array = [sum(single_device_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+		single_device_consumption_cost_allyears_array = np.full(projectionLength, sum(single_device_consumption_cost_year1_array))
+
+		savings_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array + single_device_consumption_cost_monthly_array
+		savings_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array + single_device_consumption_cost_allyears_array
+
+		print('device: ', device_result)
+		print('compensation all years = ', single_device_compensation_allyears_array)
+		print('sum compensation all years = ', sum(single_device_compensation_allyears_array))
+
+		outData[device_result+'_savings_allyears'] = list(savings_allyears_single_device)
+		outData[device_result+'_check'] = 'enabled'
+
 	## Combine all tech device compensations
 	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
 	allDevices_compensation_year1_total = np.sum(allDevices_compensation_year1_array)
@@ -796,6 +835,9 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_ongoing_allyears_array = np.full(projectionLength, sum(allDevices_subsidy_ongoing_year1_array))
 	allDevices_subsidy_allyears_array = allDevices_subsidy_ongoing_allyears_array
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
+
+	print('all tess devices allyears array: ', TESS_compensation_allyears_array)
+	print('all tess devices sum up to: ', sum(TESS_compensation_allyears_array))
 
 	## Calculate total savings
 	savings_year1_monthly_array = np.array(outData['monthlyEnergyConsumptionSavings']) + allDevices_subsidy_year1_array + allDevices_compensation_year1_array
@@ -1014,11 +1056,11 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	#__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	#__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()

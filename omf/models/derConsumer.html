@@ -593,13 +593,13 @@
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
 					"title":{"text":"", "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
-						{"name":"BESS Savings", "data": allOutputData.savings_allyears_BESS, "color": "rgba(27,121,57,0.5)"},
-						{"name":"TESS Savings", "data": allOutputData.savings_allyears_TESS, "color": "rgba(92,174,99,0.5)"},
-						{"name":"Generator Savings", "data": allOutputData.savings_allyears_GEN, "color": "rgba(139,195,27,0.5)"},
-						{"name":"BESS Costs", "data": allOutputData.costs_allyears_BESS, "color": "rgb(116,40,129)"},
-						{"name":"TESS Costs", "data": allOutputData.costs_allyears_TESS, "color": "rgb(152,110,172)"},
-						{"name":"Generator Costs", "data": allOutputData.costs_allyears_GEN, "color": "rgb(195,164,207)"},
-						{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black", "visible": false}
+						{"name":"WH Savings", "data": allOutputData.vbatResults_wh_savings_allyears, "color": "rgba(27,121,57,0.5)"},
+						{"name":"HP Savings", "data": allOutputData.vbatResults_hp_savings_allyears, "color": "rgba(92,174,99,0.5)"},
+						{"name":"AC Savings", "data": allOutputData.vbatResults_ac_savings_allyears, "color": "rgba(139,195,27,0.5)"},
+						{"name":"WH Costs", "data": allOutputData.costs_allyears_BESS, "color": "rgb(116,40,129)"},
+						{"name":"HP Costs", "data": allOutputData.costs_allyears_TESS, "color": "rgb(152,110,172)"},
+						{"name":"AC Costs", "data": allOutputData.costs_allyears_GEN, "color": "rgb(195,164,207)"},
+						//{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black", "visible": false}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv3","type":"column","marginRight":20, "height":250,"width":1000},
