@@ -1003,7 +1003,7 @@ def new(modelDir):
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1',
 		'unitDeviceCost_ac': '8', #a cheap wifi-enabled smart outlet to plug the AC into tis about $8
-		'unitUpkeepCost_ac': '0',
+		'unitUpkeepCost_ac': '0', ## NOTE: Input is currently hidden in HTML
 		'power_ac': '5.6',
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
@@ -1014,7 +1014,7 @@ def new(modelDir):
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
 		'unitDeviceCost_hp': '150',
-		'unitUpkeepCost_hp': '0',
+		'unitUpkeepCost_hp': '0', ## NOTE: Input is currently hidden in HTML
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
@@ -1025,7 +1025,7 @@ def new(modelDir):
 		## Home Water Heater inputs (vbatDispatch):
 		'load_type_wh': '4', 
 		'unitDeviceCost_wh': '175',
-		'unitUpkeepCost_wh': '0',
+		'unitUpkeepCost_wh': '0', ## NOTE: Input is currently hidden in HTML
 		'power_wh': '4.5',
 		'capacitance_wh': '0.4',
 		'resistance_wh': '120',
