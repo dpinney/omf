@@ -943,8 +943,9 @@ def new(modelDir):
 		#'latitude':  '38.353673', ## Charleston, WV
 		#'longitude': '-81.640283', ## Charleston, WV
 		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
-		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO TOU residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
-		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
+		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Residential Time of Day residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
+		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
 		'longitude' : '-104.812599', ## Brighton, CO
 		'latitude' : '39.969753', ## Brighton, CO
 		'year' : '2018',
