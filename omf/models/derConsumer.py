@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False ## Keep the model hidden=True during active development
+hidden = True ## Keep the model hidden=True during active development
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -1003,7 +1003,7 @@ def new(modelDir):
 
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1',
-		'unitDeviceCost_ac': '8', #a cheap wifi-enabled smart outlet to plug the AC into tis about $8
+		'unitDeviceCost_ac': '13', #a cheap wifi-enabled smart outlet to plug the AC into is about $13 (see https://www.lowes.com/pd/Enbrighten-125-Volt-1-Outlet-Indoor-Smart-Plug/1003202046)
 		'unitUpkeepCost_ac': '0', ## NOTE: Input is currently hidden in HTML
 		'power_ac': '5.6',
 		'capacitance_ac': '2',
@@ -1049,11 +1049,11 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
