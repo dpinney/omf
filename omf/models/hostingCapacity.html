@@ -209,25 +209,18 @@
 				</div>
 			</p>
 		{% endif %}
-		{% if allOutputDataDict['busCoordsWarningFlag'] == True %}
-			<p class="reportTitle" style="page-break-before: always"><b>TEMP: BusCoords Warning</b></p>
-				<div id="busCoordsWarningInformation" class="tightContent">
-					<p style="font-size: 20px; padding: 8x;"><span style="color: red; font-weight: bold;"> WARNING: </span> {{ allOutputDataDict['busCoordsWarningInfo'] }}</p>
-				</div>
-			</p>
-		{% endif %}
-			{% if allOutputDataDict['hideMap'] == False %}
-				<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
-				<div id="hostingCapacityMap" class="tightContent"></div>
-				<script>
-					var mapContent = allOutputData["hostingCapacityMap"]
-					var iframe = document.createElement('iframe');
-					iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-					document.getElementById('hostingCapacityMap').appendChild(iframe);
-					iframe.contentWindow.document.open();
-					iframe.contentWindow.document.write(mapContent);
-					iframe.contentWindow.document.close();
-				</script>
+		{% if allOutputDataDict['hideMap'] == False %}
+			<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
+			<div id="hostingCapacityMap" class="tightContent"></div>
+			<script>
+				var mapContent = allOutputData["hostingCapacityMap"]
+				var iframe = document.createElement('iframe');
+				iframe.style = 'width:1000px; height:800px; border-radius:8px;'
+				document.getElementById('hostingCapacityMap').appendChild(iframe);
+				iframe.contentWindow.document.open();
+				iframe.contentWindow.document.write(mapContent);
+				iframe.contentWindow.document.close();
+			</script>
 		{% endif %}
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 			<p class="reportTitle">AMI-Based Hosting Capacity Runtime ( H:M:S:MS ) </p>
