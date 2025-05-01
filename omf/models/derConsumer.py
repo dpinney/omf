@@ -1,9 +1,9 @@
 ''' Performs cost-benefit analysis for a member-consumer with distributed 
 energy resource (DER) technologies. '''
 
-# Python imports
+## Python imports
 import warnings
-# warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 import shutil, datetime
 from os.path import join as pJoin
 import numpy as np
@@ -14,13 +14,13 @@ import requests
 import matplotlib.pyplot as plt
 from numpy_financial import npv
 
-# OMF imports
+## OMF imports
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import vbatDispatch as vb
 from omf.solvers import reopt_jl
 
-# Model metadata:
+## Model metadata:
 tooltip = ('The derConsumer model evaluates the financial costs of controlling behind-the-meter \
            distributed energy resources (DERs) at the residential level using the National Renewable Energy \
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \

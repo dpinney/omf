@@ -1,12 +1,9 @@
 ''' Performs a cost-benefit analysis for a utility or cooperative member interested in 
 controlling behind-the-meter distributed energy resources (DERs).'''
 
-## TODO: check out gridlabMulti.py, cvrDynamic.py, demandResponse.py, 
-## vbatDispatch.py, solarEngineering.py for potential display and plot feautures 
-
 ## Python imports
 import warnings
-# warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 import shutil, datetime, csv, json
 from os.path import join as pJoin
 import numpy as np
@@ -251,6 +248,40 @@ def work(modelDir, inputDict):
 		combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'] = [sum(x) for x in zip(combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'], single_device_results[device_result]['energyCostAdjusted'])]
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
+
+		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
+		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
+		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+
+		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
+		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
+		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
+		single_device_subsidy_year1_array[0] += single_device_subsidy_onetime
+		single_device_subsidy_allyears_array = np.full(projectionLength, single_device_subsidy_ongoing*12.0)
+		single_device_subsidy_allyears_array[0] += single_device_subsidy_onetime
+
+		single_device_compensation_year1_array = np.array([sum(single_device_vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
+		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
+		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
+
+		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
+		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
+		energy_rate_array = np.zeros_like(single_device_demand)
+		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure
+		#single_device_consumption_cost_monthly_array = [sum(single_device_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+		#single_device_consumption_cost_allyears_array = np.full(projectionLength, sum(single_device_consumption_cost_year1_array))
+
+		costs_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array
+		costs_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array 
+
+		## Savings Breakdown Per Thermal Technology savings variables
+		## NOTE: This is where the html variables outData['vbatResults_wh_savings_allyears'], outData['vbatResults_hp_savings_allyears'], and outData['vbatResults_ac_savings_allyears'] are saved.
+		outData[device_result+'_costs_allyears'] = list(costs_allyears_single_device*-1.0) ## negative value for displaying in plot as a cost
+		outData[device_result+'_check'] = 'enabled'
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -786,7 +817,7 @@ def work(modelDir, inputDict):
 	## Calculate the financial costs of controlling member-consumer DERs
 	## e.g. subsidies, operational costs, startup costs
 	######################################################################################################################################################
-	projectionLength = int(inputDict['projectionLength'])
+
 	## If the DER tech is disabled, then set all their subsidies equal to zero.
 	if BESScheck == 'enabled':
 		BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
