@@ -238,11 +238,12 @@ def work(modelDir, inputDict):
 	## Combine all thermal device variable data for plotting
 	for device_result in single_device_results:
 		single_device_vbatPower = single_device_results[device_result]['VBpower']
-		vbatPower_series = pd.Series(single_device_vbatPower)
+		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
+
 		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
-		combined_device_results['vbatPower_series'] = vbatPower_series
-		vbatPower_series_discharge = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = discharging
-		vbatPower_series_charge = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = charging
+		combined_device_results['vbatPower_series'] = single_device_vbatPower_series
+		vbatPower_series_discharge = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
+		vbatPower_series_charge = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
 		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], vbatPower_series_discharge)]
 		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], vbatPower_series_charge)]
 		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
@@ -261,8 +262,6 @@ def work(modelDir, inputDict):
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
 
-		single_device_vbatPower = single_device_results[device_result]['VBpower']
-		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
 		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
 		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
 		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
@@ -292,8 +291,10 @@ def work(modelDir, inputDict):
 		savings_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array + single_device_consumption_cost_allyears_array
 
 		## Savings Breakdown Per Thermal Technology savings variables
+		## NOTE: This is where the html variables outData['vbatResults_wh_savings_allyears'], outData['vbatResults_hp_savings_allyears'], and outData['vbatResults_ac_savings_allyears'] are saved.
 		outData[device_result+'_savings_allyears'] = list(savings_allyears_single_device)
 		outData[device_result+'_check'] = 'enabled'
+	
 	########################################################################################################################################################
 	## DER Serving Load Overview plot 
 	########################################################################################################################################################
