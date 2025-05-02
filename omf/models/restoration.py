@@ -1180,7 +1180,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 	for timestepIndex in range(len(powerflow)):
 		for pfType in pfTypes:
 			for obName, obData in powerflow[timestepIndex][pfType].items():
-				obPf = sum(obData['real power setpoint (kW)'])
+				obPf = sum(obData.get('real power setpoint (kW)',[0]))
 				obPf *= -1 if pfType == "storage" else 1
 				obMg = obMgDict.get(obName, 'no MG')
 				pfDataAggregated[obMg].at[simTimeSteps[timestepIndex],pfType] += obPf

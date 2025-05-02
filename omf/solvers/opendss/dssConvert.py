@@ -254,9 +254,9 @@ def _dss_to_clean_via_save_toBeTested(dss_file, clean_out_path, add_pf_syntax=Tr
 	##########
 	# - Saeed
 	##########
-	# Added 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
+	# Added 'xycurve.dss', 'invcontrol.dss', 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
 	# CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
-	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'xycurve.dss', 'invcontrol.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
 	##########
 	# - Saeed
 	##########
