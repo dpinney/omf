@@ -12,12 +12,47 @@ from copy import deepcopy
 import opendssdirect as dss
 from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
-import multiprocessing
-from functools import partial
 from pathlib import Path
+import platform
+
+parent_directory = Path(__file__).parent
+instantiated_path = parent_directory / 'instantiated.txt'
+
+def install_opendss():
+	if instantiated_path.exists():
+		return 
+	system = platform.system()
+	if system == 'Linux':
+		subprocess.run(['sudo', 'chmod', '755', f'{parent_directory}/installers/opendsscmd-1.7.4-linux-x64-installer.run', '&&', 'sudo', f'{parent_directory}/installers/opendsscmd-1.7.4-linux-x64-installer.run', '--mode', 'unattended'], check=True)
+	elif system == 'Darwin':
+		try:
+			installers = Path(__file__).parent / 'installers'
+			dmg = installers / 'opendsscmd-1.7.4-osx-installer.dmg'
+			mount_pt = Path('/Volumes/OpenDSS')
+			app_bundle = mount_pt / 'opendsscmd-1.7.4-osx-installer.app'
+			installer  = app_bundle / 'Contents' / 'MacOS' / 'installbuilder.sh'
+			subprocess.run(['hdiutil', 'attach', str(dmg)], check=True)
+			subprocess.run(['sudo', str(installer), '--mode', 'unattended'], check=True, capture_output=True, text=True)
+		except subprocess.CalledProcessError as e:
+			print(f'\n--- ERROR installing OpenDSS on macOS ---')
+			print(f'Command: {e.cmd}')
+			print(f'Exit code: {e.returncode}')
+			if e.stdout:
+				print(f'\nStandard output:\n{e.stdout}')
+			if e.stderr:
+				print(f'\nStandard error:\n{e.stderr}')
+			raise
+		finally:
+			subprocess.run(['hdiutil', 'detach', str(mount_pt)], check=True)
+	elif system == 'Windows':
+		subprocess.run([f'{parent_directory}\\opendsscmd-1.7.4-windows-installer.exe', '--mode', 'unattended'], check=True)
+	else:
+		raise RuntimeError(f'Unsupported OS: {system}')
+	instantiated_path.write_text('ok')
 
 def runDssCommand(dsscmd, strict=False, logToFile=False, logFilePath=None):
 	'''Execute a single opendsscmd in the current context.'''
+	install_opendss()
 	run_command(dsscmd)
 	if logToFile == False:
 		latest_error = Error.Description()
@@ -34,6 +69,7 @@ def runDssCommand(dsscmd, strict=False, logToFile=False, logFilePath=None):
 
 def runDSS(dssFilePath, logToFile=False, logFilePath=None):
 	'''Run DSS circuit definition file, set export/data paths, solve powerflow.'''
+	install_opendss()
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
 	fullPath = os.path.abspath(dssFilePath)

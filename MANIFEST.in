@@ -8,3 +8,4 @@ prune omf/scratch
 prune omf/build
 prune omf/dist
 prune omf/omf.egg-info
+recursive-include omf/solvers/opendss/installers *
