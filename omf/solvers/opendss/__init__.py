@@ -23,7 +23,9 @@ def install_opendss():
 		return 
 	system = platform.system()
 	if system == 'Linux':
-		subprocess.run(['sudo', 'chmod', '755', f'{parent_directory}/installers/opendsscmd-1.7.4-linux-x64-installer.run', '&&', 'sudo', f'{parent_directory}/installers/opendsscmd-1.7.4-linux-x64-installer.run', '--mode', 'unattended'], check=True)
+		runfile = parent_directory / 'installers' / 'opendsscmd-1.7.4-linux-x64-installer.run'
+		subprocess.run(['sudo', 'chmod', '755', str(runfile)], check=True)
+		subprocess.run([str(runfile), '--mode', 'unattended'], check=True)
 	elif system == 'Darwin':
 		try:
 			installers = Path(__file__).parent / 'installers'
