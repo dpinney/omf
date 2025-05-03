@@ -34,6 +34,17 @@ def work(modelDir, inputDict):
 	## Delete output file every run if it exists
 	outData = {}
 
+	## Convert user provided demand and temp data from str to float
+	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
+
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
+	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
+	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+
 	########################################################################################################################
 	## Run REopt.jl solver
 	########################################################################################################################
@@ -44,10 +55,8 @@ def work(modelDir, inputDict):
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
-	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
-	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list for REopt
 
-	## Begin the REopt input dictionary called 'scenario'
+	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
 	scenario = {
 		'Site': {
 			'latitude': latitude,
@@ -125,23 +134,12 @@ def work(modelDir, inputDict):
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file outData with REopt results data
 
-	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
-
 	## Create timestamp array from REopt input information
 	try:
 		year = reoptResults['ElectricLoad.year'][0]
 	except KeyError:
 		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
-	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
-	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
-	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
-	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
 
 	########################################################################################################################
 	## Run vbatDispatch model
@@ -164,8 +162,8 @@ def work(modelDir, inputDict):
 		'projectionLength': inputDict['projectionLength'],
 		'discountRate': inputDict['discountRate'],
 		'fileName': inputDict['demandFileName'],
-		'tempFileName':  inputDict['temperatureFileName'],
-		'demandCurve':  inputDict['demandCurve'],
+		'tempFileName': inputDict['temperatureFileName'],
+		'demandCurve': inputDict['demandCurve'],
 		'tempCurve': inputDict['temperatureCurve'],
 	}
 	
@@ -547,7 +545,7 @@ def work(modelDir, inputDict):
 	monthlyAdjustedEnergyConsumptionCost = [sum(adjusted_demand_cost_array[s:f]) for s, f in monthHours] ## The total adjusted energy cost in $$ for each month	
 
 	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
-	monthlyEnergyConsumptionSavings = np.array(monthlyEnergyConsumptionCost) - np.array(monthlyAdjustedEnergyConsumptionCost) ## total consumption savings from BESS only
+	monthlyEnergyConsumptionSavings = np.array(monthlyEnergyConsumptionCost) - np.array(monthlyAdjustedEnergyConsumptionCost)
 
 	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(monthlyEnergyConsumptionCost, outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
