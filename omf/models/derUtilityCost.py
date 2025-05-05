@@ -687,6 +687,7 @@ def work(modelDir, inputDict):
 	## NOTE: The adjusted demand = the demand curve including DERs
 	adjusted_demand = np.array(demand) - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component
 	outData['adjustedDemand'] = list(adjusted_demand)
+	#monthly_peak_adjusted_demand = [adjusted_demand[np.argmax(adjusted_demand[s:f])] for s, f in monthHours] 
 	monthlyAdjustedEnergyConsumption = [sum(adjusted_demand[s:f]) for s, f in monthHours] ## The total adjusted energy in kWh for each month
 	adjusted_demand_cost_array = [float(a) * float(b) for a, b in zip(adjusted_demand, energy_rate_array)]
 	monthlyAdjustedEnergyConsumptionCost = [sum(adjusted_demand_cost_array[s:f]) for s, f in monthHours] ## The total adjusted energy cost in $$ for each month	
@@ -718,102 +719,71 @@ def work(modelDir, inputDict):
 	GEN_consumption_savings_monthly = [sum(GEN_consumption_savings_year1[s:f]) for s, f in monthHours]
 
 	allDevices_consumption_savings_monthly = [a+b+c for a,b,c in zip(BESS_consumption_savings_monthly,TESS_consumption_savings_monthly,GEN_consumption_savings_monthly)]
-	totalAllDER_consumption_savings = sum(allDevices_consumption_savings_monthly)
+	allDevices_consumption_savings_total = sum(allDevices_consumption_savings_monthly)
 	#print('allDevices monthly consumption savings: ', allDevices_consumption_savings_monthly)
 	#print('total consumption savings monthly (base demand consumption cost - adj demand cost): ', monthlyEnergyConsumptionSavings)
 
-	## Calculate the monthly peak demand savings for BESS, TESS, and GEN technologies
-	## Find the original and adjusted demand peak each month and calculate the individual DER contribution at both of those peaks.
-	## NOTE: _adjP = adjusted peak demand (kW), _baseP = baseline (original) peak demand (kW)
-	BESSpeakDemand_adjP = np.zeros(8760) ## Initialize contribution arrays with zeros (8760 = hourly increments in a year)
-	TESSpeakDemand_adjP = np.zeros(8760)
-	GENpeakDemand_adjP = np.zeros(8760) 
-	BESSpeakDemand_baseP = np.zeros(8760)
-	TESSpeakDemand_baseP = np.zeros(8760)
-	GENpeakDemand_baseP = np.zeros(8760)
-	peakDemand_baseP = np.zeros(8760)
-	peakDemand_adjP = np.zeros(8760)
+	## Calculate the peak demand savings for BESS, TESS, and GEN technologies
+	demand = np.array(demand)
+	peak_demand_indices = np.array([np.argmax(demand[s:f]) for s, f in monthHours])
+	adjusted_demand_indices = np.array([np.argmax(adjusted_demand[s:f]) for s, f in monthHours])
 
-	for s, f in monthHours:
-		## Find the index of the maximum peak value
-		## NOTE: Using argmax here gives the first index of the max value, which makes it a more deterministic 
-		## approach for cases when multiple indices have the same maximum value (e.g. a max peak that continues for several hours)
-		monthly_adjusted_demand = adjusted_demand[s:f]
-		monthly_adjusted_demand_indices = np.argmax(monthly_adjusted_demand)
-		
-		## Create a peak mask (1.0 at the peak index, 0.0 elsewhere)
-		peak_mask_adjP = np.zeros_like(monthly_adjusted_demand, dtype=float)
-		peak_mask_adjP[monthly_adjusted_demand_indices] = 1.0
-
-		## Get the baseline demand data for the same time window
-		month_data_baseP = demand[s:f]
-		peak_indices_baseP = np.argmax(month_data_baseP)
-		peak_mask_baseP = np.zeros_like(monthly_adjusted_demand, dtype=float)
-		peak_mask_baseP[peak_indices_baseP] = 1.0
-
-		## Peak of Adjusted Demand
-		BESSpeakDemand_adjP[s:f] = BESS_demand[s:f] * peak_mask_adjP ## BESS demand at the monthly adjusted peak
-		TESSpeakDemand_adjP[s:f] = TESS_demand[s:f] * peak_mask_adjP ## TESS demand at the monthly adjusted peak
-		GENpeakDemand_adjP[s:f] = GEN_demand[s:f] * peak_mask_adjP ## GEN demand at the monthly adjusted peak
-		peakDemand_adjP[s:f] = demand[s:f] * peak_mask_adjP ## total demand at the monthly adjusted demand peak
-		
-		## Peak of Original Demand
-		BESSpeakDemand_baseP[s:f] = BESS_demand[s:f] * peak_mask_baseP ## BESS demand at the monthly baseline peak
-		TESSpeakDemand_baseP[s:f] = TESS_demand[s:f] * peak_mask_baseP ## TESS demand at the monthly baseline peak
-		GENpeakDemand_baseP[s:f] = GEN_demand[s:f] * peak_mask_baseP ## GEN demand at the monthly baseline peak
-		peakDemand_baseP[s:f] = demand[s:f] * peak_mask_baseP ## total demand at the monthly baseline demand peak
-
-	#print('BESS peak demand array: ', BESSpeakDemand_baseP)
-	besspeakdemand = [BESS_demand[np.argmax(BESS_demand[s:f])] for s, f in monthHours] ## The maximum peak kW for each month
-	#print('BESS peak demand: ', besspeakdemand)
-
-	## Monthly BESS, TESS, and GEN peak demand savings
-	## NOTE: The sum is done over the entire month's DER contribution because the contribution arrays have zeroes everywhere except for the peak hour per month
-	monthlyBESS_peakDemand_savings_adjP = [sum(BESSpeakDemand_adjP[s:f])*demandCost for s, f in monthHours]
-	monthlyTESS_peakDemand_savings_adjP = [sum(TESSpeakDemand_adjP[s:f])*demandCost for s, f in monthHours]
-	monthlyGEN_peakDemand_savings_adjP = [sum(GENpeakDemand_adjP[s:f])*demandCost for s, f in monthHours]
-	monthlyAllDER_peakDemand_savings_adjP = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_savings_adjP,monthlyTESS_peakDemand_savings_adjP,monthlyGEN_peakDemand_savings_adjP)]
-	totalAllDER_peakDemand_savings = sum(monthlyAllDER_peakDemand_savings_adjP)
-	#print('total peak demand savings when adding up individual DERs: ', totalAllDER_peakDemand_savings)
-	#print('Should match (peak demand cost - peak adjusted demand cost)+()')
-
-	monthlyBESS_peakDemand_adjP = [sum(BESSpeakDemand_adjP[s:f]) for s, f in monthHours]
-	monthlyTESS_peakDemand_adjP = [sum(TESSpeakDemand_adjP[s:f]) for s, f in monthHours]
-	monthlyGEN_peakDemand_adjP = [sum(GENpeakDemand_adjP[s:f]) for s, f in monthHours]
-	monthlyAllDER_peakDemand_adjP = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_adjP,monthlyTESS_peakDemand_adjP,monthlyGEN_peakDemand_adjP)]
-
-	monthly_peakDemand_baseP = [sum(peakDemand_baseP[s:f]) for s, f in monthHours] ## monthly peak demand of baseline demand
-	monthly_peakDemand_adjP = [sum(peakDemand_adjP[s:f]) for s, f in monthHours] ## monthly peak demand of adjusted demand
-
-	## Do the same but for the baseline peak savings
-	monthlyBESS_peakDemand_baseP = [sum(BESSpeakDemand_baseP[s:f]) for s, f in monthHours]
-	monthlyTESS_peakDemand_baseP = [sum(TESSpeakDemand_baseP[s:f]) for s, f in monthHours]
-	monthlyGEN_peakDemand_baseP = [sum(GENpeakDemand_baseP[s:f]) for s, f in monthHours]
-	monthlyAllDER_peakDemand_baseP = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_baseP,monthlyTESS_peakDemand_baseP,monthlyGEN_peakDemand_baseP)]
+	peak_demand_at_baseP = demand[peak_demand_indices]
+	peak_demand_at_adjP = demand[adjusted_demand_indices]
+	adjusted_demand_at_baseP = adjusted_demand[peak_demand_indices]
+	adjusted_demand_at_adjP = adjusted_demand[adjusted_demand_indices]
 	
-	monthlyBESS_peakDemand_savings_baseP = [sum(BESSpeakDemand_baseP[s:f])*demandCost for s, f in monthHours]
-	monthlyTESS_peakDemand_savings_baseP = [sum(TESSpeakDemand_baseP[s:f])*demandCost for s, f in monthHours]
-	monthlyGEN_peakDemand_savings_baseP = [sum(GENpeakDemand_baseP[s:f])*demandCost for s, f in monthHours]
-	monthlyAllDER_peakDemand_savings_baseP = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_savings_baseP,monthlyTESS_peakDemand_savings_baseP,monthlyGEN_peakDemand_savings_baseP)]
+	peak_demand_at_baseP_cost = peak_demand_at_baseP*demandCost
+	peak_demand_at_adjP_cost = peak_demand_at_adjP*demandCost
+	adjusted_demand_at_baseP_cost = adjusted_demand_at_baseP*demandCost
+	adjusted_demand_at_adjP_cost = adjusted_demand_at_adjP*demandCost
 
-	## Extrapolate costs from 1 year to the entire projection length
-	outData['totalPeakDemandSavings_allDER_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyPeakDemandSavings'])))
+	BESS_demand_at_baseP = BESS_demand[peak_demand_indices]
+	BESS_demand_at_adjP = BESS_demand[adjusted_demand_indices]
+	TESS_demand_at_baseP = TESS_demand[peak_demand_indices]
+	TESS_demand_at_adjP = TESS_demand[adjusted_demand_indices]
+	GEN_demand_at_baseP = GEN_demand[peak_demand_indices]
+	GEN_demand_at_adjP = GEN_demand[adjusted_demand_indices]
+
+	BESS_demand_at_baseP_cost = BESS_demand_at_baseP * demandCost
+	TESS_demand_at_baseP_cost = TESS_demand_at_baseP * demandCost
+	GEN_demand_at_baseP_cost = GEN_demand_at_baseP * demandCost
+
+	BESS_demand_at_adjP_cost = BESS_demand_at_adjP * demandCost
+	TESS_demand_at_adjP_cost = TESS_demand_at_adjP * demandCost
+	GEN_demand_at_adjP_cost = GEN_demand_at_adjP * demandCost
+
+	allDER_at_baseP = BESS_demand_at_baseP+TESS_demand_at_baseP+GEN_demand_at_baseP
+	allDER_at_adjP = BESS_demand_at_adjP+TESS_demand_at_adjP+GEN_demand_at_adjP
 
 	## Calculate the F_val (the linear scaling factor that quantifies the impact of DERs on peak demand savings)
 	## NOTE: See CIDER project plan for doc link to detailed calculation of F_val
-	demand_1 = np.array(monthly_peakDemand_baseP) ## peak demand at t=1
-	demand_2 = np.array(monthly_peakDemand_adjP) ## peak demand at t=2
-	D_DER_1 = np.array(monthlyAllDER_peakDemand_baseP) ## DER contribution (kW) at t=1
-	D_DER_2 = np.array(monthlyAllDER_peakDemand_adjP) ## DER contribution (kW) at t=2
+	demand_1 = np.array(peak_demand_at_baseP) ## peak demand at t=1
+	demand_2 = np.array(peak_demand_at_adjP) ## peak demand at t=2
+	D_DER_1 = np.array(allDER_at_baseP) ## DER contribution (kW) at t=1
+	D_DER_2 = np.array(allDER_at_adjP) ## DER contribution (kW) at t=2
 	F_val = (demand_1 - demand_2 + D_DER_2) / D_DER_1
 
 	## Apply the monthly F_val to the monthly BESS, TESS, GEN peak demand savings
-	monthlyBESS_peakDemand_savings = monthlyBESS_peakDemand_savings_baseP*F_val
-	monthlyTESS_peakDemand_savings = monthlyTESS_peakDemand_savings_baseP*F_val
-	monthlyGEN_peakDemand_savings = monthlyGEN_peakDemand_savings_baseP*F_val
-	allDevices_peakDemand_savings_monthly = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_savings,monthlyTESS_peakDemand_savings,monthlyGEN_peakDemand_savings)]
-	#print('all devices monthly peak demand savings: ', allDevices_peakDemand_savings_monthly)
+	BESS_peakDemand_savings_monthly = BESS_demand_at_baseP_cost*F_val
+	TESS_peakDemand_savings_monthly = TESS_demand_at_baseP_cost*F_val
+	GEN_peakDemand_savings_monthly = GEN_demand_at_baseP_cost*F_val
+	allDevices_peakDemand_savings_monthly = [a+b+c for a,b,c in zip(BESS_peakDemand_savings_monthly,TESS_peakDemand_savings_monthly,GEN_peakDemand_savings_monthly)]
+	allDevices_peakDemand_savings_total = sum(allDevices_peakDemand_savings_monthly)
+	#print('test all devices monthly peak demand savings: ', testallDevices_peakDemand_savings_monthly)
 	#print('total monthly peak demand savings: ', outData['monthlyPeakDemandSavings'])
+
+	BESS_peakDemand_savings_allyears = np.full(projectionLength, sum(BESS_peakDemand_savings_monthly))
+	BESS_consumption_savings_allyears = np.full(projectionLength, sum(BESS_consumption_savings_monthly))
+	BESS_savings_allyears = BESS_peakDemand_savings_allyears + BESS_consumption_savings_allyears
+
+	TESS_peakDemand_savings_allyears = np.full(projectionLength, sum(TESS_peakDemand_savings_monthly))
+	TESS_consumption_savings_allyears = np.full(projectionLength, sum(TESS_consumption_savings_monthly))
+	TESS_savings_allyears = TESS_peakDemand_savings_allyears + TESS_consumption_savings_allyears
+
+	GEN_peakDemand_savings_allyears = np.full(projectionLength, sum(GEN_peakDemand_savings_monthly))
+	GEN_consumption_savings_allyears = np.full(projectionLength, sum(GEN_consumption_savings_monthly))
+	GEN_savings_allyears = GEN_peakDemand_savings_allyears + GEN_consumption_savings_allyears
 
 	######################################################################################################################################################
 	## COSTS
@@ -999,12 +969,12 @@ def work(modelDir, inputDict):
 	######################################################################################################################################################
 	## Savings Breakdown Per Technology Plot variables
 	######################################################################################################################################################
-	outData['savings_peakDemand_BESS_allyears'] = list(np.full(projectionLength, sum(monthlyBESS_peakDemand_savings)))
-	outData['savings_consumption_BESS_allyears'] = list(np.full(projectionLength, sum(BESS_consumption_savings_monthly)))
-	outData['savings_peakDemand_TESS_allyears'] = list(np.full(projectionLength, sum(monthlyTESS_peakDemand_savings)))
-	outData['savings_consumption_TESS_allyears'] = list(np.full(projectionLength, sum(TESS_consumption_savings_monthly)))
-	outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, sum(monthlyGEN_peakDemand_savings)))
-	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, sum(GEN_consumption_savings_monthly)))
+	outData['savings_peakDemand_BESS_allyears'] = list(BESS_peakDemand_savings_allyears)
+	outData['savings_consumption_BESS_allyears'] = list(BESS_consumption_savings_allyears)
+	outData['savings_peakDemand_TESS_allyears'] = list(TESS_peakDemand_savings_allyears)
+	outData['savings_consumption_TESS_allyears'] = list(TESS_consumption_savings_allyears)
+	outData['savings_peakDemand_GEN_allyears'] = list(GEN_peakDemand_savings_allyears)
+	outData['savings_consumption_GEN_allyears'] = list(GEN_consumption_savings_allyears)
 	outData['totalCosts_BESS_allyears'] = list(-1.0*totalCosts_BESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
@@ -1130,11 +1100,11 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
+	#__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
+	#__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
 
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
