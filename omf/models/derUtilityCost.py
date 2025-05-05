@@ -141,6 +141,33 @@ def work(modelDir, inputDict):
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
 	########################################################################################################################
+	## REopt Results
+	########################################################################################################################
+
+	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
+	if 'ElectricStorage' in reoptResults: 
+		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
+			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
+		else:
+			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
+	else:
+		print('No BESS was specified in REopt. Setting BESS variables to zero for plotting purposes.')
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
+		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
+
+	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
+	## NOTE: This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
+	#	static_reopt_results = json.load(f)
+	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
+	#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
+	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+	#outData.update(static_reopt_results['outputs'])
+
+	########################################################################################################################
 	## Run vbatDispatch model
 	########################################################################################################################
 
@@ -174,7 +201,7 @@ def work(modelDir, inputDict):
 	single_device_results = {} 
 	for suffix in thermal_suffixes:
 		## Include only the thermal devices specified by the user
-		if float(inputDict['load_type'+suffix]) > 0 and float(inputDict['number_devices'+suffix]) > 0:
+		if float(inputDict['load_type'+suffix]) > 0: ## NOTE: If thermal tech is not enabled by the user, the load_type_X variable will be set to 0 in derConsumer.html
 			all_device_suffixes.append(suffix)
 
 			## Add the appropriate thermal device variables to the inputDict_vbatDispatch
@@ -201,6 +228,18 @@ def work(modelDir, inputDict):
 			## Go back to the main derUtilityCost model directory and continue on
 			os.chdir(modelDir)
 
+
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	#consumptionCost = float(inputDict['electricityCost'])
+	demandCost = float(inputDict['demandChargeCost'])
+	rateCompensation = float(inputDict['rateCompensation'])
+
+	########################################################################################################################
+	## TESS technology combined and individual calculations
+	########################################################################################################################
+
 	## Initialize an empty dictionary to hold all thermal device results added together
 	## Length 8760 represents hourly data for one year, length 12 is monthly data for a year
 	combined_device_results = {
@@ -225,24 +264,19 @@ def work(modelDir, inputDict):
 		'combinedTESS_subsidy_onetime': 0,
 	}
 
-	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	#consumptionCost = float(inputDict['electricityCost'])
-	demandCost = float(inputDict['demandChargeCost'])
-	rateCompensation = float(inputDict['rateCompensation'])
-
+	thermal_device_savings = {}
 	## Combine all thermal device variable data for plotting
 	for device_result in single_device_results:
 		single_device_vbatPower = single_device_results[device_result]['VBpower']
 		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
-
+		single_device_vbat_discharge_component = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
+		single_device_vbat_charge_component = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
+		single_device_vbat_charge_component_flipsign = single_device_vbat_charge_component.mul(-1)
+		
 		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
 		combined_device_results['vbatPower_series'] = single_device_vbatPower_series
-		vbatPower_series_discharge = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
-		vbatPower_series_charge = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
-		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], vbatPower_series_discharge)]
-		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], vbatPower_series_charge)]
+		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], single_device_vbat_discharge_component)]
+		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], single_device_vbat_charge_component)]
 		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
 		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
 		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
@@ -259,10 +293,7 @@ def work(modelDir, inputDict):
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
 
-		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
-		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
-		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
-
+		## Calculate subsidy for each thermal DER technology
 		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
 		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
@@ -270,26 +301,33 @@ def work(modelDir, inputDict):
 		single_device_subsidy_allyears_array = np.full(projectionLength, single_device_subsidy_ongoing*12.0)
 		single_device_subsidy_allyears_array[0] += single_device_subsidy_onetime
 
+		## Calculate the consumer compensation for each thermal DER technology
 		single_device_compensation_year1_array = np.array([sum(single_device_vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
 		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
 		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
 
+		## Calculate the consumption cost savings for each DER tech using the input rate structure (hourly data for the whole year)
 		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
+		single_device_consumption_cost_year1 = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+		single_device_consumption_cost_monthly = [sum(single_device_consumption_cost_year1[s:f]) for s, f in monthHours]
+		single_device_consumption_cost_allyears = np.full(projectionLength, sum(single_device_consumption_cost_year1))
 		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
 
-		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
-		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
-
-		## Calculate the consumption cost saved by each DER tech using the input rate structure
-		#single_device_consumption_cost_monthly_array = [sum(single_device_consumption_cost_year1_array[s:f]) for s, f in monthHours]
-		#single_device_consumption_cost_allyears_array = np.full(projectionLength, sum(single_device_consumption_cost_year1_array))
-
+		## Add up all the costs for the total TESS
 		costs_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array
 		costs_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array 
+
+		## Save relevant variables for calculating the demand cost savings later on
+		thermal_device_savings[device_result] = {
+			'demand': single_device_demand,
+			'consumption_cost_monthly': np.array(single_device_consumption_cost_monthly),
+			'consumption_cost_allyears': np.array(single_device_consumption_cost_allyears),
+    	}
 
 		## Savings Breakdown Per Thermal Technology cost variables
 		## NOTE: This is where the html variables outData['vbatResults_wh_costs_allyears'], outData['vbatResults_hp_costs_allyears'], and outData['vbatResults_ac_costs_allyears'] are saved.
 		outData[device_result+'_costs_allyears'] = list(costs_allyears_single_device*-1.0) ## Multiply by negative one for displaying in the plot as a cost
+
 		outData[device_result+'_check'] = 'enabled'
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
@@ -390,29 +428,6 @@ def work(modelDir, inputDict):
 	########################################################################################################################################################
 	## DER Serving Load Overview plot 
 	########################################################################################################################################################
-
-	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
-	if 'ElectricStorage' in reoptResults: 
-		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
-			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
-		else:
-			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
-	else:
-		print('No BESS was specified in REopt. Setting BESS variables to zero for plotting purposes.')
-		BESS = np.zeros_like(demand)
-		grid_charging_BESS = np.zeros_like(demand)
-		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
-
-	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
-	## NOTE: This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
-	#	static_reopt_results = json.load(f)
-	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
-	#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
-	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-	#outData.update(static_reopt_results['outputs'])
 
 	## vbatDispatch variables
 	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
@@ -701,7 +716,7 @@ def work(modelDir, inputDict):
 	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(monthlyEnergyConsumptionCost, outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
 	outData['monthlyTotalCostAdjustedService'] = [eca+dca for eca, dca in zip(monthlyAdjustedEnergyConsumptionCost, outData['monthlyAdjustedPeakDemandCost'])] ## total cost of energy and peak demand from including DERs
 	outData['monthlyTotalSavingsAdjustedService'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService'])] ## total savings from all DERs
-	
+
 	#########################################################################################################################################################
 	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption and peak demand savings
 	#########################################################################################################################################################
@@ -784,6 +799,27 @@ def work(modelDir, inputDict):
 	GEN_peakDemand_savings_allyears = np.full(projectionLength, sum(GEN_peakDemand_savings_monthly))
 	GEN_consumption_savings_allyears = np.full(projectionLength, sum(GEN_consumption_savings_monthly))
 	GEN_savings_allyears = GEN_peakDemand_savings_allyears + GEN_consumption_savings_allyears
+
+	## Calculate the individual TESS technology consumption and peak demand savings
+	for device_result in single_device_results:
+		device_demand = thermal_device_savings[device_result]['demand']
+		device_demand_at_baseP = device_demand[peak_demand_indices]
+		device_demand_at_baseP_cost = device_demand_at_baseP * demandCost
+		device_peakDemand_savings_monthly = device_demand_at_baseP_cost*F_val
+
+		device_peakDemand_savings_allyears = np.full(projectionLength, sum(device_peakDemand_savings_monthly))
+
+		device_consumption_savings_monthly = thermal_device_savings[device_result]['consumption_cost_monthly']
+		device_consumption_savings_allyears = thermal_device_savings[device_result]['consumption_cost_allyears']
+
+		#device_savings_monthly = device_peakDemand_savings_monthly + device_consumption_savings_monthly
+		#device_savings_allyears = device_peakDemand_savings_allyears + device_consumption_savings_allyears
+
+		#print(device_result+' savings :', device_peakDemand_savings_monthly)
+
+		outData[device_result+'_consumption_savings_allyears'] = device_consumption_savings_allyears.tolist()
+		outData[device_result+'_peakDemand_savings_allyears'] = device_peakDemand_savings_allyears.tolist()
+
 
 	######################################################################################################################################################
 	## COSTS
