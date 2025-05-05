@@ -93,12 +93,21 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Curve in &degF (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
-				<input id="tempCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'tempCurve','tempFileName')">
-				<input id="tempCurve" name="tempCurve" value="{{allInputDataDict.tempCurve}}" type="hidden">
+				<label class="tooltip">Temperature Curve in &degC (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
+				<input id="temperatureCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'temperatureCurve','temperatureFileName')">
+				<input id="temperatureCurve" name="temperatureCurve" value="{{allInputDataDict.temperatureCurve}}" type="hidden">
 				<div>
-					<label for="tempCurveFile" class="fileButton">Choose File</label>
-					<input id="tempFileName" name="tempFileName" value="{{allInputDataDict.tempFileName}}" value='' readonly class="uploadFileName">
+					<label for="temperatureCurveFile" class="fileButton">Choose File</label>
+					<input id="temperatureFileName" name="temperatureFileName" value="{{allInputDataDict.temperatureFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Rate Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example energy rate file.</span></label>
+				<input id="energyRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'energyRateCurve','energyRateFileName')">
+				<input id="energyRateCurve" name="energyRateCurve" value="{{allInputDataDict.energyRateCurve}}" type="hidden">
+				<div>
+					<label for="energyRateCurveFile" class="fileButton">Choose File</label>
+					<input id="energyRateFileName" name="energyRateFileName" value="{{allInputDataDict.energyRateFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -130,10 +139,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
@@ -526,6 +531,36 @@
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+			{% endif %}
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Savings Breakdown of Thermal Technologies</p>
+		<div id="cashFlowReport" class="tightContent">
+			<div id="cashFlowChartDiv3"></div>
+			{% if allOutputDataDict.thermalDataCheck == 0 %}
+			<script type="text/javascript">	
+				$("#cashFlowChartDiv3").html("<p>&#160;&#160;&#160;No thermal technologies were specified or built by the model.</p>")
+			</script>
+			{% else %}
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
+					"title":{"text":"", "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[
+						{"name":"Water Heater Savings", "data": allOutputData.vbatResults_wh_costs_allyears, "color": "rgb(16,101,171)"},
+						{"name":"Heat Pump Savings", "data": allOutputData.vbatResults_hp_costs_allyears, "color": "rgb(58,147,195)"},
+						{"name":"Air Conditioner Savings", "data": allOutputData.vbatResults_ac_costs_allyears, "color": "rgb(142,196,222)"},
+						{"name":"Water Heater Incentives", "data": allOutputData.vbatResults_wh_costs_allyears, "color": "rgb(179,21,41)"},
+						{"name":"Heat Pump Incentives", "data": allOutputData.vbatResults_hp_costs_allyears, "color": "rgb(215,95,76)"},
+						{"name":"Air Conditioner Incentives", "data": allOutputData.vbatResults_ac_costs_allyears, "color": "rgb(246,164,130)"},
+						//{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black", "visible": false}
+					],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv3","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>

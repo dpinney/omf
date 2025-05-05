@@ -1,9 +1,9 @@
 ''' Performs cost-benefit analysis for a member-consumer with distributed 
 energy resource (DER) technologies. '''
 
-# Python imports
+## Python imports
 import warnings
-# warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 import shutil, datetime
 from os.path import join as pJoin
 import numpy as np
@@ -12,14 +12,15 @@ import plotly.graph_objs as go
 import plotly.utils
 import requests
 import matplotlib.pyplot as plt
+from numpy_financial import npv
 
-# OMF imports
+## OMF imports
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import vbatDispatch as vb
 from omf.solvers import reopt_jl
 
-# Model metadata:
+## Model metadata:
 tooltip = ('The derConsumer model evaluates the financial costs of controlling behind-the-meter \
            distributed energy resources (DERs) at the residential level using the National Renewable Energy \
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
@@ -27,35 +28,43 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True ## Keep the model hidden=True during active development
 
-def create_REopt_jl_jsonFile(modelDir, inputDict):
-	'''
-	Function that assembles a dictionary (and saves as a JSON file) of all user inputs for the purposes \
-		of preparing to run reopt_jl.
-	** Inputs
-		modelDir: (str) path of where to save the ouput JSON file (needed for reopt_jl)
-		inputDict: (dict) input dictionary containing relevant user inputs to be modeled in REopt 
-			(e.g. latitude, longitude, urdb label, etc.)
-	** Outputs
-		scenario: (dict) output dictionary containing the correct format.
-	'''
+def work(modelDir, inputDict):
+	''' Run the model in its directory. '''
 
-	## Site parameters
+	## Delete output file every run if it exists
+	outData = {}
+
+	## Convert user provided demand and temp data from str to float
+	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
+
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
+	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
+	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+
+	########################################################################################################################
+	## Run REopt.jl solver
+	########################################################################################################################
+
+	## Create REopt input file
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
-	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
-	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	## Begin the REopt input dictionary called 'scenario'
+	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
 	scenario = {
 		'Site': {
 			'latitude': latitude,
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel
+			'urdb_label': urdbLabel,
+			'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -67,172 +76,49 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
-	scenario['ElectricStorage'] = {
-		##TODO: Add options here, if needed
-		'min_kw': float(inputDict['BESS_kw']), 
-		'max_kw': float(inputDict['BESS_kw']), 
-		'min_kwh': float(inputDict['BESS_kwh']), 
-		'max_kwh': float(inputDict['BESS_kwh']), 
-		'can_grid_charge': True,
-		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
-		'macrs_option_years': 0.0,
-		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
-		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
-		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
-		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
-		'total_itc_fraction': float(inputDict['total_itc_fraction']),
-		'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
-		'battery_replacement_year': float(inputDict['battery_replacement_year']),
-		}
+	if inputDict['enableBESS'] == 'Yes':
+		BESScheck = 'enabled'
+		scenario['ElectricStorage'] = {
+			'min_kw': float(inputDict['BESS_kw']), 
+			'max_kw': float(inputDict['BESS_kw']), 
+			'min_kwh': float(inputDict['BESS_kwh']), 
+			'max_kwh': float(inputDict['BESS_kwh']), 
+			'can_grid_charge': True,
+			'total_rebate_per_kw': 0.0,
+			'macrs_option_years': 0,
+			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
+			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
+			'total_itc_fraction': 0.0,
+			'inverter_replacement_year': int(inputDict['inverter_replacement_year']),
+			'battery_replacement_year': int(inputDict['battery_replacement_year']),
+			'soc_min_fraction': 1.0 - float(inputDict['utility_BESS_portion'])/100,
+			}
+	else:
+		BESScheck = 'disabled'
 	
-	## Add fossil fuel (diesel) generator to input scenario
+	## Add fossil fuel (diesel) generator to input scenario (if enabled)
 	if inputDict['fossilGenerator'] == 'Yes':
+		GENcheck = 'enabled'
+
 		scenario['Generator'] = {
-			'existing_kw': float(inputDict['existing_gen_kw']),
-			'max_kw': 0,
-			'min_kw': 0,
+			'existing_kw': float(inputDict['existing_gen_kw']), ## Existing generator
+			'max_kw': 0.0, ## New generator minumum
+			'min_kw': 0.0, ## New generator maximum
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
-			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal'])
+			'replacement_year': int(inputDict['generator_replacement_year']),
+			'replace_cost_per_kw': float(inputDict['replace_cost_generator_per_kw']),
+			'fuel_avail_gal': float(inputDict['fuel_avail']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost']),
 		}
+
+	else:
+		GENcheck = 'disabled'
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
 	## preferrably in the modelDir directory
 	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
 		json.dump(scenario, jsonFile)
-	
-	return scenario
-
-
-def get_tou_rates(modelDir, inputDict): 
-	'''
-	Function that pulls rate information from the OEDI utility rate database via API functionality.
-
-	** Inputs
-	modelDir: (str) Currently model directory
-	inputDict: (dict) Input dictionary containing latitude and longitude information 
-
-	** Outputs
-	data: (JSON file) Ouput JSON file containing the API response fields \
-		(see https://openei.org/services/doc/rest/util_rates/?version=3#json-output-format for more info)
-	'''
-
-	api_url = 'https://api.openei.org/utility_rates?parameters'
-	api_key = '5dFShfSVRt2XJpPYCbzBeLM6nHrOXc0VFPTWxfJJ' ## API key generated by following this website: 'https://openei.org/services/'
-
-	params = {
-		'version': '3',
-		'format': 'json',
-		'api_key': api_key,
-		'detail': 'full',
-		'lat': inputDict['latitude'],
-		'lon': inputDict['longitude']
-		}
-	
-	#if inputDict['demandChargeURDB'] == 'Yes':
-	#	params['getpage'] = str(inputDict['urdbLabel']) ## Residential TOU example: 5b311c595457a3496d8367be
-	#else:
-	#	params['lat'] = inputDict['latitude'],
-	#	params['lon'] = inputDict['longitude']
-	
-	try:
-		response = requests.get(api_url, params=params)
-		response.raise_for_status()  ## Raise an exception for HTTP errors
-		
-		data = response.json()
-
-		## Save the retrieved data as a JSON file
-		with open(pJoin(modelDir, 'OEDIrateData.json'), 'w') as json_file:
-			json.dump(data, json_file)
-		
-		return data
-			
-	except requests.exceptions.RequestException as e:
-		print('Error:', e)
-		return None
-	
-
-def get_tou_rates_adhoc():
-	'''
-	Ad-hoc function that arbitrarily assigns TOU rates for summer/winter on- and 0ff-peaks.
-	NOTE: This function was temporarily used in place of get_tou_rates() due to issues with API \
-	not returning rate data. Issue was solved by specifying 'detail: full' in the API request.
-	'''
-
-	tou_rates = {
-		## Example TOU rates data for ad-hoc use
-		'summer_on_peak': 0.25,
-		'summer_off_peak': 0.15,
-		'winter_on_peak': 0.20,
-		'winter_off_peak': 0.12
-	}
-	return tou_rates
-
-## Function to create TOU schedule based on the given OEDI utility energy schedule
-def create_tou_schedule(energy_schedule):
-	'''
-	Function that sorts through the OEDI's provided energy rate schedule to create a Time of Use (TOU) schedule.
-
-	** Inputs
-	energy_schedule: (array of arrays) Corresponds to the demandweekdayschedule or demandweekendschedule provided by the OEDI API request. \
-		Time of Use Demand Charge Structure Weekday or Weekend Schedule. Value is an array of arrays. \
-		The 12 top-level arrays correspond to a month of the year. Each month array contains one integer per hour of the weekday \
-		from 12am to 11pm, and the integer corresponds to the index of a period in demandratestructure. 
-
-	** Outputs
-	tou_schedule: (DataFrame) Consisting of the Month, Hour, and TOU Period (an integer corresponding to the index \
-		of a period in demandratestructure)
-	'''
-	tou_schedule = []
-	for month in range(12):
-		for hour in range(24):
-			tou_schedule.append({
-				'Month': month + 1,
-				'Hour': hour,
-				'TOU Period': energy_schedule[month][hour]
-			})
-	return pd.DataFrame(tou_schedule)
-
-## Function to get the TOU rate based on the TOU schedule
-def calc_tou_rate(timestamp, tou_schedules, tou_structure):
-	'''
-	Function that identifies the Time of Use (TOU) rate given the TOU schedule and structure.
-	
-	** Inputs
-	timestamp: (array) Hourly timestamps for a given year, length 8760.
-	tou_schedules: (DataFrame) Consisting of the Month, Hour, and TOU Period (an integer corresponding to the index \
-		of a period in demandratestructure)
-	tou_structure: (array) Corresponds to the energyratestructure provided by the OEDI API response request.
-
-	** Outputs
-	tou_rate: (float) The TOU rate ($) for the specified period.
-	tou_period: (int) An integer number corresponding to the index of a period in demandratestructure provided by the OEDI API response request.
-	'''
-	month = timestamp.month
-	hour = timestamp.hour
-	day_of_week = timestamp.weekday()
-
-	## Weekdays
-	if day_of_week < 5: 
-		tou_period = tou_schedules['weekday'].loc[(tou_schedules['weekday']['Month'] == month) & (tou_schedules['weekday']['Hour'] == hour), 'TOU Period'].values[0]
-	
-	## Weekends
-	else:
-		tou_period = tou_schedules['weekend'].loc[(tou_schedules['weekend']['Month'] == month) & (tou_schedules['weekend']['Hour'] == hour), 'TOU Period'].values[0]
-
-	tou_rate = tou_structure[tou_period][0]['rate']
-	return tou_rate, tou_period
-
-
-def work(modelDir, inputDict):
-	''' Run the model in its directory. '''
-
-	## Delete output file every run if it exists
-	outData = {}
-
-	## Create REopt input file
-	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
 	## Read in a static REopt test file
 	## NOTE: The single commented code below is used temporarily if reopt_jl is not working or for other debugging purposes.
@@ -243,15 +129,10 @@ def work(modelDir, inputDict):
 	#	reoptResults = pd.json_normalize(json.load(f))
 	#	print('Successfully loaded REopt test file. \n')
 
-	## Run REopt.jl 
 	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file outData with REopt results data
-
-	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	## Create timestamp array from REopt input information
 	try:
@@ -260,322 +141,772 @@ def work(modelDir, inputDict):
 		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
-	## Run vbatDispatch, unless it is disabled
-	## TODO: Check that the rest of the code functions if the vbat (TESS) load type is None
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
-		vbatResults = vb.work(modelDir,inputDict)
-		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
-			json.dump(vbatResults, jsonFile)
-		outData.update(vbatResults) ## Update output file with vbat results
+	########################################################################################################################
+	## Run vbatDispatch model
+	########################################################################################################################
 
-		## vbatDispatch variables
-		vbpower_series = pd.Series(vbatResults['VBpower'])
-		vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ##positive values = charging
-		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
-		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
-
-	## Update the financial outputs
-	subsidies = np.full(12, float(inputDict['subsidyOngoing']))
-	subsidies[0] = float(inputDict['subsidyUpfront'])
-	outData['savings'] = np.array(outData['savings']) + subsidies
-
-	## DER Overview plot ###################################################################################################################################################################
-	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
-
-	if 'Generator' in reoptResults:
-		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
+	## Set up base input dictionary for vbatDispatch runs
+	inputDict_vbatDispatch = {
+		'load_type': '', ## 1=AirConditioner, 2=HeatPump, 3=Refrigerator, 4=WaterHeater (These conventions are from OMF model vbatDispatch.html)
+		'number_devices': '1',
+		'power': '',
+		'capacitance': '',
+		'resistance': '',
+		'cop': '',
+		'setpoint':  '',
+		'deadband': '',
+		'unitDeviceCost': '', 
+		'unitUpkeepCost':  '', 
+		'demandChargeCost': '0.0',
+		'electricityCost': '0.16',
+		'projectionLength': inputDict['projectionLength'],
+		'discountRate': inputDict['discountRate'],
+		'fileName': inputDict['demandFileName'],
+		'tempFileName': inputDict['temperatureFileName'],
+		'demandCurve': inputDict['demandCurve'],
+		'tempCurve': inputDict['temperatureCurve'],
+	}
 	
-	## Using REopt's Battery Energy Storage System (BESS) output
-	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
-		print("Using REopt's BESS output. \n")
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
+	thermal_suffixes = ['_hp', '_ac', '_wh'] ## heat pump, air conditioner, water heater - (Add more suffixes here after establishing inputs in the defaultInputs and derUtilityCost.html)
+	thermal_variables=['load_type','power','capacitance','resistance','cop','setpoint','deadband','TESS_subsidy_ongoing','TESS_subsidy_onetime','unitDeviceCost','unitUpkeepCost']
 
-		## Update the monthly consumer savings
-		## Add BESS compensation amount to vbatDispatch's thermal BESS savings
-		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-		BESS_compensation_monthly = np.asarray([sum(BESS[s:f]) for s, f in monthHours])
-		outData['savings'] = list(np.asarray(outData['savings'])+np.asarray(BESS_compensation_monthly)) ## NOTE: There is likely a better way to add two lists together, but this works for now
+	all_device_suffixes = []
+	single_device_results = {} 
+	for suffix in thermal_suffixes:
+		## Include only the thermal devices specified by the user
+		if float(inputDict['load_type'+suffix]) > 0: ## NOTE: If thermal tech is not enabled by the user, the load_type_X variable will be set to 0 in derConsumer.html
+			all_device_suffixes.append(suffix)
 
+			## Add the appropriate thermal device variables to the inputDict_vbatDispatch
+			for i in thermal_variables:
+				inputDict_vbatDispatch[i] = inputDict[i+suffix]
+
+			## Create a model subdirectory for each thermal device and store the vbatDispatch results
+			newDir = pJoin(modelDir,'vbatDispatch_results'+suffix)
+			os.makedirs(newDir, exist_ok=True)
+			os.chdir(newDir) ##jump into the newly created subdirectory
+
+			## Run vbatDispatch for the thermal device
+			vbatResults = vb.work(modelDir,inputDict_vbatDispatch)
+			with open(pJoin(newDir, 'vbatResults.json'), 'w') as jsonFile:
+				json.dump(vbatResults, jsonFile)
+			
+			## Update the vbatResults to include subsidies (for easier usage later)
+			vbatResults['TESS_subsidy_onetime'] = float(inputDict_vbatDispatch['TESS_subsidy_onetime'])#*float(inputDict['number_devices'+suffix])
+			vbatResults['TESS_subsidy_ongoing'] = float(inputDict_vbatDispatch['TESS_subsidy_ongoing'])#*float(inputDict['number_devices'+suffix])
+
+			## Store the results in all_device_results dictionary
+			single_device_results['vbatResults'+suffix] = vbatResults
+
+			## Go back to the main derUtilityCost model directory and continue on
+			os.chdir(modelDir)
+
+	## Initialize an empty dictionary to hold all thermal device results added together
+	## Length 8760 represents hourly data for one year, length 12 is monthly data for a year
+	combined_device_results = {
+		'vbatPower_series': [0]*8760,
+		'vbat_charge': [0]*8760,
+		'vbat_discharge': [0]*8760,
+		'vbat_charge_flipsign': [0]*8760,
+		'vbatMinEnergyCapacity': [0]*8760,
+		'vbatMaxEnergyCapacity':[0]*8760,
+		'vbatEnergy':[0]*8760,
+		'vbatMinPowerCapacity': [0]*8760,
+		'vbatMaxPowerCapacity': [0]*8760,
+		'vbatPower': [0]*8760,
+		'savingsTESS': [0]*12,
+		'energyAdjustedMonthlyTESS': [0]*12,
+		'demandAdjustedTESS': [0]*8760,
+		'peakAdjustedDemandTESS': [0]*12,
+		'totalCostAdjustedTESS': [0]*12,
+		'demandChargeAdjustedTESS': [0]*12,
+		'monthlyEnergyConsumptionCost_Adjusted_TESS':[0]*12,
+		'combinedTESS_subsidy_ongoing': 0,
+		'combinedTESS_subsidy_onetime': 0,
+	}
+
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	#consumptionCost = float(inputDict['electricityCost'])
+	demandCost = 0.0
+	rateCompensation = float(inputDict['rateCompensation'])
+
+	## Combine all thermal device variable data for plotting
+	for device_result in single_device_results:
+		single_device_vbatPower = single_device_results[device_result]['VBpower']
+		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
+
+		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
+		combined_device_results['vbatPower_series'] = single_device_vbatPower_series
+		vbatPower_series_discharge = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
+		vbatPower_series_charge = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
+		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], vbatPower_series_discharge)]
+		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], vbatPower_series_charge)]
+		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
+		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
+		combined_device_results['vbatEnergy'] = [sum(x) for x in zip(combined_device_results['vbatEnergy'], single_device_results[device_result]['VBenergy'])]
+		combined_device_results['vbatMinPowerCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinPowerCapacity'], single_device_results[device_result]['minPowerSeries'])]
+		combined_device_results['vbatMaxPowerCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxPowerCapacity'], single_device_results[device_result]['maxPowerSeries'])]
+		combined_device_results['savingsTESS'] = [sum(x) for x in zip(combined_device_results['savingsTESS'], single_device_results[device_result]['savings'])]
+		combined_device_results['energyAdjustedMonthlyTESS'] = [sum(x) for x in zip(combined_device_results['energyAdjustedMonthlyTESS'], single_device_results[device_result]['energyAdjustedMonthly'])]
+		combined_device_results['demandAdjustedTESS'] = [sum(x) for x in zip(combined_device_results['demandAdjustedTESS'], single_device_results[device_result]['demandAdjusted'])]
+		combined_device_results['peakAdjustedDemandTESS'] = [sum(x) for x in zip(combined_device_results['peakAdjustedDemandTESS'], single_device_results[device_result]['peakAdjustedDemand'])]
+		combined_device_results['totalCostAdjustedTESS'] = [sum(x) for x in zip(combined_device_results['totalCostAdjustedTESS'], single_device_results[device_result]['totalCostAdjusted'])]
+		combined_device_results['demandChargeAdjustedTESS'] = [sum(x) for x in zip(combined_device_results['demandChargeAdjustedTESS'], single_device_results[device_result]['demandChargeAdjusted'])]
+		combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'] = [sum(x) for x in zip(combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'], single_device_results[device_result]['energyCostAdjusted'])]
+		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
+		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
+
+		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
+		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
+		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+
+		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
+		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
+		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
+		single_device_subsidy_year1_array[0] += single_device_subsidy_onetime
+		single_device_subsidy_allyears_array = np.full(projectionLength, single_device_subsidy_ongoing*12.0)
+		single_device_subsidy_allyears_array[0] += single_device_subsidy_onetime
+
+		single_device_compensation_year1_array = np.array([sum(single_device_vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
+		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
+		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
+
+		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
+		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
+		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure
+		single_device_consumption_cost_monthly_array = [sum(single_device_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+		single_device_consumption_cost_allyears_array = np.full(projectionLength, sum(single_device_consumption_cost_year1_array))
+
+		savings_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array + single_device_consumption_cost_monthly_array
+		savings_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array + single_device_consumption_cost_allyears_array
+
+		## Savings Breakdown Per Thermal Technology savings variables
+		## NOTE: This is where the html variables outData['vbatResults_wh_savings_allyears'], outData['vbatResults_hp_savings_allyears'], and outData['vbatResults_ac_savings_allyears'] are saved.
+		outData[device_result+'_savings_allyears'] = list(savings_allyears_single_device)
+		outData[device_result+'_check'] = 'enabled'
+	
+	########################################################################################################################################################
+	## DER Serving Load Overview plot 
+	########################################################################################################################################################
+
+	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
+	if 'Generator' in reoptResults:
+		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw'])
+		generator = np.where(generator == -0.0, 0.0, generator) ## convert negative zero values to positive zero values
+		generator_W = generator * 1000. ## convert from kW to W for plotting
 	else:
-		print('No BESS found in REopt: Setting BESS data to 0. \n')
+		generator = np.zeros_like(demand)
+		generator_W = generator * 1000. ## convert from kW to W for plotting
+	
+	## TODO: Potentially clean up this ElectricStorage code to make it more sensible and flow better
+	if 'ElectricStorage' in reoptResults: 
+		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
+			BESS = np.array(reoptResults['ElectricStorage']['storage_to_load_series_kw'])
+			BESS = np.where(BESS == -0.0, 0.0, BESS) ## convert negative zero values to positive zero values
+			BESS_W = BESS * 1000. ## convert from kW to W for plotting
+			grid_charging_BESS = np.array(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
+			grid_charging_BESS = np.where(grid_charging_BESS == -0.0, 0.0, grid_charging_BESS) ## convert negative zero values to positive zero values
+			grid_charging_BESS_W = grid_charging_BESS * 1000. ## convert from kW to W for plotting
+			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
+		else:
+			#raise ValueError('The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
+			BESS = np.zeros_like(demand)
+			BESS_W = BESS * 1000. ## convert from kW to W for plotting
+			grid_charging_BESS = np.zeros_like(demand)
+			grid_charging_BESS_W = grid_charging_BESS * 1000. ## convert from kW to W for plotting
+			outData['chargeLevelBattery'] = list(np.zeros_like(demand))
+	else:
+		print('No BESS was specified in REopt. Setting BESS variables to zero for plotting purposes.')
 		BESS = np.zeros_like(demand)
+		BESS_W = BESS * 1000. ## convert from kW to W for plotting
 		grid_charging_BESS = np.zeros_like(demand)
-		outData['chargeLevelBattery'] = np.zeros_like(demand)
+		grid_charging_BESS_W = grid_charging_BESS * 1000. ## convert from kW to W for plotting
+		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
-	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
-	#	static_reopt_results = json.load(f)
-	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+	## vbatDispatch variables
+	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
+	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
+	vbat_discharge_component = np.where(vbat_discharge_component == -0.0, 0.0, vbat_discharge_component) ## convert negative zero values to positive zero values
+	vbat_charge_component = np.where(vbat_charge_component == -0.0, 0.0, vbat_charge_component) ## convert negative zero values to positive zero values
+	vbat_discharge_component_W = vbat_discharge_component * 1000. ## convert from kW to W for plotting
+	vbat_charge_component_W = vbat_charge_component * 1000. ## convert from kW to W for plotting
+	
+	## Calculate all other plot variables from kW to W for plotting
+	demand_W = np.array(demand) * 1000. ## convert from kW to W for plotting
+	grid_to_load = np.array(reoptResults['ElectricUtility']['electric_to_load_series_kw'])
+	grid_to_load = np.where(grid_to_load == -0.0, 0.0, grid_to_load) ## convert negative zero values to positive zero values
+	grid_to_load_W = grid_to_load * 1000. ## convert from kW to W for plotting
+	grid_serving_new_load_W = grid_to_load_W + grid_charging_BESS_W + vbat_charge_component_W - vbat_discharge_component_W
 
+	## Put all DER plot variables into a dataFrame for plotting
+	df = pd.DataFrame({
+		'timestamp': timestamps,
+		'Home BESS Serving Load': BESS_W,
+		'Home TESS Serving Load': vbat_discharge_component_W,
+		'Grid Serving Load': grid_to_load_W, #grid_serving_new_load_W,
+		'Home Generator Serving Load': generator_W,
+		'Grid Charging Home BESS': grid_charging_BESS_W,
+		'Grid Charging Home TESS': vbat_charge_component_W
+	})
 
-	## Create DER overview plot object ######################################################################################################################################################
+	## Define colors for each plot series
+	colors = {
+		'Grid Serving Load': 'rgba(128, 128, 128, 0.8)',  ## Gray
+		'Home BESS Serving Load': 'rgba(0, 128, 0, 0.8)',  ## Green
+		'Home Generator Serving Load': 'rgba(139, 0, 0, 0.8)',  ## Dark red
+		'Home TESS Serving Load': 'rgba(128, 0, 128, 0.8)',  ## Purple
+		'Grid Charging Home BESS': 'rgba(0, 128, 0, 0.4)',  ## Green w/ half opacity
+		'Grid Charging Home TESS': 'rgba(128, 0, 128, 0.4)'  ## Purple w/ half opacity
+	}
+
+	## Plot options
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
 	fig = go.Figure()
-	showlegend = True # either enable or disable the legend toggle in the plot
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
-		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
-		vbat_charge_component = np.asarray(vbat_charge)
-	else:
-		vbat_discharge_component = np.zeros_like(demand)
-		vbat_charge_component = np.zeros_like(demand)
 
-	## Convert all values from kW to Watts for plotting purposes only
-	grid_to_load = np.array(grid_to_load) * 1000.
-	BESS = np.array(BESS) * 1000.
-	grid_charging_BESS = np.array(grid_charging_BESS) * 1000.
-	vbat_discharge_component = vbat_discharge_component * 1000.
-	vbat_charge_component = vbat_charge_component * 1000.
-	demand = np.array(demand) * 1000.
-
-	## BESS serving load piece
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						name='BESS Serving Load',
-						fillcolor='rgba(0,137,83,1)',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	## Discharging DERs to plot
+	for col in ["Grid Serving Load", "Home BESS Serving Load", "Home Generator Serving Load", "Home TESS Serving Load","Grid Charging Home BESS", "Grid Charging Home TESS"]:
+		fig.add_trace(go.Scatter(
+			x=df["timestamp"],
+			y=df[col],
+			fill="tonexty",
+			mode="none",
+			name=col,
+			fillcolor=colors[col],
+			line_shape=lineshape,			
+			stackgroup="discharge"  ## Stack all the discharging DERs together
+		))
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						  y=temperatures,
-						  yaxis='y2',
-						  mode='lines',
-						  line=dict(color='red',width=1),
-						  name='Average Air Temperature',
-						  showlegend=showlegend 
-						  ))
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
 	
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=vbat_discharge_component + np.asarray(demand),
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(127,0,255,1)',
-						name='vbat Serving Load',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
+	fig.update_layout(
+		xaxis_title="Timestamp",yaxis_title="Power (W)",
+		yaxis2=dict(title='degrees Fahrenheit',overlaying='y',side='right'),
+    	legend=dict(orientation='h',yanchor='bottom', xanchor='right',y=1.02,x=1,)
+	)
+
+	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
+	## NOTE (cont.): For some reason, the slash-mark patterns are not showing up on the OMF page otherwise. Eventually we will delete this part.
+	#fig.show()
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
+
+	## Encode plot data as JSON for showing in the HTML 
+	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	###################################################################################################################################
+	## Impact to Demand plot 
+	###################################################################################################################################
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
+
+	new_demand = demand_W + vbat_charge_component_W + grid_charging_BESS_W - BESS_W - vbat_discharge_component_W - generator_W
+
+	fig = go.Figure()
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
+						y = demand_W,
 						yaxis='y1',
 						mode='none',
-						name='Original Load',
+						name='Original Demand',
 						fill='tozeroy',
-						fillcolor='rgba(100,200,210,1)',
+						fillcolor='rgba(81,40,136,1)',
 						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	#fig.update_traces(legendgroup='Original Demand', visible='legendonly', selector=dict(name='Original Demand')) 
+
+	## New demand piece (minus any vbat or BESS charging aka 'new/additional loads')
+	fig.add_trace(go.Scatter(x=timestamps,
+						y = new_demand,
+						yaxis='y1',
+						mode='none',
+						name='New Demand',
+						fill='tozeroy',
+						fillcolor='rgba(235,97,35,0.5)',
+						showlegend=showlegend))
+
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
 	
-	## Additional load (Charging BESS and vbat)
-	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
-	## How or if this should be done is still being discussed
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
-						 yaxis='y1',
-                         mode='none',
-                         name='Additional Load (Charging BESS and vbat)', ## TODO: Edit this title accordingly if BESS and/or vbat are disabled
-                         fill='tonexty',
-                         fillcolor='rgba(175,0,42,0)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
-
-	## Grid serving new load
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=grid_serving_new_load,
-						 yaxis='y1',
-                         mode='none',
-                         fill='tozeroy',
-                         name='Grid Serving New Load',
-                         fillcolor='rgba(192,192,192,1)',
-						 showlegend=showlegend))
-
-	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
-	## toggled back on by the user by clicking it in the plot legend
-	#fig.add_trace(go.Scatter(x=timestamps, 
-	#				 y=demand,
-	#				 yaxis='y1',
-	#				 mode='lines',
-	#				 line=dict(color='black'),
-	#				 name='Demand',
-	#				 showlegend=showlegend))
-	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
-
-		
-	## Fossil Generator piece
-	if 'Generator' in reoptResults:
-		fig.add_trace(go.Scatter(x=timestamps,
-						y = generator,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(153,0,0,1)',
-						name='Fossil Generator Serving Load',
-						showlegend=showlegend))
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
 
 	## Plot layout
 	fig.update_layout(
-    	#title='Residential Data',
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Power (kW)'),
-    	yaxis2=dict(title='degrees Celsius',
-                overlaying='y',
-                side='right'
-                ),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
+    	#yaxis=dict(title='Power (W)',type='log'),
+		yaxis=dict(title='Power (W)'),
+    	yaxis2=dict(title='degrees Fahrenheit',overlaying='y',side='right'),
+		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1)
 	)
 
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
-	## Eventually we want to delete this part.
+	## Eventually we will delete this part.
 	#fig.show()
-	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_NewDemand.html"))
 
-	## Encode plot data as JSON for showing in the HTML side
-	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	## Encode plot data as JSON for showing in the HTML 
+	outData['newDemandData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['newDemandLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-
-	## Create Exported Power plot object ######################################################################################################################################################
+	################################################################################################################################################
+	## Create Thermal Battery Power plot object 
+	################################################################################################################################################
 	fig = go.Figure()
+
+	data_names = ['vbatMinPowerCapacity', 'vbatMaxPowerCapacity', 'vbatPower']
+	colors = ['green', 'blue', 'black']
+	titles = ['Minimum Calculated Power Capacity', 'Maximum Calculated Power Capacity', 'Actual Power Utilized']
+
+	thermalDataCheckList = []
+	for data_name, color, title in zip(data_names, colors, titles):
+		thermalDataCheck = np.sum(combined_device_results[data_name])
+		thermalDataCheckList.append(thermalDataCheck)
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=np.array(combined_device_results[data_name])*1000., ## convert from kW to W
+			yaxis='y1',
+			mode='lines',
+			line=dict(color=color, width=1),
+			name=title,
+			showlegend=True
+		))
+
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (W)'),
+		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
 	
-	## Power used to charge BESS (electric_to_storage_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(grid_charging_BESS),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge BESS',
-						fillcolor='rgba(75,137,83,1)',
+	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
+	outData['thermalDataCheck'] = float(sum(np.array(thermalDataCheckList)))
+	
+	## Encode plot data as JSON for showing in the HTML side
+	outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	################################################################################################################################################
+	## Create Chemical BESS State of Charge plot object 
+	################################################################################################################################################
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=timestamps, y=outData['chargeLevelBattery'],
+						mode='lines',
+						line=dict(color='purple', width=1),
+						name='Battery SOC',
 						showlegend=True))
 	
-	## Power used to charge vbat (vbat_charging)
-	if inputDict['load_type'] != '0':
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_charge),
-							mode='none',
-							fill='tozeroy',
-							name='Power Used to Charge TESS',
-							fillcolor='rgba(155,148,225,1)',
-							showlegend=True))
-		
-	## Power used to meet load (NOTE: Does this mean grid to load?)
-	fig.add_trace(go.Scatter(x=timestamps,
-					y=np.asarray(grid_to_load),
-					mode='none',
-					fill='tozeroy',
-					name='Grid Serving Load',
-					fillcolor='rgba(100,131,130,1)',
-					showlegend=True))
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Charge (%)'), legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right',x=1))
 
-	fig.update_layout(
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Power (kW)'),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
-	)
+	outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	#########################################################################################################################################################
+	### Calculate the monthly consumption and peak demand costs and savings
+	#########################################################################################################################################################
+
+	## Calculate the monthly demand and energy consumption (for the demand curve without DERs)
+	outData['monthlyPeakDemand'] = [max(demand[s:f]) for s, f in monthHours] ## The maximum peak kW for each month
+	outData['monthlyPeakDemandCost'] = [peak*demandCost for peak in outData['monthlyPeakDemand']] ## peak demand charge before including DERs
+	demand_cost_array = [float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
+	monthlyEnergyConsumption = [sum(demand[s:f]) for s, f in monthHours] ## The total energy in kWh for each month
+	monthlyEnergyConsumptionCost = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy cost in $$ for each month	
+
+	## Calculate the monthly adjusted demand ("adjusted" = the demand curve including DERs)
+	adjusted_demand = demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component
+	outData['adjustedDemand'] = list(adjusted_demand)
+	monthlyAdjustedEnergyConsumption = [sum(adjusted_demand[s:f]) for s, f in monthHours] ## The total adjusted energy in kWh for each month
+	adjusted_demand_cost_array = [float(a) * float(b) for a, b in zip(adjusted_demand, energy_rate_array)]
+	monthlyAdjustedEnergyConsumptionCost = [sum(adjusted_demand_cost_array[s:f]) for s, f in monthHours] ## The total adjusted energy cost in $$ for each month	
+
+	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
+	monthlyEnergyConsumptionSavings = np.array(monthlyEnergyConsumptionCost) - np.array(monthlyAdjustedEnergyConsumptionCost)
+
+	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
+	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(monthlyEnergyConsumptionCost, outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
+
+	## Calculate the individual DER consumption costs using the TOU rate schedule
+	## BESS
+	demand_cost_array_BESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(grid_charging_BESS, energy_rate_array)]
+	costs_year1_BESS_consumption = sum(demand_cost_array_BESS)
+	costs_allyears_BESS_consumption = np.full(projectionLength, costs_year1_BESS_consumption)
+	## TESS
+	demand_cost_array_TESS = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(vbat_charge_component, energy_rate_array)]
+	costs_year1_TESS_consumption = sum(demand_cost_array_TESS)
+	costs_allyears_TESS_consumption = np.full(projectionLength, costs_year1_TESS_consumption)
+	## GEN
+	#demand_cost_array_GEN = [float(a) * float(b) if float(a) != 0 else 0 for a, b in zip(generator, energy_rate_array)]
+	#costs_year1_GEN_consumption = sum(demand_cost_array_GEN)
+	#costs_allyears_GEN_consumption = np.full(projectionLength, costs_year1_GEN_consumption)
+
+	#########################################################################################################################################################
+	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption cost/savings
+	#########################################################################################################################################################
+	BESSdemand = np.array(BESS)-np.array(grid_charging_BESS)
+	TESSdemand = np.array(vbat_discharge_component)-np.array(vbat_charge_component)
+	GENdemand = np.array(generator)
+	monthly_BESS_consumption_total = [sum(BESSdemand[s:f]) for s, f in monthHours]
+	monthly_TESS_consumption_total = [sum(TESSdemand[s:f]) for s, f in monthHours]
+	monthly_GEN_consumption_total = [sum(GENdemand[s:f]) for s, f in monthHours]
+
+	## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
+	BESS_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(BESSdemand, energy_rate_array)]
+	TESS_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(TESSdemand, energy_rate_array)]
+	GEN_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(GENdemand, energy_rate_array)]
+
+	## Calculate the consumption cost saved by each DER tech using the input rate structure (monthly data for the whole year)
+	BESS_consumption_cost_monthly_array = [sum(BESS_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+	TESS_consumption_cost_monthly_array = [sum(TESS_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+	GEN_consumption_cost_monthly_array = [sum(GEN_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+
+	## Calculate the consumption cost saved by each DER tech using the input rate structure (yearly data for the entire projection length)
+	BESS_consumption_cost_allyears_array = np.full(projectionLength, sum(BESS_consumption_cost_year1_array))
+	TESS_consumption_cost_allyears_array = np.full(projectionLength, sum(TESS_consumption_cost_year1_array))
+	GEN_consumption_cost_allyears_array = np.full(projectionLength, sum(GEN_consumption_cost_year1_array))
+
+	######################################################################################################################################################
+	## COSTS
+	## Calculate the financial costs of enrolling member-consumer DERs into a utility DER-sharing program
+	## e.g. Initial Investment = retrofit costs
+	## Total consumer costs = generator fuel cost + BESS replacement cost + BESS inverter replacement cost + BESS retrofit costs +  TESS unit cost + TESS upkeep cost
+	######################################################################################################################################################
+	## Initialize cost arrays for the Cash Flow Projection and Savings Breakdown Per Technology plots
+	costs_allyears_BESS = np.zeros(projectionLength)
+	costs_allyears_GEN = np.zeros(projectionLength)
+	costs_allyears_TESS = np.zeros(projectionLength)
+	costs_allyears_wh = np.zeros(projectionLength)
+	costs_allyears_hp = np.zeros(projectionLength)
+	costs_allyears_ac = np.zeros(projectionLength)
+	costs_allyears_array = np.zeros(projectionLength) ## includes all costs for all tech
+	costs_year1_array = np.zeros(12)
+	retrofit_cost_total = 0.
+
+	if 'Generator' in reoptResults:
+		## GEN fuel cost
+		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
+		gen_fuel_cost = float(inputDict['fuel_cost'])
+		btu_per_kwh = 3412.0 ## constant
+		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
+		monthly_GEN_consumption_total = np.array(monthly_GEN_consumption_total)
+		fuel_type = int(inputDict['fuel_type'])
+		if fuel_type == 1: ## Natural Gas
+			## Assume the fuel cost input is given in units of $/cubic foot
+			price_per_cubic_foot = gen_fuel_cost
+			btu_per_cubic_ft = 1030.0
+
+			## Convert the monthly GEN energy consumption from kWh to BTU
+			monthly_GEN_consumption_total_btu = monthly_GEN_consumption_total * btu_per_kwh 
+
+			## Calculate the amount of natural gas needed per cubic foot
+			## = BTUs required / (BTUs per cubic foot * thermal efficiency)
+			monthly_gas_needed_cubic_ft = monthly_GEN_consumption_total_btu / (btu_per_cubic_ft * thermal_efficiency)
+
+			## Total monthly fuel cost
+			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
+			annual_fuel_cost = np.sum(monthly_fuel_cost)
+
+		if fuel_type == 2: ## Propane
+			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		if fuel_type == 3:  # Diesel
+			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		if fuel_type == 4: ## Gasoline
+			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
+			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
+			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+
+		costs_year1_gen_fuel = gen_fuel_cost * gen_annual_fuel_consumption_gal
+		costs_year1_array += monthly_fuel_cost
+		costs_allyears_gen_fuel = np.full(projectionLength, costs_year1_gen_fuel)
+		costs_allyears_GEN += costs_allyears_gen_fuel
+		costs_allyears_array += costs_allyears_gen_fuel
+
+		## GEN replacement cost
+		replacement_cost_GEN = float(inputDict['replace_cost_generator_per_kw']) * float(inputDict['existing_gen_kw']) ## units: $
+		replacement_year_GEN = int(inputDict['generator_replacement_year'])
+		for year in range(0, projectionLength): ## Apply the replacement costs for the specified replacement years
+			if year % replacement_year_GEN == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_GEN
+				costs_allyears_GEN[year] += replacement_cost_GEN
+
+		## GEN retrofit cost
+		retrofit_cost_GEN = float(inputDict['gen_retrofit_cost'])
+		costs_allyears_GEN[0] += retrofit_cost_GEN
+		retrofit_cost_total += retrofit_cost_GEN
+
+	## Thermal retrofit costs (TODO: Add replacement costs later?)
+	retrofit_cost_total = 0
+
+	if float(inputDict['load_type_wh']) > 0:  ## Check if water heater is enabled
+		retrofit_cost_wh = float(inputDict['unitDeviceCost_wh'])
+		costs_allyears_wh[0] += retrofit_cost_wh
+		retrofit_cost_total += retrofit_cost_wh
+
+	if float(inputDict['load_type_ac']) > 0:  ## Check if air conditioner is enabled
+		retrofit_cost_ac = float(inputDict['unitDeviceCost_ac'])
+		costs_allyears_ac[0] += retrofit_cost_ac
+		retrofit_cost_total += retrofit_cost_ac
+
+	if float(inputDict['load_type_hp']) > 0:  ## Check if heat pump is enabled
+		retrofit_cost_hp = float(inputDict['unitDeviceCost_hp'])
+		costs_allyears_hp[0] += retrofit_cost_hp
+		retrofit_cost_total += retrofit_cost_hp
+
+	## Calculate total retrofit cost for TESS only if at least one technology is enabled
+	if retrofit_cost_total > 0:
+		costs_allyears_TESS[0] += retrofit_cost_total
+
+	## BESS retrofit and replacement costs
+	if BESScheck == 'enabled':
+		## BESS retrofit cost
+		retrofit_cost_BESS = float(inputDict['BESS_retrofit_cost'])
+		costs_allyears_BESS[0] += retrofit_cost_BESS
+
+		## BESS replacement cost
+		replacement_cost_BESS_kw = float(inputDict['replace_cost_per_kw']) ## units: $
+		replacement_cost_BESS_kwh = float(inputDict['replace_cost_per_kwh']) ## units: $
+		BESS_kw = float(inputDict['BESS_kw'])
+		BESS_kwh = float(inputDict['BESS_kwh'])
+		replacement_cost_BESS = BESS_kw * replacement_cost_BESS_kw + BESS_kwh * replacement_cost_BESS_kwh
+		replacement_cost_inverter = float(inputDict['replace_cost_inverter'])
+		replacement_year_BESS = int(inputDict['battery_replacement_year'])
+		replacement_year_inverter = int(inputDict['inverter_replacement_year'])
+		for year in range(0, projectionLength): ## Apply the replacement costs for the specified replacement years
+			if year % replacement_year_BESS == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_BESS
+				costs_allyears_BESS[year] += replacement_cost_BESS
+			if year % replacement_year_inverter == 0 and year != 0:
+				costs_allyears_array[year] += replacement_cost_inverter
+				costs_allyears_BESS[year] += replacement_cost_inverter
+
+	## Initial Investment
+	initialInvestment = retrofit_cost_total
+	costs_allyears_array[0] += initialInvestment
 	
-	## Encode plot data as JSON for showing in the HTML side
-	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	## Calculate cost array for year 1 only
+	## TODO: potentially add electricity cost for electricity bought from utility here
+	#costs_year1_adjustedEnergyConsumption = np.sum(outData['monthlyAdjustedEnergyConsumptionCost'])
+	#costs_allyears_energyConsumption = np.full(projectionLength,costs_year1_adjustedEnergyConsumption)
+	#costs_allyears_array += costs_allyears_energyConsumption
+	costs_allyears_total = sum(costs_allyears_array)
+	costs_year1_array[0] += initialInvestment
+	costs_year1_total = sum(costs_year1_array)
+	#costs_allyears_total_minus_initial_investment = costs_allyears_total - initialInvestment
 
 
-	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
-	
-		fig = go.Figure()
-	
-		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
-		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
-		## It does not currently seem to output the changing interior temp.
+	######################################################################################################################################################
+	## SAVINGS
+	## Calculate the financial savings of enrolling member-consumer DERs into a utility DER-sharing program
+	## Total consumer savings = upfront subsidy + ongoing subsidy + compensation for all DERs 
+	######################################################################################################################################################
 
-		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
-			# Interior Temperature
-			#interior_temp = theta.mean(axis=0) 
-			#theta_s_wh #temperature setpoint (interior)
-			#theta_s_wh +/- deadband 
+	## If BESS is enabled
+	if BESScheck == 'enabled':
+		## Calculate the BESS subsidy for year 1 and the projection length (all years)
+		## Year 1 includes the onetime subsidy, but subsequent years only include the ongoing subsidies.
+		BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])
+		BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])
+		BESS_subsidy_year1_total =  BESS_subsidy_onetime + (BESS_subsidy_ongoing*12.0)
+		BESS_subsidy_year1_array =  np.full(12, BESS_subsidy_ongoing)
+		BESS_subsidy_year1_array[0] += BESS_subsidy_onetime
+		BESS_subsidy_allyears_array = np.full(projectionLength, BESS_subsidy_ongoing*12.0)
+		BESS_subsidy_allyears_array[0] += BESS_subsidy_onetime
 
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=temperatures,
-							yaxis='y2',
-							mode='lines',
-							line=dict(color='red',width=1),
-							name='Average Air Temperature',
-							showlegend=showlegend 
-							))
+		## Calculate BESS compensation 
+		BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
+		BESS_compensation_year1_total = np.sum(BESS_compensation_year1_array)
+		BESS_compensation_allyears_array = np.full(projectionLength, BESS_compensation_year1_total)
+
+		## Calculate total BESS savings
+		savings_year1_monthly_BESS = BESS_subsidy_year1_array + BESS_compensation_year1_array + BESS_consumption_cost_monthly_array
+		savings_allyears_BESS = BESS_subsidy_allyears_array + BESS_compensation_allyears_array + BESS_consumption_cost_allyears_array
+	else: ## If the DER tech is disabled, then set all of the corresponding subsidies and compensation rates equal to zero.
+		BESS_subsidy_ongoing = 0
+		BESS_subsidy_onetime = 0
+		BESS_subsidy_year1_array = np.full(12, 0.0)
+		BESS_subsidy_allyears_array = np.full(projectionLength, 0.0)
+		BESS_compensation_year1_array = np.full(12, 0.)
+		BESS_compensation_year1_total = 0.
+		BESS_compensation_allyears_array = np.full(projectionLength, 0)
+		savings_year1_monthly_BESS = np.zeros(12)
+		savings_allyears_BESS = np.zeros(projectionLength)
+
+	## If generator is enabled
+	if GENcheck == 'enabled':
+		## Calculate Generator Subsidy for year 1 and the projection length (all years)
+		## Year 1 includes the onetime subsidy, but subsequent years do not.
+		GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])
+		GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])
+		GEN_subsidy_year1_total =  GEN_subsidy_onetime + (GEN_subsidy_ongoing*12.0)
+		GEN_subsidy_year1_array =  np.full(12, GEN_subsidy_ongoing)
+		GEN_subsidy_year1_array[0] += GEN_subsidy_onetime
+		GEN_subsidy_allyears_array = np.full(projectionLength, GEN_subsidy_ongoing*12.0)
+		GEN_subsidy_allyears_array[0] += GEN_subsidy_onetime
 		
-		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
-		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
-		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
-
-		## Plot deadband upper bound
-		fig.add_trace(go.Scatter(
-			x=timestamps,  
-			y=upper_bound, 
-			yaxis='y2',
-			line=dict(color='rgba(0,0,0,1)'), ## color black
-			name='Deadband upper bound',
-			showlegend=True
-		))
-
-		## Plot deadband lower bound
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=lower_bound,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
-			name='Deadband lower bound',
-			showlegend=True
-		))
-
-		## Plot the setpoint (interior temperature)
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=setpoint,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
-			name='Setpoint',
-			showlegend=True
-		))
-
-		## Plot layout
-		fig.update_layout(
-			#title='Residential Data',
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Power (kW)'),
-			yaxis2=dict(title='degrees Celsius',
-					overlaying='y',
-					side='right'
-					),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-				)
-		)
+		## Calculate GEN compensation
+		GEN_compensation_year1_array = np.array([sum(generator[s:f])*rateCompensation for s, f in monthHours])
+		GEN_compensation_year1_total = np.sum(GEN_compensation_year1_array)
+		GEN_compensation_allyears_array = np.full(projectionLength, GEN_compensation_year1_total)
 		
-		## Encode plot data as JSON for showing in the HTML side
-		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+		## Calculate total GEN savings
+		savings_year1_monthly_GEN = GEN_subsidy_year1_array + GEN_compensation_year1_array + GEN_consumption_cost_monthly_array
+		savings_allyears_GEN = GEN_subsidy_allyears_array + GEN_compensation_allyears_array + GEN_consumption_cost_allyears_array
+	else:
+		GEN_subsidy_ongoing = 0
+		GEN_subsidy_onetime = 0
+		GEN_subsidy_year1_array = np.full(12, 0.0)
+		GEN_subsidy_allyears_array = np.full(projectionLength, 0.0)
+		GEN_compensation_year1_array = np.full(12, 0.)
+		GEN_compensation_year1_total = 0.
+		GEN_compensation_allyears_array = np.full(projectionLength, 0)
+		savings_year1_monthly_GEN = np.zeros(12)
+		savings_allyears_GEN = np.zeros(projectionLength)
+
+	## Initialize variables for TESS subsidies and compensation
+	TESS_subsidy_ongoing = 0
+	TESS_subsidy_onetime = 0
+	TESS_compensation_year1_total = 0.0
+
+	## Check if any thermal technology is enabled
+	if (float(inputDict['load_type_wh']) > 0 or 
+		float(inputDict['load_type_ac']) > 0 or 
+		float(inputDict['load_type_hp']) > 0):
+		
+		## Calculate the total TESS subsidies for year 1 and the projection length (all years)
+		TESS_subsidy_ongoing = combined_device_results['combinedTESS_subsidy_ongoing']
+		TESS_subsidy_onetime = combined_device_results['combinedTESS_subsidy_onetime']
+		TESS_subsidy_year1_total = TESS_subsidy_onetime + (TESS_subsidy_ongoing * 12.0)
+		
+		TESS_subsidy_year1_array = np.full(12, TESS_subsidy_ongoing)
+		TESS_subsidy_year1_array[0] += TESS_subsidy_onetime
+		
+		TESS_subsidy_allyears_array = np.full(projectionLength, TESS_subsidy_ongoing * 12.0)
+		TESS_subsidy_allyears_array[0] += TESS_subsidy_onetime
+		
+		## Calculate TESS compensation
+		TESS_compensation_year1_array = np.array([sum(vbat_discharge_component[s:f]) * rateCompensation for s, f in monthHours])
+		TESS_compensation_year1_total = np.sum(TESS_compensation_year1_array)
+		TESS_compensation_allyears_array = np.full(projectionLength, TESS_compensation_year1_total)
+		
+		## Calculate total TESS savings
+		savings_year1_monthly_TESS = TESS_subsidy_year1_array + TESS_compensation_year1_array + TESS_consumption_cost_monthly_array
+		savings_allyears_TESS = TESS_subsidy_allyears_array + TESS_compensation_allyears_array + TESS_consumption_cost_allyears_array
+	else:
+		## If no thermal technology is enabled, then initialize all arrays with zeros
+		GEN_subsidy_year1_array = np.full(12, 0.0)
+		GEN_subsidy_allyears_array = np.full(projectionLength, 0.0)
+		TESS_compensation_year1_array = np.full(12, 0.0)
+		TESS_compensation_year1_total = 0.0
+		TESS_compensation_allyears_array = np.full(projectionLength, 0.0)
+		savings_year1_monthly_TESS = np.zeros(12)
+		savings_allyears_TESS = np.zeros(projectionLength)
+
+	## Combine all tech device compensations
+	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
+	allDevices_compensation_year1_total = np.sum(allDevices_compensation_year1_array)
+	allDevices_compensation_allyears_array = BESS_compensation_allyears_array + GEN_compensation_allyears_array + TESS_compensation_allyears_array
+
+	## Calculate the total TESS+BESS+generator subsidies for year 1 and the projection length (all years)
+	## The first month of Year 1 includes the onetime subsidy, but subsequent months and years only include the ongoing subsidies.
+	allDevices_subsidy_ongoing = GEN_subsidy_ongoing + BESS_subsidy_ongoing + TESS_subsidy_ongoing
+	allDevices_subsidy_onetime = GEN_subsidy_onetime + BESS_subsidy_onetime + TESS_subsidy_onetime
+	allDevices_subsidy_year1_total = allDevices_subsidy_onetime + (allDevices_subsidy_ongoing*12.0)
+	allDevices_subsidy_ongoing_year1_array = np.full(12, allDevices_subsidy_ongoing)
+	allDevices_subsidy_year1_array = allDevices_subsidy_ongoing_year1_array.copy()
+	allDevices_subsidy_year1_array[0] += allDevices_subsidy_onetime
+	allDevices_subsidy_ongoing_allyears_array = np.full(projectionLength, sum(allDevices_subsidy_ongoing_year1_array))
+	allDevices_subsidy_allyears_array = allDevices_subsidy_ongoing_allyears_array
+	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
+
+	## Calculate total savings
+	savings_year1_monthly_array = np.array(monthlyEnergyConsumptionSavings) + allDevices_subsidy_year1_array + allDevices_compensation_year1_array
+	savings_year1_total = sum(savings_year1_monthly_array)
+	savings_consumption_allyears_array = np.full(projectionLength, sum(monthlyEnergyConsumptionSavings))
+	savings_allyears_array = savings_consumption_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array
+	savings_allyears_total = sum(savings_allyears_array)
+
+	## Calculate net savings = savings - costs
+	net_savings_year1_total = savings_year1_total - costs_year1_total
+	net_savings_year1_array = savings_year1_monthly_array - costs_year1_array
+	net_savings_allyears_array = savings_allyears_array - costs_allyears_array
+	net_savings_allyears_total = savings_allyears_total - costs_allyears_total
+
+	######################################################################################################################################################
+	## MONTHLY COST COMPARISON PLOT VARIABLES
+	######################################################################################################################################################
+	outData['monthlyEnergyConsumption'] = list(monthlyEnergyConsumption)
+	outData['monthlyAdjustedEnergyConsumption'] = list(monthlyAdjustedEnergyConsumption)
+	outData['monthlyEnergyConsumptionCost'] = list(monthlyEnergyConsumptionCost)
+	outData['monthlyAdjustedEnergyConsumptionCost'] = list(monthlyAdjustedEnergyConsumptionCost)
+	outData['monthlyEnergyConsumptionSavings'] = list(monthlyEnergyConsumptionSavings)
+	outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
+	outData['allDevices_subsidy_year1'] = list(allDevices_subsidy_year1_array)
+	outData['allDevices_compensation_year1'] = list(allDevices_compensation_year1_array)
+	outData['savings_year1_monthly_array'] = list(savings_year1_monthly_array)
+	outData['costs_year1_array'] = list(costs_year1_array)
+	outData['net_savings_year1_array'] = list(net_savings_year1_array)
+
+
+	######################################################################################################################################################
+	## CashFlow Projection Plot variables
+	## NOTE: Costs are converted to a negative value for plotting purposes
+	######################################################################################################################################################
+	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
+	outData['NPV'] = npv(float(inputDict['discountRate'])/100., net_savings_allyears_array)
+	SPP = initialInvestment/savings_year1_total
+	outData['SPP'] = SPP
+	outData['savings_allyears_array'] = list(savings_allyears_array)
+	outData['costs_allyears_array'] = list(costs_allyears_array*-1.0) ## negative for plotting purposes
+	outData['cumulativeCashflow_total'] = list(np.cumsum(net_savings_allyears_array))
+	
+	######################################################################################################################################################
+	## Savings Breakdown Per Technology Plot variables
+	## NOTE: Costs are converted to a negative value for plotting purposes
+	######################################################################################################################################################
+	outData['savings_allyears_BESS'] = list(savings_allyears_BESS)
+	outData['savings_allyears_TESS'] = list(savings_allyears_TESS)
+	outData['savings_allyears_GEN'] = list(savings_allyears_GEN)
+	outData['costs_allyears_BESS'] = list(-1.0*(costs_allyears_BESS)) 
+	outData['costs_allyears_TESS'] = list(-1.0*(costs_allyears_TESS))
+	outData['costs_allyears_GEN'] = list(-1.0*(costs_allyears_GEN))
+	outData['cumulativeSavings_total'] = list(np.cumsum(savings_allyears_array))
+
+	outData['costs_allyears_wh'] = list(-1.0*(costs_allyears_wh))
+	outData['costs_allyears_hp'] = list(-1.0*(costs_allyears_hp))
+	outData['costs_allyears_ac'] = list(-1.0*(costs_allyears_ac))
+
+	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
+	outData['techCheck'] = float(sum(BESS) + sum(vbat_discharge_component) + sum(generator))
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -585,12 +916,19 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_PV_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load_tenX.csv')) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_extended_temperature_data.csv')) as f:
-		temp_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
-		criticalLoad_curve = f.read()
+	## NOTE: The following temperature curve is for a residence in West Virginia area
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
+	#	temp_curve = f.read()
+	## NOTE: The following temperature curve is for a residence in Denver, CO
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
+		temperature_curve = f.read()
+	## NOTE: Following line commented out because it was used for simulating outages in REopt.
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
+	#	criticalLoad_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -600,58 +938,100 @@ def new(modelDir):
 
 		## REopt inputs:
 		## NOTE: Variables are strings as dictated by the html input options
-		'latitude':  '39.5298059', ## Rivesville, WV
-		'longitude': '-80.1167417', 
+
+		#'latitude':  '38.353673', ## Charleston, WV
+		#'longitude': '-81.640283', ## Charleston, WV
+		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
+		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Residential Time of Day residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
+		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
+		'longitude' : '-104.812599', ## Brighton, CO
+		'latitude' : '39.969753', ## Brighton, CO
 		'year' : '2018',
-		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
-		'fileName': 'residential_PV_load.csv',
-		'tempFileName': 'residential_extended_temperature_data.csv',
-		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		'demandFileName': 'residential_PV_load_tenX.csv',
 		'demandCurve': demand_curve,
-		'tempCurve': temp_curve,
-		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'Yes',
-		'criticalLoadFactor': '0.50',
+		'temperatureFileName': 'open-meteo-denverCO-noheaders.csv',
+		'temperatureCurve': temperature_curve,
+		'energyRateFileName': 'TOU_rate_schedule.csv',
+		'energyRateCurve': energy_rate_curve,
 
 		## Financial Inputs
-		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '0.0', ## Set to zero because a residential consumer would not pay this -- the utility would
 		'projectionLength': '25',
+		'discountRate': '1',
 		'rateCompensation': '0.1', ## unit: $/kWh
 		'subsidyUpfront': '50',
 		'subsidyOngoing': '10',
+		'TESS_subsidy_onetime_ac': '25.0',
+		'TESS_subsidy_ongoing_ac': '5.0',
+		'TESS_subsidy_onetime_hp': '25.0',
+		'TESS_subsidy_ongoing_hp': '5.0',
+		'TESS_subsidy_onetime_wh': '25.0',
+		'TESS_subsidy_ongoing_wh': '5.0',
+		'BESS_subsidy_onetime': '100.0',
+		'BESS_subsidy_ongoing': '55.0',
+		'GEN_subsidy_onetime': '25.0',
+		'GEN_subsidy_ongoing': '5.0',
 
 		## Chemical Battery Inputs
+		## Modeled after residential Tesla Powerwall 3 battery specs
+		'enableBESS': 'Yes',
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
-		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
-		'replace_cost_per_kw': '460.0', 
-		'replace_cost_per_kwh': '240.0', 
-		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
-		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost
-		'total_itc_fraction': '0.0', ## No ITC included unless specified
-		'inverter_replacement_year': '10', 
+		'BESS_retrofit_cost': '0.0',
+		'utility_BESS_portion': '20',
+		'total_govt_rebate': '0.0', ## No incentives considered
+		'replace_cost_per_kw': '324.0', 
+		'replace_cost_per_kwh': '351.0', 
 		'battery_replacement_year': '10',  
+		'BESS_installed_cost': '0.0', 
+		'total_itc_fraction': '0.0', ## No ITC
+		'inverter_replacement_year': '10',
+		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
+		## NOTE: Generac Guardian models range from 10-26 kW
 		'fossilGenerator': 'Yes',
-		'existing_gen_kw': '22', ## NOTE: Generac Guardian 22 kW model
-		'fuel_available_gal': '15.6', ## NOTE: For liquid propane: 3.56 gal/hr
-		'fuel_cost_per_gal': '3.61',
+		'fuel_type': '3', 
+		'existing_gen_kw': '5',
+		'thermal_efficiency': '35',
+		'gen_retrofit_cost': '0.0',
+		'fuel_avail': '1000', 
+		'fuel_cost': '3.80',
+		'replace_cost_generator_per_kw': '450',
+		'generator_replacement_year': '15',
 
-		## vbatDispatch inputs:
-		'load_type': '2', ## Heat Pump
-		'number_devices': '1',
-		'power': '5.6',
-		'capacitance': '2',
-		'resistance': '2',
-		'cop': '2.5',
-		'setpoint': '19.5',
-		'deadband': '0.625',
-		'electricityCost': '0.16',
-		'discountRate': '2',
-		'unitDeviceCost': '150',
-		'unitUpkeepCost': '5',
+		## Home Air Conditioner inputs (vbatDispatch):
+		'load_type_ac': '1',
+		'unitDeviceCost_ac': '13', #a cheap wifi-enabled smart outlet to plug the AC into is about $13 (see https://www.lowes.com/pd/Enbrighten-125-Volt-1-Outlet-Indoor-Smart-Plug/1003202046)
+		'unitUpkeepCost_ac': '0', ## NOTE: Input is currently hidden in HTML
+		'power_ac': '5.6',
+		'capacitance_ac': '2',
+		'resistance_ac': '2',
+		'cop_ac': '2.5',
+		'setpoint_ac': '22.5',
+		'deadband_ac': '0.625',
+
+		## Home Heat Pump inputs (vbatDispatch):
+		'load_type_hp': '2', 
+		'unitDeviceCost_hp': '150',
+		'unitUpkeepCost_hp': '0', ## NOTE: Input is currently hidden in HTML
+		'power_hp': '5.6',
+		'capacitance_hp': '2',
+		'resistance_hp': '2',
+		'cop_hp': '3.5',
+		'setpoint_hp': '19.5',
+		'deadband_hp': '0.625',
+
+		## Home Water Heater inputs (vbatDispatch):
+		'load_type_wh': '4', 
+		'unitDeviceCost_wh': '175',
+		'unitUpkeepCost_wh': '0', ## NOTE: Input is currently hidden in HTML
+		'power_wh': '4.5',
+		'capacitance_wh': '0.4',
+		'resistance_wh': '120',
+		'cop_wh': '1',
+		'setpoint_wh': '48.5',
+		'deadband_wh': '3',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
@@ -668,7 +1048,7 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.

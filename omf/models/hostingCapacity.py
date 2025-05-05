@@ -235,9 +235,12 @@ def run_AMIAlgorithm( modelDir, inputDict, outData ):
 	outputPathVoltageHC = Path(modelDir, 'outputMohcaVoltageHC.csv')
 	outputPathThermalHC = Path(modelDir, 'outputMohcaThermalHC.csv')
 	hasKvar = checkKvar( inputPathAMIData )
+	# Thermal Hosting Capacity Variables
+	busCoords = None
+	xfLookup = None
 	if hasKvar == False:
 		outData["reactivePowerWarningFlag"] = True
-		outData["reactivePowerWarningInfo"] = f"Reactive power not present in Meter Data Input File. Model-free voltage results will be estimated. No model-free thermal results available."
+		outData["reactivePowerWarningInfo"] = f"Reactive power not present in Meter Data Input File. Model-free voltage-constrained results will be estimated. No model-free thermal-constrained results available."
 	else: # Process all the inputs for Thermal-Constrained Hosting Capacity
 		xfLookupPath = Path(modelDir, inputDict['xfLookupDataFileName']) 
 		xfLookupDF = pd.read_csv( xfLookupPath )
@@ -263,13 +266,13 @@ def run_AMIAlgorithm( modelDir, inputDict, outData ):
 			inputDict['busCoords'] = None
 			outData["xfmrWarningFlag"] = True
 			outData["xfmrWarningInfo"] = f"If the number of transformers ( numOfXFmrs ) is set to False, Exact Transformers ( exactXfmrs ) is set to False and no buscoords are used ( set to None )."
-	# Temp warning until fixed
-	if busCoords == None:
-		outData["busCoordsWarningFlag"] = True
-		outData["busCoordsWarningInfo"] = f"Current model-free thermal constrained hosting capacity does not work without bus coords as an input. No model-free thermal results are available at this time."
 	amiStartTime = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		if inputDict["dgInverterSetting"] == 'constantPF':
+			valueDerPF = float(inputDict['derPF'])
+			if valueDerPF > 1.0 or valueDerPF < 0:
+				errorMessage = "DG Power Factor must be between 0 and 1"
+				raise Exception(errorMessage)
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPathAMIData, out_path=outputPathVoltageHC, der_pf= float(inputDict['derPF']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
 			# Temp warning and catching if statement until fixed
@@ -284,8 +287,8 @@ def run_AMIAlgorithm( modelDir, inputDict, outData ):
 						outputPath_xfmrCustResults = Path(modelDir, 'output_IsuXfmrCustPairing.csv')
 						xfmrCustMapResult = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPathAMIData, grouping_output_fp=outputPath_xfmrCustResults, minimum_xfmr_n=numOfXfmr, fmr_n_is_exact=exactXfmrs, bus_coords_fp=busCoords )
 						mohca_cl.sandiaTCHC( in_path=inputPathAMIData, out_path=outputPathThermalHC, final_results=xfmrCustMapResult, der_pf=float(inputDict['derPF']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overloadConstraint']), xf_lookup=xfLookup )
-					# nd if completed_xfmrCustFlag
-				# nd if hasKvar
+					# end if completed_xfmrCustFlag
+				# end if hasKvar
 			# end if busCoords
 		# end if constantPF
 		elif inputDict["dgInverterSetting"] == 'voltVar':

@@ -16,27 +16,33 @@ import multiprocessing
 from functools import partial
 from pathlib import Path
 
-def runDssCommand(dsscmd, strict=False):
+def runDssCommand(dsscmd, strict=False, logToFile=False, logFilePath=None):
 	'''Execute a single opendsscmd in the current context.'''
 	run_command(dsscmd)
-	latest_error = Error.Description()
-	if latest_error != '':
-		if strict:
-			raise Exception('OpenDSS Error:', latest_error)
+	if logToFile == False:
+		latest_error = Error.Description()
+		if latest_error != '':
+			if strict:
+				raise Exception('OpenDSS Error:', latest_error)
+			else:
+				print('WARNING: OpenDSS Error:', latest_error)
+	elif logToFile == True:
+		if logFilePath != None:
+			run_command(f'export errorlog "{logFilePath}"')
 		else:
-			print('WARNING: OpenDSS Error:', latest_error)
+			run_command(f'export errorlog')
 
-def runDSS(dssFilePath):
+def runDSS(dssFilePath, logToFile=False, logFilePath=None):
 	'''Run DSS circuit definition file, set export/data paths, solve powerflow.'''
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
-	runDssCommand('clear')
-	runDssCommand(f'set datapath="{dssFileLoc}"')
-	runDssCommand(f'redirect "{fullPath}"')
-	runDssCommand('calcvoltagebases')
-	runDssCommand('solve')
+	runDssCommand('clear', logToFile=logToFile, logFilePath=logFilePath)
+	runDssCommand(f'set datapath="{dssFileLoc}"', logToFile=logToFile, logFilePath=logFilePath)
+	runDssCommand(f'redirect "{fullPath}"', logToFile=logToFile, logFilePath=logFilePath)
+	runDssCommand('calcvoltagebases', logToFile=logToFile, logFilePath=logFilePath)
+	runDssCommand('solve', logToFile=logToFile, logFilePath=logFilePath)
 
 def getCoords(dssFilePath):
 	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
@@ -307,7 +313,7 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	filedir = os.path.dirname(fullpath)
 	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
 	# Find the insertion kv level.
-	kv_mappings = get_bus_kv_mappings(fullpath)
+	kv_mappings = get_bus_kv_mappings(fullpath, logToFile=True)
 	# Error cleanly on invalid bus.
 	if BUS_NAME not in kv_mappings:
 		raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
@@ -332,15 +338,15 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	# Make DSS and run.
 	new_tree.insert(insertion_index, new_gen)
 	dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
-	runDSS('HOSTCAP.dss')
+	runDSS('HOSTCAP.dss', logToFile=True)
 	# Calc max voltages.
-	runDssCommand(f'export voltages "{filedir}/volts.csv"')
+	runDssCommand(f'export voltages "{filedir}/volts.csv"', logToFile=True)
 	volt_df = pd.read_csv(f'{filedir}/volts.csv')
 	v_max_pu1, v_max_pu2, v_max_pu3 =  volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu2'].max()
 	v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
 	volt_violation = True if np.greater(v_max_pu_all, ansi_a_max_pu) else False
 	# Calc number of thermal violations.
-	runDssCommand(f'export overloads "overloads.csv"')
+	runDssCommand(f'export overloads "overloads.csv"', logToFile=True)
 	over_df = pd.read_csv(f'overloads.csv')
 	therm_violation = True if len(over_df) > 0 else False
 	return {'thermally_limited':therm_violation, 'voltage_limited':volt_violation}
@@ -437,11 +443,11 @@ def voltagePlot(filePath, PU=True):
 		plt.savefig(dssFileLoc + '/Voltage Profile [V].png')
 	plt.clf()
 
-def get_bus_kv_mappings(path_to_dss):
+def get_bus_kv_mappings(path_to_dss, logToFile=False, logFilePath=None):
 	''' Returns a map {bus_name:base_kv} where base_kv is the line-to-neutral voltage.'''
 	# voltagePlot(path_to_dss)
-	runDSS(path_to_dss)
-	runDssCommand('export voltages volts.csv')
+	runDSS(path_to_dss, logToFile=logToFile, logFilePath=logFilePath)
+	runDssCommand('export voltages volts.csv', logToFile=logToFile, logFilePath=logFilePath)
 	file_loc = os.path.dirname(os.path.abspath(path_to_dss))
 	volt_file_loc = f'{file_loc}/volts.csv'
 	volt_df = pd.read_csv(volt_file_loc)

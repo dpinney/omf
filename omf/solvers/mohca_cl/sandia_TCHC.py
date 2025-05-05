@@ -61,11 +61,16 @@ def hosting_cap_tchc(
 
     Note: kVAR mesurements are required to calculate TCHC
 
-    NOTE: what are Final_results ?  are they from the ISU code?
+    NOTE: Final_results is a dataframe of busname, Transformer Index, X, Y
 
     """
     # read in the smart meter data
     input_data = pd.read_csv(input_csv_path)
+    # convert to category for more performant masking...
+    input_data['busname'] = input_data['busname'].astype('category')
+
+    Final_results['Transformer Index'] = Final_results['Transformer Index'].astype('category')
+    Final_results['busname'] = Final_results['busname'].astype('category')
 
     # set the upper bound voltage limit
     vpu_upperbound = 1.05
@@ -144,11 +149,7 @@ def hosting_cap_tchc(
             df_xfmr_info['nearby_idx'] = df_nearby_xfmrs['nearby_idx'].copy()
 
         else:
-            # use nighttime voltage magnitudes or voltage correlations
-            # to create nearby xfmrs list
-            # df_nearby_xfmrs = get_nearby_xfmr_idx_volt_based()
-
-            # temporarily just use all:
+            # use all:
             df_nearby_xfmrs = get_nearby_xfmr_idx_all(df_xfmr_info)
             df_xfmr_info['nearby_idx'] = df_nearby_xfmrs['nearby_idx'].copy()
 
@@ -185,13 +186,10 @@ def get_nearby_xfmr_idx_all(df_xfmr_info):
     """
     df_nearby_xfmrs = pd.DataFrame(columns=['nearby_idx'])
     xfmr_idx_all = df_xfmr_info['Transformer Index'].values
-    df_xfmr_all = df_xfmr_info['Transformer Index'].copy()
 
     for ii in range(len(xfmr_idx_all)):
         idx_now = xfmr_idx_all[ii]
         idx_nearby = xfmr_idx_all[xfmr_idx_all != idx_now]
-        xfmr_idx_nearby = df_xfmr_all[idx_nearby]
-        xfmr_idx_nearby = xfmr_idx_nearby.values
         df_nearby_xfmrs.at[ii, 'nearby_idx'] = idx_nearby
 
     return df_nearby_xfmrs
@@ -625,11 +623,9 @@ def get_customer_tchc(
         np.nan)
 
     # ensure datetime column
+    # TODO: check if datetime already, if not, then convert
     df_xfmr_estimated['datetime'] = pd.to_datetime(
         df_xfmr_estimated['datetime'], utc=True)
-    after_sunrise = df_xfmr_estimated['datetime'].dt.hour >= 9
-    before_sunset = df_xfmr_estimated['datetime'].dt.hour < 15
-    hours_of_interest_mask = after_sunrise & before_sunset
 
     # loop through all xfmrs to calculate the tchc
     # assign that value to each downstream bus
@@ -644,6 +640,9 @@ def get_customer_tchc(
         after_sunrise = df_target_xfmr_pqv['datetime'].dt.hour >= 9
         before_sunset = df_target_xfmr_pqv['datetime'].dt.hour < 15
         hours_of_interest_mask = after_sunrise & before_sunset
+
+        # mask inputs
+        df_target_xfmr_pqv = df_target_xfmr_pqv[hours_of_interest_mask]
 
         xfmr_now_conf = df_target_xfmr_info['conf_score'].values
         xfmr_now_conf = xfmr_now_conf[0]
@@ -665,8 +664,13 @@ def get_customer_tchc(
 
         # calculate the thermal headroom for reverse power flow, using der_pf
         if der_pf == 1:
-            p_pv_max_ts = q1_kvar/np.tan(np.arcsin(q1_kvar/kva_limit_ts))-p1_kw
-            p_pv_max_ts = np.abs(p_pv_max_ts)
+            # Check for negative values and handle them
+            q1_temp = np.copy(q1_kvar)
+            filter_neg_sqrt = np.abs(q1_temp) > np.abs(kva_limit_ts)
+            q1_temp[filter_neg_sqrt] = np.nan
+
+            p_pv_max_ts = np.sqrt((kva_limit_ts**2) - (q1_temp**2)) + p1_kw
+            p_pv_max_ts[np.isnan(p_pv_max_ts)] = 0
             s_pv_max_ts = p_pv_max_ts
         else:
             k_pf = der_pf/np.sin(np.arccos(der_pf))
@@ -676,36 +680,34 @@ def get_customer_tchc(
             coef_c = (p1_kw**2)+(q1_kvar**2)-(kva_limit_ts**2)
 
             p_pv_max_ts = np.full((len(p1_kw), 1), np.nan)
+            coef_all = np.concatenate([coef_a, coef_b, coef_c], axis=1)
 
-            for jj in range(len(p1_kw)):
-                coef_all = [coef_a[jj, 0], coef_b[jj, 0], coef_c[jj, 0]]
-                discriminant = coef_b[jj, 0]**2 - (4*coef_a[jj, 0]*coef_c[jj, 0])
-                if discriminant < 0:
-                    # only complex solutions exist
-                    p_pv_max_ts[jj, 0] = 0
-                else:
-                    roots = np.roots(coef_all)
-                    roots_zero = np.reshape(roots, (1, len(roots)))
-                    roots_zero = np.concatenate(
-                        (roots_zero, np.zeros(np.shape(roots_zero))),
-                        axis=1)
-                    p_pv = np.min(roots_zero)
-                    p_pv_max_ts[jj, 0] = p_pv
+            discriminant = coef_b[:, 0]**2 - (4*coef_a[:, 0]*coef_c[:, 0])
+            complex_only_mask = discriminant < 0
+            roots = [np.roots(coeff) for coeff in coef_all]
+
+            roots_zero = np.concatenate(
+                (roots, np.zeros(np.shape(roots))),
+                axis=1)
+
+            p_pv_max_ts = np.min(roots_zero, axis=1)
+            p_pv_max_ts[complex_only_mask] = 0
 
             p_pv_max_ts = np.abs(p_pv_max_ts)
+            p_pv_max_ts = p_pv_max_ts.reshape(-1, 1)
+
             s_pv_max_ts = np.abs(p_pv_max_ts / der_pf)
+            s_pv_max_ts = s_pv_max_ts.reshape(-1, 1)
 
         # Ensures negative HC set to zero
         s_pv_max_ts = np.concatenate(
             (s_pv_max_ts, np.zeros(np.shape(s_pv_max_ts))),
             axis=1)
         s_pv_max_ts = np.max(s_pv_max_ts, axis=1)
-        s_pv_max_ts = np.reshape(s_pv_max_ts, (len(s_pv_max_ts), 1))
+        s_pv_max_ts_daytime = np.reshape(s_pv_max_ts, (len(s_pv_max_ts), 1))
 
         # take the daytime minimum as the hosting capacity limit
-        s_pv_max_ts_daytime = s_pv_max_ts[hours_of_interest_mask]
         s_pv_tchc_scen2 = np.min(s_pv_max_ts_daytime)
-
         p_pv_tchc_scen2 = np.abs(s_pv_tchc_scen2*der_pf)
 
         # store the values in the output dataframe

@@ -1,12 +1,9 @@
 ''' Performs a cost-benefit analysis for a utility or cooperative member interested in 
 controlling behind-the-meter distributed energy resources (DERs).'''
 
-## TODO: check out gridlabMulti.py, cvrDynamic.py, demandResponse.py, 
-## vbatDispatch.py, solarEngineering.py for potential display and plot feautures 
-
 ## Python imports
 import warnings
-# warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 import shutil, datetime, csv, json
 from os.path import join as pJoin
 import numpy as np
@@ -36,24 +33,38 @@ def work(modelDir, inputDict):
 	## Delete output file every run if it exists
 	outData = {}
 
+	## Convert user provided demand and temp data from str to float
+	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
+
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
+	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
+	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+
+	########################################################################################################################
+	## Run REopt.jl solver
+	########################################################################################################################
+	
 	## Gather input variables to pass to the omf.solvers.reopt_jl model
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
-	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
-	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
-	## NOTE: REopt specific inputs are specified in this input dictionary
 	scenario = {
 		'Site': {
 			'latitude': latitude,
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel
+			'urdb_label': urdbLabel,
+			#'tou_energy_rates_per_kwh': energy_rate_list,
+			'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -69,8 +80,8 @@ def work(modelDir, inputDict):
 		GENcheck = 'enabled'
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
-			'max_kw': 0,
-			'min_kw': 0,
+			'max_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
+			'min_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
 			'only_runs_during_grid_outage': False,
 			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_GEN']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
@@ -121,10 +132,6 @@ def work(modelDir, inputDict):
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
 
-	## Convert the user-provided demand curve and temperature curve values from strings to floats
-	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
-
 	## Create timestamp array from REopt input information
 	## TODO: check that this KeyError works
 	try:
@@ -150,13 +157,13 @@ def work(modelDir, inputDict):
 		'unitDeviceCost': '0.0', ## set to zero: assuming utility does not pay for this
 		'unitUpkeepCost':  '0.0', ## set to zero: assuming utility does not pay for this
 		'demandChargeCost': inputDict['demandChargeCost'],
-		'electricityCost': inputDict['electricityCost'],
+		'electricityCost': '0.12',
 		'projectionLength': inputDict['projectionLength'],
 		'discountRate': inputDict['discountRate'],
 		'fileName': inputDict['fileName'],
-		'tempFileName':  inputDict['tempFileName'],
-		'demandCurve':  inputDict['demandCurve'],
-		'tempCurve': inputDict['tempCurve'],
+		'tempFileName': inputDict['temperatureFileName'],
+		'demandCurve': inputDict['demandCurve'],
+		'tempCurve': inputDict['temperatureCurve'],
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -218,14 +225,25 @@ def work(modelDir, inputDict):
 		'combinedTESS_subsidy_onetime': 0,
 	}
 
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	#consumptionCost = float(inputDict['electricityCost'])
+	demandCost = float(inputDict['demandChargeCost'])
+	rateCompensation = float(inputDict['rateCompensation'])
+
 	## Combine all thermal device variable data for plotting
 	for device_result in single_device_results:
-		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_results[device_result]['VBpower'])]
-		vbatPower_series = pd.Series(combined_device_results['vbatPower'])
-		combined_device_results['vbatPower_series'] = vbatPower_series
-		combined_device_results['vbat_discharge'] = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = discharging
-		combined_device_results['vbat_charge'] = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = charging
-		combined_device_results['vbat_charge_flipsign'] = combined_device_results['vbat_charge'].mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+		single_device_vbatPower = single_device_results[device_result]['VBpower']
+		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
+
+		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
+		combined_device_results['vbatPower_series'] = single_device_vbatPower_series
+		vbatPower_series_discharge = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
+		vbatPower_series_charge = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
+		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], vbatPower_series_discharge)]
+		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], vbatPower_series_charge)]
+		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
 		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
 		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
 		combined_device_results['vbatEnergy'] = [sum(x) for x in zip(combined_device_results['vbatEnergy'], single_device_results[device_result]['VBenergy'])]
@@ -240,6 +258,39 @@ def work(modelDir, inputDict):
 		combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'] = [sum(x) for x in zip(combined_device_results['monthlyEnergyConsumptionCost_Adjusted_TESS'], single_device_results[device_result]['energyCostAdjusted'])]
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
+
+		single_device_vbat_discharge_component = np.array(single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0)) ##positive values = discharging
+		single_device_vbat_charge_component =  np.array(single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0)) ##negative values = charging
+		single_device_vbat_charge_component_flipsign = pd.Series(single_device_vbat_charge_component).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
+
+		single_device_subsidy_ongoing = float(single_device_results[device_result]['TESS_subsidy_ongoing'])
+		single_device_subsidy_onetime = float(single_device_results[device_result]['TESS_subsidy_onetime'])
+		single_device_subsidy_year1_array = np.full(12, single_device_subsidy_ongoing)
+		single_device_subsidy_year1_array[0] += single_device_subsidy_onetime
+		single_device_subsidy_allyears_array = np.full(projectionLength, single_device_subsidy_ongoing*12.0)
+		single_device_subsidy_allyears_array[0] += single_device_subsidy_onetime
+
+		single_device_compensation_year1_array = np.array([sum(single_device_vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
+		single_device_compensation_year1_total = np.sum(single_device_compensation_year1_array)
+		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
+
+		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
+		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure (hourly data for the whole year)
+		single_device_consumption_cost_year1_array = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+
+		## Calculate the consumption cost saved by each DER tech using the input rate structure
+		#single_device_consumption_cost_monthly_array = [sum(single_device_consumption_cost_year1_array[s:f]) for s, f in monthHours]
+		#single_device_consumption_cost_allyears_array = np.full(projectionLength, sum(single_device_consumption_cost_year1_array))
+
+		costs_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array
+		costs_allyears_single_device = single_device_subsidy_allyears_array + single_device_compensation_allyears_array 
+
+		## Savings Breakdown Per Thermal Technology savings variables
+		## NOTE: This is where the html variables outData['vbatResults_wh_savings_allyears'], outData['vbatResults_hp_savings_allyears'], and outData['vbatResults_ac_savings_allyears'] are saved.
+		outData[device_result+'_costs_allyears'] = list(costs_allyears_single_device*-1.0) ## negative value for displaying in plot as a cost
+		outData[device_result+'_check'] = 'enabled'
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -339,17 +390,13 @@ def work(modelDir, inputDict):
 	########################################################################################################################################################
 	## DER Serving Load Overview plot 
 	########################################################################################################################################################
-	showlegend = True ## either enable or disable the legend toggle in the plot
-	#lineshape = 'linear'
-	lineshape = 'hv'
-	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
 	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
 	if 'ElectricStorage' in reoptResults: 
 		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
 			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-			outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
 		else:
 			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
 	else:
@@ -367,14 +414,12 @@ def work(modelDir, inputDict):
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
 	#outData.update(static_reopt_results['outputs'])
 
-	## Create DER overview plot object
-	fig = go.Figure()
-
 	## vbatDispatch variables
 	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
 	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
 
 	## Convert all values from kW to Watts for plotting purposes only
+	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 	grid_to_load_W = np.array(grid_to_load) * 1000.
 	BESS_W = np.array(BESS) * 1000.
 	grid_charging_BESS_W = np.array(grid_charging_BESS) * 1000.
@@ -395,7 +440,7 @@ def work(modelDir, inputDict):
 		'timestamp': timestamps,
 		'Home BESS Serving Load': BESS_W,
 		'Home TESS Serving Load': vbat_discharge_component_W,
-		'Grid Serving Load': grid_serving_new_load_W,
+		'Grid Serving Load': grid_to_load_W, #grid_serving_new_load_W,
 		'Home Generator Serving Load': generator_W,
 		'Grid Charging Home BESS': grid_charging_BESS_W,
 		'Grid Charging Home TESS': vbat_charge_component_W
@@ -411,6 +456,9 @@ def work(modelDir, inputDict):
 		'Grid Charging Home TESS': 'rgba(128, 0, 128, 0.4)'  ## Purple w/ half opacity
 	}
 
+	## Plot options
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
 	fig = go.Figure()
 
 	## Discharging DERs to plot
@@ -462,7 +510,6 @@ def work(modelDir, inputDict):
 	lineshape = 'hv'
 
 	fig = go.Figure()
-	demand_W = demand * 1000.
 	new_demand = demand_W + vbat_charge_component_W + grid_charging_BESS_W - BESS_W - vbat_discharge_component_W - generator_W
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
@@ -535,7 +582,7 @@ def work(modelDir, inputDict):
 		dataCheckList.append(dataCheck)
 		fig.add_trace(go.Scatter(
 			x=timestamps, 
-			y=combined_device_results[data_name], 
+			y=np.array(combined_device_results[data_name])*1000., ## convert from kW to W
 			yaxis='y1',
 			mode='lines',
 			line=dict(color=color, width=1),
@@ -543,7 +590,7 @@ def work(modelDir, inputDict):
 			showlegend=True
 		))
 
-	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (kW)'),
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (W)'),
 		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
 	
 	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
@@ -628,40 +675,34 @@ def work(modelDir, inputDict):
 	### Calculate the monthly consumption and peak demand costs and savings
 	#########################################################################################################################################################
 
-	## Update energy and power variables
-	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	consumptionCost = float(inputDict['electricityCost'])
-	demandCost = float(inputDict['demandChargeCost'])
-	rateCompensation = float(inputDict['rateCompensation'])
-
 	## Calculate the monthly demand and energy consumption (for the demand curve without DERs)
-	outData['monthlyPeakDemand'] = [max(demand[s:f]) for s, f in monthHours] ## The maximum peak kW for each month
+	outData['monthlyPeakDemand'] = [demand[np.argmax(demand[s:f])] for s, f in monthHours] ## The maximum peak kW for each month
 	outData['monthlyPeakDemandCost'] = [peak*demandCost for peak in outData['monthlyPeakDemand']] ## peak demand charge before including DERs
-	outData['monthlyEnergyConsumption'] = [sum(demand[s:f]) for s, f in monthHours] ## The total energy kWh for each month
-	outData['monthlyEnergyConsumptionCost'] = [em*consumptionCost for em in outData['monthlyEnergyConsumption']] ## The total cost of kWh energy each month
+	demand_cost_array = [float(a) * float(b) for a, b in zip(demand, energy_rate_array)]
+	monthlyEnergyConsumption = [sum(demand[s:f]) for s, f in monthHours] ## The total energy in kWh for each month
+	monthlyEnergyConsumptionCost = [sum(demand_cost_array[s:f]) for s, f in monthHours] ## The total energy cost in $$ for each month	
 
 	## Calculate the monthly adjusted demand ("adjusted" = the demand curve including DERs)
-	outData['adjustedDemand'] = list(demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component)
-	outData['monthlyAdjustedEnergyConsumption'] = [sum(outData['adjustedDemand'][s:f]) for s, f in monthHours]
-	outData['monthlyAdjustedEnergyConsumptionCost'] = [eam*consumptionCost for eam in outData['monthlyAdjustedEnergyConsumption']]
-	outData['monthlyAdjustedPeakDemand'] = [max(outData['adjustedDemand'][s:f]) for s, f in monthHours] ## monthly peak demand hours (including DERs)
-	outData['monthlyAdjustedPeakDemandCost'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand']] ## peak demand charge after including all DERs
+	adjusted_demand = np.array(demand) - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component
+	outData['adjustedDemand'] = list(adjusted_demand)
+	monthlyAdjustedEnergyConsumption = [sum(adjusted_demand[s:f]) for s, f in monthHours] ## The total adjusted energy in kWh for each month
+	adjusted_demand_cost_array = [float(a) * float(b) for a, b in zip(adjusted_demand, energy_rate_array)]
+	monthlyAdjustedEnergyConsumptionCost = [sum(adjusted_demand_cost_array[s:f]) for s, f in monthHours] ## The total adjusted energy cost in $$ for each month	
 
 	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
+	monthlyEnergyConsumptionSavings = np.array(monthlyEnergyConsumptionCost) - np.array(monthlyAdjustedEnergyConsumptionCost)
+	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(monthlyEnergyConsumptionCost, outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
+	outData['monthlyAdjustedPeakDemand'] = [adjusted_demand[np.argmax(adjusted_demand[s:f])] for s, f in monthHours] ## monthly peak demand hours (including DERs)
+	outData['monthlyAdjustedPeakDemandCost'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand']] ## peak demand charge after including all DERs
+	
+	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyPeakDemandSavings'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost'])) ## total demand charge savings from all DERs
-	#print('Monthly Peak Demand cost (baseline demand): \n', np.array(outData['monthlyPeakDemandCost']))
-	#print('Monthly Adjusted Peak Demand cost: \n', np.array(outData['monthlyAdjustedPeakDemandCost']))
-	#print('Monthly Peak Demand Savings Dcost x (D-Dadj): \n', outData['monthlyPeakDemandSavings'])
-
-	outData['monthlyEnergyConsumptionSavings'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost'])) ## total consumption savings from BESS only
 	
 	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
-	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(outData['monthlyEnergyConsumptionCost'], outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
-	outData['monthlyTotalCostAdjustedService'] = [eca+dca for eca, dca in zip(outData['monthlyAdjustedEnergyConsumptionCost'], outData['monthlyAdjustedPeakDemandCost'])] ## total cost of energy and peak demand from including DERs
+	outData['monthlyTotalCostService'] = [ec+dcm for ec, dcm in zip(monthlyEnergyConsumptionCost, outData['monthlyPeakDemandCost'])] ## total cost of energy and demand charge prior to DERs
+	outData['monthlyTotalCostAdjustedService'] = [eca+dca for eca, dca in zip(monthlyAdjustedEnergyConsumptionCost, outData['monthlyAdjustedPeakDemandCost'])] ## total cost of energy and peak demand from including DERs
 	outData['monthlyTotalSavingsAdjustedService'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService'])] ## total savings from all DERs
-
+	
 	#########################################################################################################################################################
 	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption and peak demand savings
 	#########################################################################################################################################################
@@ -682,35 +723,45 @@ def work(modelDir, inputDict):
 	GENpeakDemand_baseP = np.zeros(8760)
 	peakDemand_baseP = np.zeros(8760)
 	peakDemand_adjP = np.zeros(8760)
+
 	for s, f in monthHours:
-		## Gather the monthly baseline and adjusted demand curve data and identify the maximum peak kW per month
-		month_data_adjP = outData['adjustedDemand'][s:f]
-		month_peak_kw_adjP = max(month_data_adjP)
+		## Adjusted demand profile for the current month
+		month_data_adjP = adjusted_demand[s:f]
 
+		## Find the index of the maximum peak value
+		## NOTE: Using argmax here gives the first occurrence of the max value, which makes it a more deterministic 
+		## approach for cases when multiple indices have the same maximum value (e.g. a max peak that continues for several hours)
+		peak_indices_adjP = np.argmax(month_data_adjP)
+		
+		## Create a peak mask (1.0 at the peak index, 0.0 elsewhere)
+		peak_mask_adjP = np.zeros_like(month_data_adjP, dtype=float)
+		peak_mask_adjP[peak_indices_adjP] = 1.0
+
+		## Get the baseline demand data for the same time window
 		month_data_baseP = demand[s:f]
-		month_peak_kw_baseP = max(month_data_baseP)
+		peak_indices_baseP = np.argmax(month_data_baseP)
+		peak_mask_baseP = np.zeros_like(month_data_adjP, dtype=float)
+		peak_mask_baseP[peak_indices_baseP] = 1.0
 
-		## Create a mask array where 1=peak and 0=nonpeak
-		peak_mask_adjP = np.where(month_data_adjP == month_peak_kw_adjP, 1.0, 0.0)
+		## Peak of Adjusted Demand
 		BESSpeakDemand_adjP[s:f] = BESSdemand[s:f] * peak_mask_adjP ## BESS demand at the monthly adjusted peak
 		TESSpeakDemand_adjP[s:f] = TESSdemand[s:f] * peak_mask_adjP ## TESS demand at the monthly adjusted peak
 		GENpeakDemand_adjP[s:f] = GENdemand[s:f] * peak_mask_adjP ## GEN demand at the monthly adjusted peak
-		peakDemand_adjP[s:f] = demand[s:f] * peak_mask_adjP ## demand at the monthly adjusted demand peak
+		peakDemand_adjP[s:f] = demand[s:f] * peak_mask_adjP ## total demand at the monthly adjusted demand peak
 		
-		peak_mask_baseP = np.where(month_data_baseP == month_peak_kw_baseP, 1.0, 0.0)
+		## Peak of Original Demand
 		BESSpeakDemand_baseP[s:f] = BESSdemand[s:f] * peak_mask_baseP ## BESS demand at the monthly baseline peak
 		TESSpeakDemand_baseP[s:f] = TESSdemand[s:f] * peak_mask_baseP ## TESS demand at the monthly baseline peak
 		GENpeakDemand_baseP[s:f] = GENdemand[s:f] * peak_mask_baseP ## GEN demand at the monthly baseline peak
-		peakDemand_baseP[s:f] = demand[s:f] * peak_mask_baseP ## demand at the monthly baseline demand peak
+		peakDemand_baseP[s:f] = demand[s:f] * peak_mask_baseP ## total demand at the monthly baseline demand peak
 
 	## Monthly BESS, TESS, and GEN energy consumption savings
+	consumptionCost=0.16
 	monthlyBESS_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyBESSconsumption]
 	monthlyTESS_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyTESSconsumption]
 	monthlyGEN_consumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyGENconsumption]
 	monthlyAllDER_consumption_savings = [a+b+c for a,b,c in zip(monthlyBESS_consumption_savings,monthlyTESS_consumption_savings,monthlyGEN_consumption_savings)]
 	totalAllDER_consumption_savings = sum(monthlyAllDER_consumption_savings)
-	#print('total consumption savings when adding up individual DERs: ', totalAllDER_consumption_savings)
-	#print('total consumption savings (D-Dadj)*Ecost: ', consumptionCost*(sum(demand)-sum(outData['adjustedDemand']))) NOTE: These agree, yay!
 
 	## Monthly BESS, TESS, and GEN peak demand savings
 	## NOTE: The sum is done over the entire month's DER contribution because the contribution arrays have zeroes everywhere except for the peak hour per month
@@ -760,7 +811,7 @@ def work(modelDir, inputDict):
 	allDevices_compensation_year1_total = np.sum(allDevices_compensation_year1_array)
 	allDevices_compensation_allyears_array = BESS_compensation_allyears_array + GEN_compensation_allyears_array + TESS_compensation_allyears_array
 
-	## Calculate the F_val (the linear scaling factor that accound for the peak demand shift)
+	## Calculate the F_val (the linear scaling factor that quantifies the impact of DERs on peak demand savings)
 	## NOTE: See CIDER project plan for doc link to detailed calculation of F_val
 	demand_1 = np.array(monthly_peakDemand_baseP) ## peak demand at t=1
 	demand_2 = np.array(monthly_peakDemand_adjP) ## peak demand at t=2
@@ -769,7 +820,7 @@ def work(modelDir, inputDict):
 	F_val = (demand_1 - demand_2 + D_DER_2) / D_DER_1
 
 	## Apply the monthly F_val to the monthly BESS, TESS, GEN peak demand savings
-	monthlyBESS_peakDemand_savings = monthlyBESS_peakDemand_savings_baseP*F_val ## change these back to adjP if not working
+	monthlyBESS_peakDemand_savings = monthlyBESS_peakDemand_savings_baseP*F_val
 	monthlyTESS_peakDemand_savings = monthlyTESS_peakDemand_savings_baseP*F_val
 	monthlyGEN_peakDemand_savings = monthlyGEN_peakDemand_savings_baseP*F_val
 
@@ -778,7 +829,7 @@ def work(modelDir, inputDict):
 	## Calculate the financial costs of controlling member-consumer DERs
 	## e.g. subsidies, operational costs, startup costs
 	######################################################################################################################################################
-	projectionLength = int(inputDict['projectionLength'])
+
 	## If the DER tech is disabled, then set all their subsidies equal to zero.
 	if BESScheck == 'enabled':
 		BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
@@ -897,7 +948,7 @@ def work(modelDir, inputDict):
 	outData['totalCost_year1'] = list(utilityCosts_year1_array)
 	outData['totalSavings_year1'] = list(utilitySavings_year1_array)
 	outData['totalCost_paidToConsumer'] = list(allDevices_compensation_year1_array + allDevices_subsidy_year1_array)
-
+	
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	outData['NPV'] = npv(float(inputDict['discountRate'])/100., utilityNetSavings_allyears_array)
 	#SPP = utilityCosts_year1_total / utilityNetSavings_year1_total
@@ -905,13 +956,29 @@ def work(modelDir, inputDict):
 	utilityCosts_year1_minus_onetime_costs = (operationalCosts_ongoing*12.0) + (allDevices_subsidy_ongoing*12.0) + allDevices_compensation_year1_total
 	utilityNetSavings_year1_total_minus_onetime_costs = utilitySavings_year1_total - utilityCosts_year1_minus_onetime_costs
 	SPP = initialInvestment/utilityNetSavings_year1_total_minus_onetime_costs
-	outData['SPP'] = np.abs(SPP)
+	outData['SPP'] = SPP
 	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
 	outData['totalNetSavings_allyears'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow_total'] = list(np.cumsum(utilityNetSavings_allyears_array))
 	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
 	outData['costsAllYears'] = list(utilityCosts_allyears_array*-1.) ## Show as negative for plotting purposes
 	
+	######################################################################################################################################################
+	## Monthly Cost Comparison Plot Variables
+	######################################################################################################################################################
+	outData['monthlyEnergyConsumption'] = list(monthlyEnergyConsumption)
+	outData['monthlyAdjustedEnergyConsumption'] = list(monthlyAdjustedEnergyConsumption)
+	outData['monthlyEnergyConsumptionCost'] = list(monthlyEnergyConsumptionCost)
+	outData['monthlyAdjustedEnergyConsumptionCost'] = list(monthlyAdjustedEnergyConsumptionCost)
+	outData['monthlyEnergyConsumptionSavings'] = list(monthlyEnergyConsumptionSavings)
+	
+	#outData['monthly_gen_fuel_cost'] = list(monthly_fuel_cost)
+	#outData['allDevices_subsidy_year1'] = list(allDevices_subsidy_year1_array)
+	#outData['allDevices_compensation_year1'] = list(allDevices_compensation_year1_array)
+	#outData['savings_year1_monthly_array'] = list(savings_year1_monthly_array)
+	#outData['costs_year1_array'] = list(costs_year1_array)
+	#outData['net_savings_year1_array'] = list(net_savings_year1_array)
+
 	######################################################################################################################################################
 	## CashFlow Projection Plot variables
 	## NOTE: The utility costs are shown as negative values
@@ -942,7 +1009,7 @@ def work(modelDir, inputDict):
 	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
 	outData['cumulativeSavings_total'] = list(np.cumsum(utilitySavings_allyears_array))
-
+	
 	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
 	outData['techCheck'] = float(sum(BESS) + sum(vbat_discharge_component) + sum(generator))
 
@@ -957,7 +1024,9 @@ def new(modelDir):
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','utility_2018_kW_load.csv')) as f:
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
-		temp_curve = f.read()
+		temperature_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
 
 	defaultInputs = {
 		## TODO: maybe incorporate float, int, bool types on the html side instead of only strings
@@ -967,20 +1036,25 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
-		'latitude' : '39.986771', 
+		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
+		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
+		'latitude' : '39.969753', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
-		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
 		'fileName': 'utility_2018_kW_load.csv',
-		'tempFileName': 'open-meteo-denverCO-noheaders.csv',
 		'demandCurve': demand_curve,
-		'tempCurve': temp_curve,
+		'temperatureFileName': 'open-meteo-denverCO-noheaders.csv',
+		'temperatureCurve': temperature_curve,
+		'energyRateFileName': 'TOU_rate_schedule.csv',
+		'energyRateCurve': energy_rate_curve,
 
 		## Fossil Fuel Generator Inputs
+		## Modeled after Generac 20 kW diesel model with max tank of 95 gallons
 		'fossilGenerator': 'Yes',
 		'number_devices_GEN': '5',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
-		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
+		'fuel_avail_gal': '95', 
 		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
@@ -993,17 +1067,17 @@ def new(modelDir):
 		## Financial Inputs
 		'demandChargeCost': '50', ## this input is used by vbatDispatch
 		'projectionLength': '25',
-		'electricityCost': '0.05',
+		#'electricityCost': '0.05',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
-		'TESS_subsidy_onetime_ac': '0.0',
+		'TESS_subsidy_onetime_ac': '25.0',
 		'TESS_subsidy_ongoing_ac': '0.0',
-		'TESS_subsidy_onetime_hp': '0.0',
+		'TESS_subsidy_onetime_hp': '100.0',
 		'TESS_subsidy_ongoing_hp': '0.0',
-		'TESS_subsidy_onetime_wh': '0.0',
+		'TESS_subsidy_onetime_wh': '25.0',
 		'TESS_subsidy_ongoing_wh': '0.0',
-		'BESS_subsidy_onetime': '5.0',
+		'BESS_subsidy_onetime': '100.0',
 		'BESS_subsidy_ongoing': '0.0',
 		'GEN_subsidy_onetime': '0.0',
 		'GEN_subsidy_ongoing': '0.0',
@@ -1022,7 +1096,7 @@ def new(modelDir):
 
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
-		'number_devices_hp': '33000',
+		'number_devices_hp': '16500',
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
@@ -1056,11 +1130,11 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## NOTE: Why is there a pre-run?
+	__neoMetaModel__.renderAndShow(modelLoc) 
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc) 
 
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
