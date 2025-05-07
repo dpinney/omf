@@ -1136,11 +1136,11 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
+	__neoMetaModel__.renderAndShow(modelLoc) 
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	#__neoMetaModel__.renderAndShow(modelLoc) ## TODO: Bri remove comment before push
+	__neoMetaModel__.renderAndShow(modelLoc) 
 
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
