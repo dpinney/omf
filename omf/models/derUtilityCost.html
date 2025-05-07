@@ -240,20 +240,47 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Fuel Type<span class="classic">Type of fossil fuel used for the generator.</span></label>
+				<select id="fuel_type" onchange="loadDefaultParameters()" name="fuel_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('fuel_type').value;
+						if (x == 1){ // Natural Gas
+							gebi('fuel_cost').value = '0.00386'; // units: $/cubic ft
+							gebi('fuel_avail').value = '1000'; // units: cubic ft
+						} else if (x == 2){ // Propane
+							gebi('fuel_cost').value = '2.70'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						} else if (x == 3) { // Diesel
+							gebi('fuel_cost').value = '3.80'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						} else { // Gasoline
+							gebi('fuel_cost').value = '3.17'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						}
+					}
+				</script>
+					<option value="1" {{ 'selected' if allInputDataDict.fuel_type == '1' }}>Natural Gas</option>
+					<option value="2" {{ 'selected' if allInputDataDict.fuel_type == '2' }}>Propane</option>
+					<option value="3" {{ 'selected' if allInputDataDict.fuel_type == '3' }}>Diesel</option>
+					<option value="4" {{ 'selected' if allInputDataDict.fuel_type == '4' }}>Gasoline</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of home fossil fuel generators to model.</span></label>
 				<input type="text" id="number_devices_GEN" name="number_devices_GEN" value="{{allInputDataDict.number_devices_GEN}}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Average Generator Capacity (kW)<span class="classic">Specify the average capacity size (kW) of each home fossil fuel generator.</span></label>
+				<label class="tooltip">Rated Power Capacity (kW)<span class="classic">Specify the operating power of the fossil fuel generator.</span></label>
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Fuel (gal)<span class="classic"> Specify the maximum amount of fossil fuel available (gallon) per device. Default assumes a 95 gallon tank.</span></label>
-				<input type="text" id="fuel_avail_gal" name="fuel_avail_gal" value="{{allInputDataDict.fuel_avail_gal}}" required="required"/>
+				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this input expects units of cubic feet. For all other liquid fuels, the expected units are gallons.</span></label>
+				<input type="text" id="fuel_avail" name="fuel_avail" value="{{allInputDataDict.fuel_avail}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Cost ($/gal)<span class="classic">Specify the cost in USD per gallon of the fossil fuel.</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, this input expects units of $/cubic foot. For all other liquid fuels, the expected units are $/gallon.</span></label>
+				<input type="text" id="fuel_cost" name="fuel_cost" value="{{allInputDataDict.fuel_cost}}" required="required"/>
 			</div>
 
 			<!-- Air Conditioner (vbatDispatch) Inputs -->

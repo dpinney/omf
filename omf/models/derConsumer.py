@@ -99,7 +99,6 @@ def work(modelDir, inputDict):
 	## Add fossil fuel (diesel) generator to input scenario (if enabled)
 	if inputDict['fossilGenerator'] == 'Yes':
 		GENcheck = 'enabled'
-
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']), ## Existing generator
 			'max_kw': 0.0, ## New generator minumum

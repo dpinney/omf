@@ -80,11 +80,11 @@ def work(modelDir, inputDict):
 		GENcheck = 'enabled'
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
-			'max_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
-			'min_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
+			'max_kw': 0.0, ## New generator minumum
+			'min_kw': 0.0, ## New generator maximum
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_GEN']),
-			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
+			'fuel_avail_gal': float(inputDict['fuel_avail']) * float(inputDict['number_devices_GEN']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost']),
 		}
 	else:
 		GENcheck = 'disabled'
@@ -1060,8 +1060,9 @@ def new(modelDir):
 		'fossilGenerator': 'Yes',
 		'number_devices_GEN': '5',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
-		'fuel_avail_gal': '95', 
-		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
+		'fuel_type': '3', 
+		'fuel_avail': '95', 
+		'fuel_cost': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
 		## Modeled after residential Tesla Powerwall 3 battery specs
@@ -1085,7 +1086,7 @@ def new(modelDir):
 		'TESS_subsidy_ongoing_wh': '0.0',
 		'BESS_subsidy_onetime': '100.0',
 		'BESS_subsidy_ongoing': '0.0',
-		'GEN_subsidy_onetime': '0.0',
+		'GEN_subsidy_onetime': '25.0',
 		'GEN_subsidy_ongoing': '0.0',
 		'operationalCosts_ongoing': '1000.0',
 		'operationalCosts_onetime': '20000.0',
