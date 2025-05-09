@@ -39,7 +39,7 @@ def pyVbat(modelDir, i):
 		ambient = np.array([[i]*60 for i in list(variables[0])]).reshape(365*24*60, 1)
 		variables[0] = ambient
 		variables.append(ambient)
-		file = pJoin(__neoMetaModel__._omfDir,'static','testFiles','vbatDispatch',"Flow_raw_1minute_BPA.csv")
+		file = pJoin(__neoMetaModel__._omfDir,'static','testFiles',"Flow_raw_1minute_BPA.csv")
 		water = np.genfromtxt(file, delimiter=',')
 		variables.append(water)
 		return VB.WH(*variables).generate() # water heater
@@ -92,6 +92,11 @@ def work(modelDir, inputDict):
 		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
+
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','vbatDispatch','TOU_rate_schedule.csv')) as f:
+		energy_rate_curve = f.read()
+	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+
 	
 	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
 	# m = [calendar[key]*24 for key in calendar]
@@ -132,12 +137,20 @@ def work(modelDir, inputDict):
 	out["energyAdjustedMonthly"] = energyAdjustedMonthly
 	
 	cellCost = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-	eCost = float(inputDict["electricityCost"])
+	#eCost = float(inputDict["electricityCost"])
 	dCharge = float(inputDict["demandChargeCost"])
 
 	out["VBdispatch"] = [dal-d for dal, d in zip(demandAdj, demand)]
-	out["energyCost"] = [em*eCost for em in energyMonthly]
-	out["energyCostAdjusted"] = [eam*eCost for eam in energyAdjustedMonthly]
+
+	
+	energy_cost_hourly = demand * energy_rate_array
+	adjusted_energy_cost_hourly = demandAdj * energy_rate_array
+	energy_cost_monthly = [sum(energy_cost_hourly[s:f]) for s, f in monthHours]
+	adjusted_energy_cost_monthly = [sum(adjusted_energy_cost_hourly[s:f]) for s, f in monthHours]
+
+	
+	out["energyCost"] = energy_cost_monthly
+	out["energyCostAdjusted"] = adjusted_energy_cost_monthly
 	out["demandCharge"] = [peak*dCharge for peak in peakDemand]
 	out["demandChargeAdjusted"] = [pad*dCharge for pad in out["peakAdjustedDemand"]]
 	out["totalCost"] = [ec+dcm for ec, dcm in zip(out["energyCost"], out["demandCharge"])]
@@ -162,6 +175,8 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","Texas_1yr_Temp.csv")) as f:
 		temp_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","TOU_rate_schedule.csv")) as f:
+		energy_rate_curve = f.read()
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
@@ -183,6 +198,8 @@ def new(modelDir):
 		"fileName": "Texas_1yr_Load.csv",
 		"tempFileName": "Texas_1yr_Temp.csv",
 		"modelType": modelName,
+		'energyRateFileName': 'TOU_rate_schedule.csv',
+		'energyRateCurve': energy_rate_curve,
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
