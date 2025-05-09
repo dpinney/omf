@@ -39,7 +39,7 @@ def pyVbat(modelDir, i):
 		ambient = np.array([[i]*60 for i in list(variables[0])]).reshape(365*24*60, 1)
 		variables[0] = ambient
 		variables.append(ambient)
-		file = pJoin(__neoMetaModel__._omfDir,'static','testFiles',"Flow_raw_1minute_BPA.csv")
+		file = pJoin(__neoMetaModel__._omfDir,'static','testFiles','vbatDispatch',"Flow_raw_1minute_BPA.csv")
 		water = np.genfromtxt(file, delimiter=',')
 		variables.append(water)
 		return VB.WH(*variables).generate() # water heater
@@ -158,9 +158,9 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","Texas_1yr_Load.csv")) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","Texas_1yr_Temp.csv")) as f:
 		temp_curve = f.read()
 	defaultInputs = {
 		"user": "admin",
