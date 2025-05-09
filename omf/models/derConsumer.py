@@ -604,8 +604,9 @@ def work(modelDir, inputDict):
 	costs_allyears_array = np.zeros(projectionLength) ## includes all costs for all tech
 	costs_year1_array = np.zeros(12)
 	retrofit_cost_total = 0.
+	monthly_fuel_cost = np.zeros(12)
 
-	if 'Generator' in reoptResults:
+	if GENcheck == 'enabled':
 		## GEN fuel cost
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
 		gen_fuel_cost = float(inputDict['fuel_cost'])
@@ -613,6 +614,7 @@ def work(modelDir, inputDict):
 		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
 		monthly_GEN_consumption_total = np.array(monthly_GEN_consumption_total)
 		fuel_type = int(inputDict['fuel_type'])
+
 		if fuel_type == 1: ## Natural Gas
 			## Assume the fuel cost input is given in units of $/cubic foot
 			price_per_cubic_foot = gen_fuel_cost
@@ -626,23 +628,23 @@ def work(modelDir, inputDict):
 			monthly_gas_needed_cubic_ft = monthly_GEN_consumption_total_btu / (btu_per_cubic_ft * thermal_efficiency)
 
 			## Total monthly fuel cost
-			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
+			monthly_fuel_cost += monthly_gas_needed_cubic_ft * gen_fuel_cost
 			annual_fuel_cost = np.sum(monthly_fuel_cost)
 
 		if fuel_type == 2: ## Propane
 			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 3:  # Diesel
 			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 4: ## Gasoline
 			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		costs_year1_gen_fuel = gen_fuel_cost * gen_annual_fuel_consumption_gal
 		costs_year1_array += monthly_fuel_cost
@@ -942,10 +944,10 @@ def new(modelDir):
 		#'longitude': '-81.640283', ## Charleston, WV
 		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
 		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Residential Time of Day residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
-		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
-		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
-		'longitude' : '-104.812599', ## Brighton, CO
+		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
+		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
 		'latitude' : '39.969753', ## Brighton, CO
+		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
 		'demandFileName': 'residential_PV_load_tenX.csv',
 		'demandCurve': demand_curve,

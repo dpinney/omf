@@ -1044,7 +1044,7 @@ def new(modelDir):
 		## REopt inputs:
 		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
-		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
+		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
 		'latitude' : '39.969753', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
