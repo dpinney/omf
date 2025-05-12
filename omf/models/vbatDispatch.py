@@ -93,10 +93,8 @@ def work(modelDir, inputDict):
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
 
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','vbatDispatch','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
-	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
-
+	## Get the energy rate curve from the inputs
+	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
 	
 	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
 	# m = [calendar[key]*24 for key in calendar]
@@ -135,22 +133,19 @@ def work(modelDir, inputDict):
 	out["demandAdjusted"] = demandAdj
 	out["peakAdjustedDemand"] = peakAdjustedDemand
 	out["energyAdjustedMonthly"] = energyAdjustedMonthly
-	
-	cellCost = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-	#eCost = float(inputDict["electricityCost"])
-	dCharge = float(inputDict["demandChargeCost"])
-
 	out["VBdispatch"] = [dal-d for dal, d in zip(demandAdj, demand)]
 
-	
-	energy_cost_hourly = demand * energy_rate_array
-	adjusted_energy_cost_hourly = demandAdj * energy_rate_array
-	energy_cost_monthly = [sum(energy_cost_hourly[s:f]) for s, f in monthHours]
-	adjusted_energy_cost_monthly = [sum(adjusted_energy_cost_hourly[s:f]) for s, f in monthHours]
+	cellCost = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+	dCharge = float(inputDict["demandChargeCost"])
 
-	
+	## Calculate the hourly and monthly energy consumption costs using the hourly $/kWh rates in the input Energy Rate Curve
+	energy_cost_hourly = demand * energy_rate_array
+	energy_cost_monthly = [sum(energy_cost_hourly[s:f]) for s, f in monthHours]
+	adjusted_energy_cost_hourly = demandAdj * energy_rate_array
+	adjusted_energy_cost_monthly = [sum(adjusted_energy_cost_hourly[s:f]) for s, f in monthHours]
 	out["energyCost"] = energy_cost_monthly
 	out["energyCostAdjusted"] = adjusted_energy_cost_monthly
+
 	out["demandCharge"] = [peak*dCharge for peak in peakDemand]
 	out["demandChargeAdjusted"] = [pad*dCharge for pad in out["peakAdjustedDemand"]]
 	out["totalCost"] = [ec+dcm for ec, dcm in zip(out["energyCost"], out["demandCharge"])]
@@ -188,7 +183,6 @@ def new(modelDir):
 		"setpoint": "22.5",
 		"deadband": "0.625",
 		"demandChargeCost":"25",
-		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
 		"unitDeviceCost":"150",
