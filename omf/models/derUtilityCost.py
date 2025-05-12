@@ -37,12 +37,11 @@ def work(modelDir, inputDict):
 	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
-	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
+	## TODO: contact NREL and ask for it. 
 	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
 	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
-	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
 
 	########################################################################################################################
 	## Run REopt.jl solver
@@ -191,6 +190,7 @@ def work(modelDir, inputDict):
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
 		'tempCurve': inputDict['temperatureCurve'],
+		'energyRateCurve': inputDict['energyRateCurve'],
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -1074,7 +1074,6 @@ def new(modelDir):
 		## Financial Inputs
 		'demandChargeCost': '50', ## this input is used by vbatDispatch
 		'projectionLength': '25',
-		#'electricityCost': '0.05',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
