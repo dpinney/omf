@@ -38,12 +38,11 @@ def work(modelDir, inputDict):
 	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
-	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
+	## TODO: contact NREL and ask for it. 
 	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
 	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
-	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
 
 	########################################################################################################################
 	## Run REopt.jl solver
@@ -157,13 +156,13 @@ def work(modelDir, inputDict):
 		'unitDeviceCost': '', 
 		'unitUpkeepCost':  '', 
 		'demandChargeCost': '0.0',
-		'electricityCost': '0.16',
 		'projectionLength': inputDict['projectionLength'],
 		'discountRate': inputDict['discountRate'],
 		'fileName': inputDict['demandFileName'],
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
 		'tempCurve': inputDict['temperatureCurve'],
+		'energyRateCurve': inputDict['energyRateCurve'],
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -228,7 +227,7 @@ def work(modelDir, inputDict):
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	#consumptionCost = float(inputDict['electricityCost'])
+
 	demandCost = 0.0
 	rateCompensation = float(inputDict['rateCompensation'])
 
