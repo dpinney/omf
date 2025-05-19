@@ -1004,7 +1004,7 @@ def new(modelDir):
 		'load_type_ac': '1',
 		'unitDeviceCost_ac': '13', #a cheap wifi-enabled smart outlet to plug the AC into is about $13 (see https://www.lowes.com/pd/Enbrighten-125-Volt-1-Outlet-Indoor-Smart-Plug/1003202046)
 		'unitUpkeepCost_ac': '0', ## NOTE: Input is currently hidden in HTML
-		'power_ac': '5.6',
+		'power_ac': '0.5', ## In-window air unit power
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
 		'cop_ac': '2.5',
