@@ -33,8 +33,10 @@ def work(modelDir, inputDict):
 	## Delete output file every run if it exists
 	outData = {}
 
-	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	## Convert user provided demand and temperature data from str to float
+	## NOTE: assumes the input temperature curve is in degrees Fahrenheit
+	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
 	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
@@ -54,6 +56,9 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
 
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOUrate5b311c595457a3496d8367be.json')) as jsonFile:	
+		urdb_response = json.load(jsonFile)
+
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
 	scenario = {
 		'Site': {
@@ -61,9 +66,10 @@ def work(modelDir, inputDict):
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel,
+			#'urdb_label': urdbLabel,
+			'urdb_response': urdb_response,
 			#'tou_energy_rates_per_kwh': energy_rate_list,
-			'add_tou_energy_rates_to_urdb_rate': True
+			#'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -169,7 +175,7 @@ def work(modelDir, inputDict):
 	########################################################################################################################
 	## Run vbatDispatch model
 	########################################################################################################################
-
+	
 	## Set up base input dictionary for vbatDispatch runs
 	inputDict_vbatDispatch = {
 		'load_type': '', ## 1=AirConditioner, 2=HeatPump, 3=Refrigerator, 4=WaterHeater (This is from OMF model vbatDispatch.html)
@@ -189,7 +195,7 @@ def work(modelDir, inputDict):
 		'fileName': inputDict['fileName'],
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
-		'tempCurve': inputDict['temperatureCurve'],
+		'tempCurve': '\n'.join(f"{temp:.2f}" for temp in temperatures_degC), ## Convert temperatures_degC into the expected format for vbatDispatch
 		'energyRateCurve': inputDict['energyRateCurve'],
 	}
 	
@@ -491,7 +497,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -551,7 +557,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -957,7 +963,6 @@ def work(modelDir, inputDict):
 	
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	outData['NPV'] = npv(float(inputDict['discountRate'])/100., utilityNetSavings_allyears_array)
-	#SPP = utilityCosts_year1_total / utilityNetSavings_year1_total
 	initialInvestment = startupCosts + operationalCosts_onetime + allDevices_subsidy_onetime
 	utilityCosts_year1_minus_onetime_costs = (operationalCosts_ongoing*12.0) + (allDevices_subsidy_ongoing*12.0) + allDevices_compensation_year1_total
 	utilityNetSavings_year1_total_minus_onetime_costs = utilitySavings_year1_total - utilityCosts_year1_minus_onetime_costs
@@ -1042,9 +1047,10 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
+		#'urdbLabel': '539fb4beec4f024bc1dbecdd', ## Alaska Electric Light&Power Co, General Residential rate https://apps.openei.org/USURDB/rate/view/539fb4beec4f024bc1dbecdd#3__Energy
 		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
-		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
-		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
+		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
+		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
 		'latitude' : '39.969753', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
