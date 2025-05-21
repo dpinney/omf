@@ -1,0 +1,94 @@
+<head>
+	{{ omfHeaders }}
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!--  Macro for direct file upload macro usage:
+		file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
+		line 1: input for the actual file. There should be no value in inputDict that matches this one.
+		line 2: button for file upload, thats it.
+		line 3: the name of the file the user is using/inputting in. We wanna save this for display. Originally its set as the default.
+		line 4: This is hidden. This is the name of the file we want always = .csv name <- default naming convention 
+	-->
+	{% macro file_upload(fileInputID, userFileDisplayNameID, dataFileNameID) -%}
+    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[dataFileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{userFileDisplayNameID}}', '{{dataFileNameID}}')" style="display:none"><br>
+    <label for="{{fileInputID}}" class="fileButton">Choose File</label>
+    <input id="{{userFileDisplayNameID}}" name="{{userFileDisplayNameID}}" value="{{ allInputDataDict[userFileDisplayNameID] }}" readonly class="uploadFileName">
+    <input id="{{dataFileNameID}}" name= {{dataFileNameID}} type="hidden" value="{{ allInputDataDict[dataFileNameID] }}">
+	{% endmacro %}
+</head>
+<body>
+	{{ omfModelTitle }}
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-modelSkeleton" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}"pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
+			</div>
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">Input Data</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Circuit
+					<span class="classic">Open Circuit Editor</span>
+				</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">AMI Data Input File <span class="classic">Upload a .csv file of meter data. Format for input columns: busname, datetime, w, v, var.</span></label>
+				<div>{{ file_upload('AmiDataFile', 'AmiUIDisplay', 'AmiDataFileName') }}</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">SCADA Data Input File <span class="classic">Upload a .csv file of scada data. Format for input columns: busname, datetime, w, v, var.</span></label>
+				<div>{{ file_upload('ScadaDataFile', 'ScadaUIDisplay', 'ScadaDataFileName') }}</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">DER Pipeline Input File <span class="classic">Upload a .csv file of scada data. Format for input columns: busname, type, va.</span></label>
+				<div>{{ file_upload('derPipelineDataFile', 'derPipelineUIDisplay', 'derPipelineDataFileName') }}</div>
+			</div>
+			{{ omfModelButtons }}
+		</form>
+	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<!-- Output tables, graphs, etc -->
+	<div id="output">
+		<!-- Integer Sum Table -->
+		<p class="reportTitle">Model Skeleton Integer Sum</p>
+		<div id="analysisSummary" class="content">
+			<div class="shortInput">
+				<strong>Input 1</strong>
+				<p id="input1Out">{{allInputDataDict.input1}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Input 2</strong>
+				<p id="input2Out">{{allInputDataDict.input2}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Output</strong>
+				<p id="sumOut">{{allOutputDataDict.output}}</p>
+			</div>
+		</div>
+		{{ rawOutputFiles }}
+	</div>
+	{% endif %}
+</body>
