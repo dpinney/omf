@@ -208,12 +208,15 @@
 						} else if (x == 2){ // Propane
 							gebi('fuel_cost').value = '2.70'; // units: $/gal
 							gebi('thermal_efficiency').value = '25';
+							gebi('fuel_avail').value = '1000'; // units: gallons
 						} else if (x == 3) { // Diesel
 							gebi('fuel_cost').value = '3.80'; // units: $/gal
 							gebi('thermal_efficiency').value = '35';
+							gebi('fuel_avail').value = '1000'; // units: gallons
 						} else { // Gasoline
 							gebi('fuel_cost').value = '3.17'; // units: $/gal
 							gebi('thermal_efficiency').value = '25';
+							gebi('fuel_avail').value = '1000'; // units: gallons
 						}
 					}
 				</script>
@@ -297,7 +300,7 @@
 				<input type="text" id="replace_cost_inverter" name="replace_cost_inverter" value="{{allInputDataDict.replace_cost_inverter}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter Lifetime (years)<span class="classic">Specify after how many years in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<label class="tooltip">Inverter Lifetime (years)<span class="classic">Specify after how many years in which the battery inverter will be replaced at the cost specified in Inverter Replacement Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
 				<input type="text" id="inverter_replacement_year" name="inverter_replacement_year" value="{{allInputDataDict.inverter_replacement_year}}" required="required"/>
 			</div>
 
@@ -307,7 +310,7 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Enable Air Conditioner?<span class="classic">If yes, model will run with home air conditioner device(s).</span></label>
+				<label class="tooltip">Enable Air Conditioner?<span class="classic">If yes, model will run with a home air conditioner device.</span></label>
 				<select id="load_type_ac" name="load_type_ac" value="{{allInputDataDict.load_type_ac}}">
 					<option value="1" {{ 'selected' if allInputDataDict.load_type_ac == '1' }}>Yes</option>
 					<option value="0" {{ 'selected' if allInputDataDict.load_type_ac == '0' }}>No</option>
@@ -345,7 +348,6 @@
 				<!--<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>-->
 				<input type="hidden" id="unitUpkeepCost_ac" name="unitUpkeepCost_ac" value="{{allInputDataDict.unitUpkeepCost_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
-
 
 			<!-- Heat Pump (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
@@ -573,6 +575,36 @@
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+			{% endif %}
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Savings Breakdown of Thermal Technologies</p>
+		<div id="cashFlowReport" class="tightContent">
+			<div id="cashFlowChartDiv3"></div>
+			{% if allOutputDataDict.thermalDataCheck == 0 %}
+			<script type="text/javascript">	
+				$("#cashFlowChartDiv3").html("<p>&#160;&#160;&#160;No thermal technologies were specified or built by the model.</p>")
+			</script>
+			{% else %}
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
+					"title":{"text":"", "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[
+						{"name":"Water Heater Savings", "data": allOutputData.vbatResults_wh_savings_allyears, "color": "rgb(16,101,171)"},
+						{"name":"Heat Pump Savings", "data": allOutputData.vbatResults_hp_savings_allyears, "color": "rgb(58,147,195)"},
+						{"name":"Air Conditioner Savings", "data": allOutputData.vbatResults_ac_savings_allyears, "color": "rgb(142,196,222)"},
+						{"name":"Water Heater Costs", "data": allOutputData.costs_allyears_wh, "color": "rgb(179,21,41)"},
+						{"name":"Heat Pump Costs", "data": allOutputData.costs_allyears_hp, "color": "rgb(215,95,76)"},
+						{"name":"Air Conditioner Costs", "data": allOutputData.costs_allyears_ac, "color": "rgb(246,164,130)"},
+						//{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black", "visible": false}
+					],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv3","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>

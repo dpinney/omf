@@ -93,12 +93,21 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Curve in &degF (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
-				<input id="tempCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'tempCurve','tempFileName')">
-				<input id="tempCurve" name="tempCurve" value="{{allInputDataDict.tempCurve}}" type="hidden">
+				<label class="tooltip">Temperature Curve in &degC (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
+				<input id="temperatureCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'temperatureCurve','temperatureFileName')">
+				<input id="temperatureCurve" name="temperatureCurve" value="{{allInputDataDict.temperatureCurve}}" type="hidden">
 				<div>
-					<label for="tempCurveFile" class="fileButton">Choose File</label>
-					<input id="tempFileName" name="tempFileName" value="{{allInputDataDict.tempFileName}}" value='' readonly class="uploadFileName">
+					<label for="temperatureCurveFile" class="fileButton">Choose File</label>
+					<input id="temperatureFileName" name="temperatureFileName" value="{{allInputDataDict.temperatureFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Rate Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example energy rate file.</span></label>
+				<input id="energyRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'energyRateCurve','energyRateFileName')">
+				<input id="energyRateCurve" name="energyRateCurve" value="{{allInputDataDict.energyRateCurve}}" type="hidden">
+				<div>
+					<label for="energyRateCurveFile" class="fileButton">Choose File</label>
+					<input id="energyRateFileName" name="energyRateFileName" value="{{allInputDataDict.energyRateFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -130,10 +139,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
@@ -235,20 +240,47 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Fuel Type<span class="classic">Type of fossil fuel used for the generator.</span></label>
+				<select id="fuel_type" onchange="loadDefaultParameters()" name="fuel_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('fuel_type').value;
+						if (x == 1){ // Natural Gas
+							gebi('fuel_cost').value = '0.00386'; // units: $/cubic ft
+							gebi('fuel_avail').value = '1000'; // units: cubic ft
+						} else if (x == 2){ // Propane
+							gebi('fuel_cost').value = '2.70'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						} else if (x == 3) { // Diesel
+							gebi('fuel_cost').value = '3.80'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						} else { // Gasoline
+							gebi('fuel_cost').value = '3.17'; // units: $/gal
+							gebi('fuel_avail').value = '1000'; // units: gallons
+						}
+					}
+				</script>
+					<option value="1" {{ 'selected' if allInputDataDict.fuel_type == '1' }}>Natural Gas</option>
+					<option value="2" {{ 'selected' if allInputDataDict.fuel_type == '2' }}>Propane</option>
+					<option value="3" {{ 'selected' if allInputDataDict.fuel_type == '3' }}>Diesel</option>
+					<option value="4" {{ 'selected' if allInputDataDict.fuel_type == '4' }}>Gasoline</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of home fossil fuel generators to model.</span></label>
 				<input type="text" id="number_devices_GEN" name="number_devices_GEN" value="{{allInputDataDict.number_devices_GEN}}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Average Generator Capacity (kW)<span class="classic">Specify the average capacity size (kW) of each home fossil fuel generator.</span></label>
+				<label class="tooltip">Rated Power Capacity (kW)<span class="classic">Specify the operating power of the fossil fuel generator.</span></label>
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Fuel (gal)<span class="classic"> Specify the maximum amount of fossil fuel available (gallon) per device. Default assumes a 95 gallon tank.</span></label>
-				<input type="text" id="fuel_avail_gal" name="fuel_avail_gal" value="{{allInputDataDict.fuel_avail_gal}}" required="required"/>
+				<label class="tooltip">Available Fuel<span class="classic">Specify the annual amount of generator fuel available. For natural gas, this input expects units of cubic feet. For all other liquid fuels, the expected units are gallons.</span></label>
+				<input type="text" id="fuel_avail" name="fuel_avail" value="{{allInputDataDict.fuel_avail}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Cost ($/gal)<span class="classic">Specify the cost in USD per gallon of the fossil fuel.</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+				<label class="tooltip">Fuel Cost<span class="classic">Specify the cost of fuel used for the generator. For natural gas, this input expects units of $/cubic foot. For all other liquid fuels, the expected units are $/gallon.</span></label>
+				<input type="text" id="fuel_cost" name="fuel_cost" value="{{allInputDataDict.fuel_cost}}" required="required"/>
 			</div>
 
 			<!-- Air Conditioner (vbatDispatch) Inputs -->
@@ -528,7 +560,41 @@
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>								
+			{% endif %}
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Savings Breakdown of Thermal Technologies</p>
+		<div id="cashFlowReport" class="tightContent">
+			<div id="cashFlowChartDiv3"></div>
+			{% if allOutputDataDict.thermalDataCheck == 0 %}
+			<script type="text/javascript">	
+				$("#cashFlowChartDiv3").html("<p>&#160;&#160;&#160;No thermal technologies were specified or built by the model.</p>")
 			</script>
+			{% else %}
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+				"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+				"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray","minorTickInterval":5},
+				"title":{"text":"", "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}}, 
+				"series":[
+					{"name":"Water Heater Consumption Savings","data":allOutputData.vbatResults_wh_consumption_savings_allyears, "color": "rgb(16,101,171)"},
+					{"name":"Water Heater Peak Demand Savings","data":allOutputData.vbatResults_wh_peakDemand_savings_allyears, "color": "rgba(16,101,171,0.5)"},
+					{"name":"Heat Pump Consumption Savings","data":allOutputData.vbatResults_hp_consumption_savings_allyears, "color": "rgb(58,147,195)"},
+					{"name":"Heat Pump Peak Demand Savings","data":allOutputData.vbatResults_hp_peakDemand_savings_allyears, "color": "rgba(58,147,195,0.5)"},
+					{"name":"Air Conditioner Consumption Savings","data":allOutputData.vbatResults_ac_consumption_savings_allyears,"color":"rgb(142,196,222)"},
+					{"name":"Air Conditioner Peak Demand Savings","data":allOutputData.vbatResults_ac_peakDemand_savings_allyears,"color":"rgba(142,196,222,0.5)"},
+					{"name":"Water Heater Incentives","data":allOutputData.vbatResults_wh_costs_allyears,"color": "rgb(179,21,41)"},
+					{"name":"Heat Pump Incentives","data":allOutputData.vbatResults_hp_costs_allyears,"color": "rgb(215,95,76)"},
+					{"name":"Air Conditioner Incentives","data":allOutputData.vbatResults_ac_costs_allyears,"color": "rgb(246,164,130)"}
+				],
+				"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+				"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv3","type":"column","marginRight":20,"height":250,"width":1000},
+				"tooltip":{"valueDecimals":1},
+				"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				</script>
+				
+			
 			{% endif %}
 		</div>
 	</div>

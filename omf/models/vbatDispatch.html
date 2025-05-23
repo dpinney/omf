@@ -122,10 +122,6 @@
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
@@ -149,6 +145,15 @@
 				<div>
 					<label for="tempCurveFile" class="fileButton">Choose File</label>
 					<input id="tempFileName" name="tempFileName" value="{{allInputDataDict.tempFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Rate Curve (.csv file)<span class="classic">An hourly array of the cost of energy bought by the utility. I.e. wholesale (not retail) cost. Please see the documentation at the help link for the required format and an example energy rate file.</span></label>
+				<input id="energyRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'energyRateCurve','energyRateFileName')">
+				<input id="energyRateCurve" name="energyRateCurve" value="{{allInputDataDict.energyRateCurve}}" type="hidden">
+				<div>
+					<label for="energyRateCurveFile" class="fileButton">Choose File</label>
+					<input id="energyRateFileName" name="energyRateFileName" value="{{allInputDataDict.energyRateFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			{{ omfModelButtons }}

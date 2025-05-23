@@ -254,9 +254,9 @@ def _dss_to_clean_via_save_toBeTested(dss_file, clean_out_path, add_pf_syntax=Tr
 	##########
 	# - Saeed
 	##########
-	# Added 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
+	# Added 'xycurve.dss', 'invcontrol.dss', 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
 	# CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
-	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'xycurve.dss', 'invcontrol.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
 	##########
 	# - Saeed
 	##########
@@ -647,6 +647,7 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 				##########
 				# - Saeed
 				##########
+				# TODO: Scrutinize this change extra -Saeed
 						'parent': cobname,
 					}
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
@@ -980,33 +981,6 @@ def dss_to_networkx(dssFilePath, tree=None, omd=None):
 		tree = dssToTree(dssFilePath)
 	if omd == None:
 		omd = evilDssTreeToGldTree(tree)
-	# Gather edges, leave out source and circuit objects
-	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
-	edges_sub = [
-		(ob['parent'],ob['name']) for ob in omd.values()
-		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
-	]
-	full_edges = edges + edges_sub
-	G = nx.DiGraph(full_edges)
-	for ob in omd.values():
-		if 'latitude' in ob and 'longitude' in ob:
-			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
-		else:
-			G.add_node(ob['name'])
-	return G
-
-def _dss_to_networkx_toBeTested(dssFilePath, tree=None, omd=None):
-	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
-	if tree == None:
-		tree = dssToTree(dssFilePath)
-	if omd == None:
-		##########
-		# - Saeed
-		##########
-		omd = _evilDssTreeToGldTree_toBeTested(tree)
-		##########
-		# - Saeed
-		##########
 	# Gather edges, leave out source and circuit objects
 	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
 	edges_sub = [

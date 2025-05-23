@@ -29,7 +29,6 @@ from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
 from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
 from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
 from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
-from omf.solvers.opendss.dssConvert import _dss_to_networkx_toBeTested as dss_to_networkx
 
 # Model metadata:
 tooltip = "Determines the most vulnerable areas and pieces of equipment within a circuit "
@@ -663,7 +662,7 @@ def __getDownLineLoads__depreciated(pathToOmd,nriGeoJson):
 			kvar = float(ob['kvar'])
 			kv = float(ob['kv'])
 			# For each load, estimate the number of persons served. 
-			#Use the following equation math.sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+			#Use the following equation math.sqrt(kw**2 + kvar**2)/5 kva = # of homes served by that load
 			# assume household is 4
 			loads[obName]['base crit score']= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
 			lat = float(ob['latitude'])
@@ -851,7 +850,7 @@ def coordCheck(long, lat, geoList):
 		return ''
 
 def getPowerMeasures(ob):
-	''' Retrieves kw, kvar, kva, and pf from a load object
+	''' Retrieves kw, kvar, and kva from a load object
 		Input: ob -> a load object 
 		Return: -> [kw, kvar, kva]
 	'''
@@ -866,7 +865,7 @@ def getPowerMeasures(ob):
 	elif kw and pf:
 		kw = float(kw)
 		kva = kw/float(pf)
-		kvar = math.sqrt(kva^2 - kw^2)
+		kvar = math.sqrt(kva**2 - kw**2)
 	elif kva and pf:
 		kw = float(kva)*float(pf)
 		kva = float(kva)
@@ -893,7 +892,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 	bg_outputDict = {}
 	# lowercase list
 	# Section code
-	sectionsDict, distanceDict, totalSections = runSections(omdToTree(pathToOmd), omd)
+	sectionsDict, distanceDict, totalSections = runSections(pathToOmd, omd)
 	# Retrieve data to compute SVI
 	for ob in omd.get('tree', {}).values():
 		obType = ob['object']
@@ -1940,7 +1939,7 @@ def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList
 			kvar = float(ob['kvar'])
 			kv = float(ob['kv'])
 			# For each load, estimate the number of persons served.
-			#Use the following equation math.sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+			#Use the following equation math.sqrt(kw**2 + kvar**2)/5 kva = # of homes served by that load
 			# assume household is 4
 			loads[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4, 2)
 			long = float(ob['longitude'])
@@ -2585,10 +2584,10 @@ def cacheZillowData(pathToOmd, pathToLoad):
 	with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json', 'w') as f:
 		json.dump(zillowDict, f)
 
-def runSections(dssTree, omd):
+def runSections(pathToOmd, omd):
 	#omd = json.load(open(omdFilePath))
 	#dssTree = omdToTree(omdFilePath)
-	G = dss_to_networkx('', dssTree)
+	G = createGraph(pathToOmd)
 	disconnected_nodes = [node for node in G.nodes if G.degree[node] == 0]
 	# add data to nodes
 	for ob in omd.get('tree', {}).values():

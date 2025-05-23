@@ -92,6 +92,9 @@ def work(modelDir, inputDict):
 		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
+
+	## Get the energy rate curve from the inputs
+	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
 	
 	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
 	# m = [calendar[key]*24 for key in calendar]
@@ -130,14 +133,19 @@ def work(modelDir, inputDict):
 	out["demandAdjusted"] = demandAdj
 	out["peakAdjustedDemand"] = peakAdjustedDemand
 	out["energyAdjustedMonthly"] = energyAdjustedMonthly
-	
+	out["VBdispatch"] = [dal-d for dal, d in zip(demandAdj, demand)]
+
 	cellCost = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-	eCost = float(inputDict["electricityCost"])
 	dCharge = float(inputDict["demandChargeCost"])
 
-	out["VBdispatch"] = [dal-d for dal, d in zip(demandAdj, demand)]
-	out["energyCost"] = [em*eCost for em in energyMonthly]
-	out["energyCostAdjusted"] = [eam*eCost for eam in energyAdjustedMonthly]
+	## Calculate the hourly and monthly energy consumption costs using the hourly $/kWh rates in the input Energy Rate Curve
+	energy_cost_hourly = demand * energy_rate_array
+	energy_cost_monthly = [sum(energy_cost_hourly[s:f]) for s, f in monthHours]
+	adjusted_energy_cost_hourly = demandAdj * energy_rate_array
+	adjusted_energy_cost_monthly = [sum(adjusted_energy_cost_hourly[s:f]) for s, f in monthHours]
+	out["energyCost"] = energy_cost_monthly
+	out["energyCostAdjusted"] = adjusted_energy_cost_monthly
+
 	out["demandCharge"] = [peak*dCharge for peak in peakDemand]
 	out["demandChargeAdjusted"] = [pad*dCharge for pad in out["peakAdjustedDemand"]]
 	out["totalCost"] = [ec+dcm for ec, dcm in zip(out["energyCost"], out["demandCharge"])]
@@ -158,10 +166,12 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","Texas_1yr_Load.csv")) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","Texas_1yr_Temp.csv")) as f:
 		temp_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","vbatDispatch","TOU_rate_schedule.csv")) as f:
+		energy_rate_curve = f.read()
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
@@ -173,7 +183,6 @@ def new(modelDir):
 		"setpoint": "22.5",
 		"deadband": "0.625",
 		"demandChargeCost":"25",
-		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
 		"unitDeviceCost":"150",
@@ -183,6 +192,8 @@ def new(modelDir):
 		"fileName": "Texas_1yr_Load.csv",
 		"tempFileName": "Texas_1yr_Temp.csv",
 		"modelType": modelName,
+		'energyRateFileName': 'TOU_rate_schedule.csv',
+		'energyRateCurve': energy_rate_curve,
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
