@@ -9,7 +9,7 @@ from omf.forecast import suppress_stdout_stderr
 def train_prophet(df, modelDir, confidence=0.99):
 	# train and cache into modelDir
 	try:
-		from fbprophet import Prophet
+		from fbprophet import Prophet # type: ignore
 	except ImportError:
 		from prophet import Prophet
 	m = Prophet(
