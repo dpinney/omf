@@ -35,7 +35,8 @@ def work(modelDir, inputDict):
 	outData = {}
 
 	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
 	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
@@ -51,7 +52,7 @@ def work(modelDir, inputDict):
 	## Create REopt input file
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
-	urdbLabel = str(inputDict['urdbLabel'])
+	#urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
 
@@ -62,8 +63,8 @@ def work(modelDir, inputDict):
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel,
-			'add_tou_energy_rates_to_urdb_rate': True
+			#'urdb_label': urdbLabel,
+			#'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -73,6 +74,12 @@ def work(modelDir, inputDict):
 			"analysis_years": projectionLength
 		}
 	}
+
+	## Add either the URDB Label or URDB Response File
+	if inputDict.get('urdbLabelBool') is not None:
+		scenario['ElectricTariff']['urdb_label'] = inputDict['urdbLabel']
+	else:
+		scenario['ElectricTariff']['urdb_response'] = inputDict['residentialRateStructureFile']
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['enableBESS'] == 'Yes':
@@ -161,7 +168,7 @@ def work(modelDir, inputDict):
 		'fileName': inputDict['demandFileName'],
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
-		'tempCurve': inputDict['temperatureCurve'],
+		'tempCurve': '\n'.join(f"{temp:.2f}" for temp in temperatures_degC), ## Convert temperatures_degC into the expected format for vbatDispatch
 		'energyRateCurve': inputDict['energyRateCurve'],
 	}
 	
@@ -385,7 +392,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -445,7 +452,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -916,19 +923,15 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load_tenX.csv')) as f:
 		demand_curve = f.read()
-	## NOTE: The following temperature curve is for a residence in West Virginia area
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
-	#	temp_curve = f.read()
-	## NOTE: The following temperature curve is for a residence in Denver, CO
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','open-meteo-denverCO-noheaders.csv')) as f:
 		temperature_curve = f.read()
-	## NOTE: Following line commented out because it was used for simulating outages in REopt.
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
-	#	criticalLoad_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
 		energy_rate_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.json')) as jsonFile:
+		residential_rate_curve = json.load(jsonFile)
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -954,6 +957,8 @@ def new(modelDir):
 		'temperatureCurve': temperature_curve,
 		'energyRateFileName': 'TOU_rate_schedule.csv',
 		'energyRateCurve': energy_rate_curve,
+		'residentialRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
+		'residentialRateStructureFile': residential_rate_curve,
 
 		## Financial Inputs
 		'projectionLength': '25',

@@ -52,12 +52,8 @@ def work(modelDir, inputDict):
 	## Gather input variables to pass to the omf.solvers.reopt_jl model
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
-	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
-
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOUrate5b311c595457a3496d8367be.json')) as jsonFile:	
-		urdb_response = json.load(jsonFile)
 
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
 	scenario = {
@@ -67,7 +63,7 @@ def work(modelDir, inputDict):
 		},
 		'ElectricTariff': {
 			#'urdb_label': urdbLabel,
-			'urdb_response': urdb_response,
+			#'urdb_response': urdb_response,
 			#'tou_energy_rates_per_kwh': energy_rate_list,
 			#'add_tou_energy_rates_to_urdb_rate': True
 		},
@@ -79,6 +75,12 @@ def work(modelDir, inputDict):
 			'analysis_years': projectionLength
 		}
 	}
+
+	## Add either the URDB Label or URDB Response File
+	if inputDict.get('urdbLabelBool') is not None:
+		scenario['ElectricTariff']['urdb_label'] = inputDict['urdbLabel']
+	else:
+		scenario['ElectricTariff']['urdb_response'] = inputDict['residentialRateStructureFile']
 
 	## Add fossil fuel generator to input scenario, if enabled
 	if inputDict['fossilGenerator'] == 'Yes' and float(inputDict['number_devices_GEN']) > 0:
@@ -122,10 +124,6 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
 		json.dump(scenario, jsonFile)
 
-	## Create basic REopt input file
-	## NOTE: This function is disabled for now since the scenario dictionary above is now hard coded here and no longer relies on the helper function in omf.models.derConsumer to produce the REopt input file.
-	#derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
-
 	########################################################################################################################
 	## Run REopt.jl
 	########################################################################################################################
@@ -145,32 +143,20 @@ def work(modelDir, inputDict):
 		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
-	########################################################################################################################
-	## REopt Results
-	########################################################################################################################
-
-	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
-	if 'ElectricStorage' in reoptResults: 
-		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
-			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-			outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
-		else:
-			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
+	## Check if DER technology is enabled by the user and define relevant variables from REopt
+	if BESScheck == 'enabled':
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		outData['chargeLevelBattery'] = list(np.array(reoptResults['ElectricStorage']['soc_series_fraction']) * 100.)
 	else:
-		print('No BESS was specified in REopt. Setting BESS variables to zero for plotting purposes.')
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
 		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
-	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
-	## NOTE: This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
-	#	static_reopt_results = json.load(f)
-	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
-	#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
-	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-	#outData.update(static_reopt_results['outputs'])
+	if GENcheck == 'enabled':
+		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw'])
+	else:
+		generator = np.zeros_like(demand)
 
 	########################################################################################################################
 	## Run vbatDispatch model
@@ -336,7 +322,7 @@ def work(modelDir, inputDict):
 
 		outData[device_result+'_check'] = 'enabled'
 
-	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
+	## NOTE: temporarily comment out the two derConsumer runs. This needs some development since derConsumer.py has changed over time.
 	"""
 	## Scale down the utility demand to create an ad-hoc small consumer load (1 kW average) and large consumer load (10 kW average)
 	utilityLoadAverage = np.average(demand)
@@ -448,14 +434,8 @@ def work(modelDir, inputDict):
 	vbat_charge_component_W = vbat_charge_component * 1000.
 	demand_W = np.array(demand) * 1000.
 	grid_serving_new_load_W = grid_to_load_W + grid_charging_BESS_W + vbat_charge_component_W - vbat_discharge_component_W
+	generator_W = generator * 1000.
 
-	if 'Generator' in reoptResults:
-		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw'])
-		generator_W = generator * 1000.
-	else:
-		generator = np.zeros_like(demand)
-		generator_W = np.zeros_like(demand)
-	
 	## Put all DER plot variables into a dataFrame for plotting
 	df = pd.DataFrame({
 		'timestamp': timestamps,
@@ -917,25 +897,12 @@ def work(modelDir, inputDict):
 	## Calculate total utility costs for year 1 and all years
 	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts
 	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array 
-	utilityCosts_year1_array[0] += startupCosts
+	utilityCosts_year1_array[0] += startupCosts ## Add startup costs to the first year in the total cost array
 	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array 
-	utilityCosts_allyears_array[0] += startupCosts
+	utilityCosts_allyears_array[0] += startupCosts ## Add startup costs to the first year in the total cost array
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 
 	## Calculate total costs for BESS, TESS, and GEN
-	"""
-	if np.sum(BESS) > 0:
-		totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
-	else:
-		print('REopt did not build a BESS (the discharge array for the year is zero). Setting total BESS costs and incentives to 0 for plotting purposes.')
-		totalCosts_BESS_allyears_array = np.full(projectionLength, 0)
-	
-	if np.sum(generator) > 0:
-		totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
-	else:
-		print('REopt did not build a Generator (the discharge array for the year is zero). Setting total GEN costs and incentives to 0 for plotting purposes.')
-		totalCosts_GEN_allyears_array = np.full(projectionLength, 0)
-	"""
 	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
 	totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
 	totalCosts_TESS_allyears_array = combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
@@ -1032,12 +999,17 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','utility_2018_kW_load.csv')) as f:
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
 		temperature_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOU_rate_schedule.csv')) as f:
 		energy_rate_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.json')) as jsonFile:
+		residential_rate_curve = json.load(jsonFile)
+	#responseFilename = 'TODrate66a13566e90ecdb7d40581d2.json' ## TOD rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
+	#responseFilename = 'TOUrate5b311c595457a3496d8367be.json' ## TOU rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
 
 	defaultInputs = {
 		## TODO: maybe incorporate float, int, bool types on the html side instead of only strings
@@ -1047,10 +1019,11 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
+		'urdbLabelBool': 'False',
 		#'urdbLabel': '539fb4beec4f024bc1dbecdd', ## Alaska Electric Light&Power Co, General Residential rate https://apps.openei.org/USURDB/rate/view/539fb4beec4f024bc1dbecdd#3__Energy
-		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
+		'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
 		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
-		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
+		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
 		'latitude' : '39.969753', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
@@ -1060,6 +1033,8 @@ def new(modelDir):
 		'temperatureCurve': temperature_curve,
 		'energyRateFileName': 'TOU_rate_schedule.csv',
 		'energyRateCurve': energy_rate_curve,
+		'residentialRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
+		'residentialRateStructureFile': residential_rate_curve,
 
 		## Fossil Fuel Generator Inputs
 		## Modeled after Generac 20 kW diesel model with max tank of 95 gallons

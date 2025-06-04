@@ -102,15 +102,6 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Energy Rate Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example energy rate file.</span></label>
-				<input id="energyRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'energyRateCurve','energyRateFileName')">
-				<input id="energyRateCurve" name="energyRateCurve" value="{{allInputDataDict.energyRateCurve}}" type="hidden">
-				<div>
-					<label for="energyRateCurveFile" class="fileButton">Choose File</label>
-					<input id="energyRateFileName" name="energyRateFileName" value="{{allInputDataDict.energyRateFileName}}" value='' readonly class="uploadFileName">
-				</div>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
 				<input type="text" id="latitude" name="latitude" value="{{allInputDataDict.latitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
@@ -129,7 +120,29 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
+				<label class="tooltip">Energy Rate Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example energy rate file.</span></label>
+				<input id="energyRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'energyRateCurve','energyRateFileName')">
+				<input id="energyRateCurve" name="energyRateCurve" value="{{allInputDataDict.energyRateCurve}}" type="hidden">
+				<div>
+					<label for="energyRateCurveFile" class="fileButton">Choose File</label>
+					<input id="energyRateFileName" name="energyRateFileName" value="{{allInputDataDict.energyRateFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Residential Rate Structure (.json file)<span class="classic">Please see the documentation at the help link for the required format and an example residential rate structure.</span></label>
+				<input id="residentialRateStructureFile" type="file" style="display:none" onchange="handle_files(this.files,'residentialRateStructureFile','residentialRateStructureFileName')">
+				<input id="residentialRateStructureFile" name="residentialRateStructureFile" value="{{allInputDataDict.residentialRateStructureFile}}" type="hidden">
+				<div>
+					<label for="residentialRateStructureFile" class="fileButton">Choose File</label>
+					<input id="residentialRateStructureFileName" name="residentialRateStructureFileName" value="{{allInputDataDict.residentialRateStructureFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Use URDB Label?<span class="classic">If checked, the model will use the URDB label instead of the Residential Rate Structure file.</span></label>
+				<input type="checkbox"  id="urdbLabelBool" name="urdbLabelBool" {% if allInputDataDict.urdbLabelBool %}checked{% endif %}/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">URDB Label (Optional)<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
 				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
