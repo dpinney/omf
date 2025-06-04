@@ -120,7 +120,8 @@ def repeatFindCensusInfo(lat, long, cInfo:str, lim=10, wait=3):
 		raise Exception(f"ERROR - cInfo argument to repeatFindCensusInfo() must equal 'blockgroup' or 'tract', not '{cInfo}'")
 
 	for i in range(0,lim):
-		if info:=findInfo(lat,long):
+		info = findInfo(lat,long)
+		if info:
 			break
 		elif i == lim-1:
 			raise Exception(f'ERROR - Could not get census {info} in {lim} calls to the server')
@@ -462,7 +463,8 @@ def getDownLineLoadsBlockGroup(pathToOmd):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				if check := coordCheck(long, lat, blockgroupDict):
+				check = coordCheck(long, lat, blockgroupDict)
+				if check:
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
@@ -564,7 +566,8 @@ def getDownLineLoadsTract(pathToOmd):
 			lat = float(ob['latitude'])
 
 			if tractDict:
-				if check := coordCheck(long, lat, tractDict):
+				check = coordCheck(long, lat, tractDict)
+				if check:
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1111,7 +1114,8 @@ def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				if check := coordCheck(long, lat, tractDict):
+				check = coordCheck(long, lat, tractDict)
+				if check:
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1237,7 +1241,8 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				if check := coordCheck(long, lat, blockgroupDict):
+				check = coordCheck(long, lat, blockgroupDict)
+				if check:
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
@@ -1357,7 +1362,8 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				if check := coordCheck(long, lat, tractDict):
+				check = coordCheck(long, lat, tractDict)
+				if check:
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1484,7 +1490,8 @@ def getDownLineLoadsBlockGroup(pathToOmd, avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				if check := coordCheck(long, lat, blockgroupDict):
+				check = coordCheck(long, lat, blockgroupDict)
+				if check:
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
@@ -1585,7 +1592,8 @@ def getDownLineLoadsTract(pathToOmd, avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				if check := coordCheck(long, lat, tractDict):
+				check = coordCheck(long, lat, tractDict)
+				if check:
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1684,7 +1692,8 @@ def __getDownLineLoadsEquipmentBlockGroup__depreciated(pathToOmd, equipmentList)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				if check := coordCheck(long, lat, blockgroupDict):
+				check = coordCheck(long, lat, blockgroupDict)
+				if check:
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
@@ -1804,7 +1813,8 @@ def __getDownLineLoadsEquipmentTract__depreciated(pathToOmd, equipmentList):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				if check := coordCheck(long, lat, tractDict):
+				check = coordCheck(long, lat, tractDict)
+				if check:
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1946,7 +1956,7 @@ def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList
 			lat = float(ob['latitude'])
 			if lon_lat:
 				# we check if we have already seen the coordinates
-				if check := coordCheck(long,lat, lon_lat):
+				if coordCheck(long,lat, lon_lat):
 					svi_score = round(float(tracts.get(tract)['SOVI_SCORE']),2)
 					loads[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
 					loads[key]['SOVI_SCORE'] = svi_score
