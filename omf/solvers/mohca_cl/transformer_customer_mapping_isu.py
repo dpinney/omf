@@ -4,102 +4,170 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
-def transform_input_to_matrices(input_file, num_buses,v_base = 240):
+def transform_input_to_matrices(input_file, num_buses, v_base=240):
     """
-    Extracts P and V matrices from the input file based on bus names, 
-    renaming buses to the old format while reading and providing mapping for reverting.
+    Extracts P and V matrices from the input file based on bus names,
+    renaming buses to the old format while handling resolution-based filtering.
 
-    Parameters:
-    - input_file (str): Path to the formatted input file.
-    - num_buses (int): Number of buses in the system.
+    - For hourly data (60 min): Remove Jan-01, use all available data.
+    - For 15/30-min data:
+        • If ≤ 3 months available: use all (remove Jan-01 and Feb-29)
+        • If > 3 months: use first 4 consecutive full months
 
     Returns:
-    - P (numpy.ndarray): Power matrix (rows: time steps, columns: buses).
-    - V (numpy.ndarray): Voltage matrix (rows: time steps, columns: buses).
-    - bus (list): List of old-format bus names (e.g., "bus1", "bus2", etc.).
-    - bus_name_mapping (dict): Mapping of old names to new names for reverting later.
+    - P (np.ndarray): Power matrix (time_steps x buses)
+    - V (np.ndarray): Voltage matrix (time_steps x buses)
+    - bus (list): Old-format bus names
+    - bus_name_mapping (dict): Mapping of old to new bus names
+    - resolution_minutes (float): Data resolution in minutes
     """
+
+    # Step 1: Load and convert time
     data = pd.read_csv(input_file)
-    data = data[~data['datetime'].str.contains('-01-01')]
+    data['datetime'] = pd.to_datetime(data['datetime'])
+
+    # Step 2: Detect resolution (in minutes)
+    sample_bus = data['busname'].iloc[0]
+    sample_times = data[data['busname'] == sample_bus]['datetime'].sort_values()
+    resolution_seconds = sample_times.diff().dt.total_seconds().dropna().mode()[0]
+    resolution_minutes = resolution_seconds / 60
+
+    # Step 3: Remove Feb-29 first (safe for all resolutions)
+    data = data[~((data['datetime'].dt.month == 2) & (data['datetime'].dt.day == 29))]
+
+    # Step 4: Process by resolution
+    if resolution_minutes == 60:
+        # Hourly → Remove Jan-01, use all data
+        data = data[~((data['datetime'].dt.month == 1) & (data['datetime'].dt.day == 1))]
+
+    else:
+        # non-hourly → check how many months available
+        data['year_month'] = data['datetime'].dt.to_period('M')
+        unique_months = sorted(data['year_month'].unique())
+
+        if len(unique_months) <= 3:
+            # ≤ 3 months → remove Jan-01 and use all
+            data = data[~((data['datetime'].dt.month == 1) & (data['datetime'].dt.day == 1))]
+
+        else:
+            # > 3 months → find first 4 full consecutive months
+            month_counts = data.groupby(['busname', 'year_month']).size().unstack(fill_value=0)
+
+            complete_months = []
+            for month in month_counts.columns:
+                expected_points = month.days_in_month * int(24 * 60 / resolution_minutes)
+                if (month_counts[month] == expected_points).all():
+                    complete_months.append(month)
+
+            sorted_months = sorted(complete_months)
+            selected_months = None
+            for i in range(len(sorted_months) - 3):
+                span = [(sorted_months[i] + j) for j in range(4)]
+                if span == sorted_months[i:i+4]:
+                    selected_months = span
+                    break
+
+            if selected_months is None:
+                raise ValueError("Not enough 4 consecutive full months in the data.")
+
+            # Keep only selected full months and remove Jan-01
+            data = data[data['year_month'].isin(selected_months)]
+            data = data[~((data['datetime'].dt.month == 1) & (data['datetime'].dt.day == 1))]
+
+    # Step 5: Build matrices
     P, V, bus = [], [], []
     bus_name_mapping = {}
-
-    # Get unique bus names in the file
     unique_bus_names = data['busname'].unique()
 
-    # Rename to old format (bus1, bus2, etc.) during iteration
     for index, new_bus_name in enumerate(unique_bus_names, start=1):
         old_bus_name = f"bus{index}"
-        bus_name_mapping[old_bus_name] = new_bus_name  # Store mapping for reverting later
+        bus_name_mapping[old_bus_name] = new_bus_name
         bus_data = data[data['busname'] == new_bus_name]
         P.append(bus_data['kw_reading'].values)
         V.append(bus_data['v_reading'].values / v_base)
         bus.append(old_bus_name)
 
-    # Convert to numpy arrays and transpose
-    return np.array(P).T, np.array(V).T, bus, bus_name_mapping
-
-
+    return np.array(P).T, np.array(V).T, bus, bus_name_mapping, resolution_minutes
 
 
 
 def data_load(test_system):
     """
-    Load data for the specified test system (EC2, ST, or EC4).
+    Load and process data for the specified test system.
+    Automatically detects resolution, trims data to the first 3 months,
+    removes Jan-01 and Feb-29, computes ΔP and ΔV, and aligns time steps.
 
     Parameters:
-    test_system (str): The test system to load data for ('EC2', 'ST' or 'EC4').
+    - test_system (str): One of 'EC2', 'ST', 'EC4', or 'ckt5'
 
     Returns:
-    tuple: Contains loaded data including node_number, Trans_num, P_data, V_data, coordinates_file, coord, and distance_coord.
+    - node_number (int): Number of customers
+    - Trans_num (int): Number of transformers
+    - P_data (ndarray): ΔP matrix (aligned)
+    - V_data (ndarray): ΔV matrix (aligned)
+    - coordinates_file (str)
+    - coord (ndarray): distance matrix
+    - distance_coord (DataFrame): distance matrix
+    - P, V (ndarray): raw P, V matrices
+    - bus (list): customer labels
+    - bus_name_mapping (dict)
+    - resolution_minutes (float): time resolution in minutes
     """
     if test_system == 'EC2':
-        node_number = 403
-        Trans_num = 60
-        input_file = "input data/EC2_Input.csv"  
-        P, V, bus = transform_input_to_matrices(input_file, num_buses=node_number)        
+        node_number = 345
+        Trans_num = 59
+        input_file = "input data/EC2_Input.csv"
         coordinates_file = "input data/EC2_XY.csv"
-        coord = np.array(pd.read_csv('input data/EC2_coord_distance.csv', header=None))
-        distance_coord = pd.read_csv('input data/EC2_cluster_distance.csv', header=None)
+        coord = np.array(pd.read_csv("input data/EC2_coord_distance.csv", header=None))
+        distance_coord = pd.read_csv("input data/EC2_cluster_distance.csv", header=None)
 
-        Delta_P = np.diff(P, axis=0)[23:, :]
-        Delta_V = np.diff(V, axis=0)[23:, :]
-        
     elif test_system == 'ST':
         node_number = 46
         Trans_num = 12
-        input_file = "input data/ST_Input.csv"  
-        P, V, bus,bus_name_mapping = transform_input_to_matrices(input_file, num_buses=node_number)        
+        input_file = "input data/ST_Input.csv"
         coordinates_file = "input data/ST_XY.csv"
-        coord = np.array(pd.read_csv('input data/ST_distance.csv', header=None))
-        distance_coord = pd.read_csv('input data/ST_cluster_distance.csv', header=None)
-
-        Delta_P = np.diff(P, axis=0)[23:, :]
-        Delta_V = np.diff(V, axis=0)[23:, :]
-        
+        coord = np.array(pd.read_csv("input data/ST_distance.csv", header=None))
+        distance_coord = pd.read_csv("input data/ST_cluster_distance.csv", header=None)
 
     elif test_system == 'EC4':
-        node_number = 110
+        node_number = 96
         Trans_num = 61
-        input_file = "input data/EC4_Input.csv"  
-        P, V, bus = transform_input_to_matrices(input_file, num_buses=node_number)        
+        input_file = "input data/EC4_Input.csv"
         coordinates_file = "input data/EC4_XY.csv"
-        coord = np.array(pd.read_csv('input data/EC4_coord_distance.csv', header=None))
-        distance_coord = pd.read_csv('input data/EC4_cluster_distance.csv', header=None)
+        coord = np.array(pd.read_csv("input data/EC4_coord_distance.csv", header=None))
+        distance_coord = pd.read_csv("input data/EC4_cluster_distance.csv", header=None)
 
-        Delta_P = np.diff(P, axis=0)[23:, :]
-        Delta_V = np.diff(V, axis=0)[23:, :]
+    elif test_system == 'ckt5':
+        node_number = 1379
+        Trans_num = 591
+        input_file = "input data/Ckt5_Input.csv"
+        coordinates_file = "input data/Ckt5_XY.csv"
+        coord = np.array(pd.read_csv("input data/Ckt5_coord_distance.csv", header=None))
+        distance_coord = pd.read_csv("input data/Ckt5_cluster_distance.csv", header=None)
 
     else:
-        raise ValueError("Unsupported test system. Please choose 'EC2', 'ST', or 'EC4'.")
+        raise ValueError("Unsupported test system.")
 
-    V_data = Delta_V
-    P_data = Delta_P
+    # Load and transform input
+    P, V, bus, bus_name_mapping, resolution_minutes = transform_input_to_matrices(
+        input_file, 
+        node_number)
 
-    #  print("Data loading finished for", test_system)
-    return node_number, Trans_num, P_data, V_data, coordinates_file, coord, distance_coord, P, V, bus, bus_name_mapping
+    # Compute samples per day
+    samples_per_day = int(24 * 60 / resolution_minutes)
 
-def correlation_calculation(V_data, P_data, node_number, weight_power=0, weight_voltage=1, plot=False):
+    Delta_P = np.diff(P, axis=0)[(samples_per_day - 1):, :]
+    Delta_V = np.diff(V, axis=0)[(samples_per_day - 1):, :]
+    
+    print("Data loading finished for", test_system)
+    return (
+        node_number, Trans_num, Delta_P, Delta_V,
+        coordinates_file, coord, distance_coord,
+        P, V, bus, bus_name_mapping, resolution_minutes
+    )
+
+
+def correlation_calculation(V_data, P_data, node_number, resolution_minutes, weight_power=0, weight_voltage=1, plot=False):
     """
     Perform correlation calculations, plot heatmap, and calculate connections.
 
@@ -114,32 +182,40 @@ def correlation_calculation(V_data, P_data, node_number, weight_power=0, weight_
     - average_pc (numpy.ndarray): Weighted correlation matrix.
     - all_set (list): Bi-directional reachability for each customer.
     """
+  # Determine daily sample count based on resolution
+    samples_per_day = int(24 * 60 / resolution_minutes)
+    total_days = V_data.shape[0] // samples_per_day
 
+    # Reshape voltage and power matrices for daily blocks
+    V_V_daily = np.reshape(V_data[:total_days * samples_per_day], (total_days, samples_per_day, node_number))
+    P_P_daily = np.reshape(P_data[:total_days * samples_per_day], (total_days, samples_per_day, node_number))
+
+    # Voltage correlation matrix
     cor_collect_V_V = []
-    V_V_daily = np.reshape(V_data, (363, 24, node_number))
-    for i in range(363):
-        daily_V_V = pd.DataFrame(V_V_daily[i, :]).corr()
-        cor_collect_V_V.append(daily_V_V)
+    for i in range(total_days):
+        daily_corr = pd.DataFrame(V_V_daily[i, :]).corr()
+        cor_collect_V_V.append(daily_corr)
     average_pc_VV = abs(np.array(cor_collect_V_V)).mean(axis=0)
 
+    # Power correlation matrix
     cor_collect_P_P = []
-    P_P_daily = np.reshape(P_data, (363, 24, node_number))
-    for i in range(363):
-        daily_P_P = pd.DataFrame(P_P_daily[i, :]).corr()
-        cor_collect_P_P.append(daily_P_P)
+    for i in range(total_days):
+        daily_corr = pd.DataFrame(P_P_daily[i, :]).corr()
+        cor_collect_P_P.append(daily_corr)
     average_pc_PP = abs(np.array(cor_collect_P_P)).mean(axis=0)
 
-    weighted_correlation_matrix = (weight_power * average_pc_PP) + (weight_voltage * average_pc_VV)
-    average_pc = weighted_correlation_matrix
-
+    # weighted_correlation_matrix = (weight_power * average_pc_PP) + (weight_voltage * average_pc_VV)
+    # average_pc = weighted_correlation_matrix
+    average_pc = average_pc_VV
+    
     if plot:
         # Heatmap Plot for Customer Correlation
-        indices_to_show = np.arange(0, weighted_correlation_matrix.shape[0], 20)
+        indices_to_show = np.arange(0, average_pc.shape[0], 20)
         labels_to_show = [str(i) for i in indices_to_show]
 
         plt.figure(figsize=(30, 25))
         sns.heatmap(
-            weighted_correlation_matrix,
+            average_pc,
             annot=False,
             cmap='Greens',
             cbar_kws={'label': 'Correlation'},
@@ -224,7 +300,7 @@ def generate_connection_results_estimate(
     average_pc,
     coord,
     V,
-    num_iterations=50,
+    num_iterations=10,
 ):
     """
     Generate transformer-customer connection results through clustering and adjustment.
@@ -812,7 +888,8 @@ def get_groupings(
     node_number = len(bus_names)
 
     # NOTE: this num_buses input is not used.
-    P, V, bus, bus_name_mapping = transform_input_to_matrices(
+    # NOTE: changed 20250501 - added resolution_minutes as return...
+    P, V, bus, bus_name_mapping, resolution_minutes = transform_input_to_matrices(
         input_meter_data_fp,
         num_buses='not used...')
 
@@ -834,15 +911,23 @@ def get_groupings(
     dist_matrix = abs(m-n)
 
     # NOTE: ask about this 23... should it be optional?
-    Delta_P = np.diff(P, axis=0)[23:, :]
-    Delta_V = np.diff(V, axis=0)[23:, :]
+    #Delta_P = np.diff(P, axis=0)[23:, :]
+    #Delta_V = np.diff(V, axis=0)[23:, :]
+
+    # Compute samples per day NOTE: added 20250501
+    samples_per_day = int(24 * 60 / resolution_minutes)
+
+    Delta_P = np.diff(P, axis=0)[(samples_per_day - 1):, :]
+    Delta_V = np.diff(V, axis=0)[(samples_per_day - 1):, :]
+
     V_data = Delta_V
     P_data = Delta_P
 
     average_pc, all_set = correlation_calculation(
         V_data,
         P_data,
-        node_number)
+        node_number,
+        resolution_minutes)  # NOTE: added 20250501
 
     # Generate Connection Results
     # TODO: account for 2 cases: exact xfmr number given

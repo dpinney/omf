@@ -35,15 +35,15 @@ def work(modelDir, inputDict):
 	outData = {}
 
 	## Convert user provided demand and temp data from str to float
-	temperatures = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
+	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
-	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. TODO: contact NREL and ask for it. 
+	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
+	## TODO: contact NREL and ask for it. 
 	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
 	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
-	energy_rate_array = np.asarray([float(value) for value in energy_rate_curve.split('\n') if value.strip()])
+	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
 
 	########################################################################################################################
 	## Run REopt.jl solver
@@ -52,7 +52,7 @@ def work(modelDir, inputDict):
 	## Create REopt input file
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
-	urdbLabel = str(inputDict['urdbLabel'])
+	#urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
 
@@ -63,8 +63,8 @@ def work(modelDir, inputDict):
 			'longitude': longitude
 		},
 		'ElectricTariff': {
-			'urdb_label': urdbLabel,
-			'add_tou_energy_rates_to_urdb_rate': True
+			#'urdb_label': urdbLabel,
+			#'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
@@ -74,6 +74,12 @@ def work(modelDir, inputDict):
 			"analysis_years": projectionLength
 		}
 	}
+
+	## Add either the URDB Label or URDB Response File
+	if inputDict.get('urdbLabelBool') is not None:
+		scenario['ElectricTariff']['urdb_label'] = inputDict['urdbLabel']
+	else:
+		scenario['ElectricTariff']['urdb_response'] = inputDict['residentialRateStructureFile']
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['enableBESS'] == 'Yes':
@@ -99,7 +105,6 @@ def work(modelDir, inputDict):
 	## Add fossil fuel (diesel) generator to input scenario (if enabled)
 	if inputDict['fossilGenerator'] == 'Yes':
 		GENcheck = 'enabled'
-
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']), ## Existing generator
 			'max_kw': 0.0, ## New generator minumum
@@ -158,13 +163,13 @@ def work(modelDir, inputDict):
 		'unitDeviceCost': '', 
 		'unitUpkeepCost':  '', 
 		'demandChargeCost': '0.0',
-		'electricityCost': '0.16',
 		'projectionLength': inputDict['projectionLength'],
 		'discountRate': inputDict['discountRate'],
 		'fileName': inputDict['demandFileName'],
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
-		'tempCurve': inputDict['temperatureCurve'],
+		'tempCurve': '\n'.join(f"{temp:.2f}" for temp in temperatures_degC), ## Convert temperatures_degC into the expected format for vbatDispatch
+		'energyRateCurve': inputDict['energyRateCurve'],
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -229,7 +234,7 @@ def work(modelDir, inputDict):
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	#consumptionCost = float(inputDict['electricityCost'])
+
 	demandCost = 0.0
 	rateCompensation = float(inputDict['rateCompensation'])
 
@@ -387,7 +392,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -447,7 +452,7 @@ def work(modelDir, inputDict):
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
+						y=temperatures_degF,
 						yaxis='y2',
 						#mode='lines',
 						line=dict(color='red',width=1),
@@ -605,8 +610,9 @@ def work(modelDir, inputDict):
 	costs_allyears_array = np.zeros(projectionLength) ## includes all costs for all tech
 	costs_year1_array = np.zeros(12)
 	retrofit_cost_total = 0.
+	monthly_fuel_cost = np.zeros(12)
 
-	if 'Generator' in reoptResults:
+	if GENcheck == 'enabled':
 		## GEN fuel cost
 		gen_annual_fuel_consumption_gal = reoptResults['Generator']['annual_fuel_consumption_gal']
 		gen_fuel_cost = float(inputDict['fuel_cost'])
@@ -614,6 +620,7 @@ def work(modelDir, inputDict):
 		thermal_efficiency = float(inputDict['thermal_efficiency'])/100.
 		monthly_GEN_consumption_total = np.array(monthly_GEN_consumption_total)
 		fuel_type = int(inputDict['fuel_type'])
+
 		if fuel_type == 1: ## Natural Gas
 			## Assume the fuel cost input is given in units of $/cubic foot
 			price_per_cubic_foot = gen_fuel_cost
@@ -627,23 +634,23 @@ def work(modelDir, inputDict):
 			monthly_gas_needed_cubic_ft = monthly_GEN_consumption_total_btu / (btu_per_cubic_ft * thermal_efficiency)
 
 			## Total monthly fuel cost
-			monthly_fuel_cost = monthly_gas_needed_cubic_ft * gen_fuel_cost 
+			monthly_fuel_cost += monthly_gas_needed_cubic_ft * gen_fuel_cost
 			annual_fuel_cost = np.sum(monthly_fuel_cost)
 
 		if fuel_type == 2: ## Propane
 			btu_per_gal = 92000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 3:  # Diesel
 			btu_per_gal = 138000 ## Number chosen from https://portfoliomanager.energystar.gov/pdf/reference/Thermal%20Conversions.pdf
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		if fuel_type == 4: ## Gasoline
 			btu_per_gal = 120214 ## Number chosen from https://www.eia.gov/energyexplained/units-and-calculators/energy-conversion-calculators.php
 			monthly_gallons_used = (monthly_GEN_consumption_total * btu_per_kwh) / (thermal_efficiency * btu_per_gal)
-			monthly_fuel_cost = monthly_gallons_used * gen_fuel_cost
+			monthly_fuel_cost += monthly_gallons_used * gen_fuel_cost
 
 		costs_year1_gen_fuel = gen_fuel_cost * gen_annual_fuel_consumption_gal
 		costs_year1_array += monthly_fuel_cost
@@ -916,19 +923,15 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load_tenX.csv')) as f:
 		demand_curve = f.read()
-	## NOTE: The following temperature curve is for a residence in West Virginia area
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
-	#	temp_curve = f.read()
-	## NOTE: The following temperature curve is for a residence in Denver, CO
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','open-meteo-denverCO-noheaders.csv')) as f:
 		temperature_curve = f.read()
-	## NOTE: Following line commented out because it was used for simulating outages in REopt.
-	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
-	#	criticalLoad_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','TOU_rate_schedule.csv')) as f:
 		energy_rate_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.json')) as jsonFile:
+		residential_rate_curve = json.load(jsonFile)
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -943,10 +946,10 @@ def new(modelDir):
 		#'longitude': '-81.640283', ## Charleston, WV
 		# 'urdbLabel': '5a95a9a45457a36540a199a0', ## Charleston, WV - Appalachian Power Co Residential Time of Day https://apps.openei.org/USURDB/rate/view/5a95a9a45457a36540a199a0#3__Energy
 		#'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Residential Time of Day residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
-		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy		'latitude' : '39.986771', ## Brighton, CO
-		'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be
-		'longitude' : '-104.812599', ## Brighton, CO
+		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
+		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of Use rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
 		'latitude' : '39.969753', ## Brighton, CO
+		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
 		'demandFileName': 'residential_PV_load_tenX.csv',
 		'demandCurve': demand_curve,
@@ -954,6 +957,8 @@ def new(modelDir):
 		'temperatureCurve': temperature_curve,
 		'energyRateFileName': 'TOU_rate_schedule.csv',
 		'energyRateCurve': energy_rate_curve,
+		'residentialRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
+		'residentialRateStructureFile': residential_rate_curve,
 
 		## Financial Inputs
 		'projectionLength': '25',
@@ -1004,7 +1009,7 @@ def new(modelDir):
 		'load_type_ac': '1',
 		'unitDeviceCost_ac': '13', #a cheap wifi-enabled smart outlet to plug the AC into is about $13 (see https://www.lowes.com/pd/Enbrighten-125-Volt-1-Outlet-Indoor-Smart-Plug/1003202046)
 		'unitUpkeepCost_ac': '0', ## NOTE: Input is currently hidden in HTML
-		'power_ac': '5.6',
+		'power_ac': '0.5', ## In-window air unit power
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
 		'cop_ac': '2.5',
