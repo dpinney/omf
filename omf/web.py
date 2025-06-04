@@ -114,7 +114,7 @@ app.secret_key = cryptoRandomString()
 
 def _send_email(recipient, subject, message):
 	with open(os.path.join(_omfDir, 'emailCredentials.key')) as f:
-		key = f.read()
+		key = f.read().strip()
 	c = boto3.client('ses', aws_access_key_id='AKIA34IQDYMM4QKGU3MH', aws_secret_access_key=key, region_name='us-east-1')
 	email_content = {
 		'Source': 'admin@omf.coop',
