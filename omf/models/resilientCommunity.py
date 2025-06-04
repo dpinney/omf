@@ -937,7 +937,8 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 				long = float(ob['longitude'])
 				lat = float(ob['latitude'])
 				if blockgroupDict:
-					if check := coordCheck(long, lat, blockgroupDict):
+					check = coordCheck(long, lat, blockgroupDict)
+					if check:
 						loadsDict[key]['blockgroup'] = check
 						continue
 					else:
