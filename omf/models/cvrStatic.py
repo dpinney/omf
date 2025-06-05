@@ -6,6 +6,7 @@ from os.path import join as pJoin
 
 import matplotlib
 from matplotlib import pyplot as plt
+import numpy as np
 
 # OMF imports
 from omf import feeder
@@ -100,7 +101,7 @@ def work(modelDir, inputDict):
 		if tree[key].get('name','') == regConfName:
 			regConfIndex = key
 	# Set substation regulator to manual operation.
-	baselineTap = int(inputDict.get("baselineTap")) # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
+	baselineTap = float(inputDict.get("baselineTap")) # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
 	tree[regConfIndex] = {
 		'name':tree[regConfIndex]['name'],
 		'object':'regulator_configuration',
@@ -340,7 +341,8 @@ def work(modelDir, inputDict):
 	ticks = list(range(len(d1)))
 	bar_erd = plt.bar(ticks,d1,color='red')
 	bar_lrd = plt.bar(ticks,d2,color='green')
-	bar_prd = plt.bar(ticks,d3,color='blue',yerr=d2)
+	d2_abs = np.abs(d2)
+	bar_prd = plt.bar(ticks,d3,color='blue',yerr=d2_abs)
 	plt.legend([bar_prd[0], bar_lrd[0], bar_erd[0]], ['peakReductionDollars','lossReductionDollars','energyReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
 	   ncol=2, mode="expand", borderaxespad=0.1)
 	plt.xticks([t+0.5 for t in ticks],indices)
