@@ -668,6 +668,6 @@ def add_day(df, weather):
 		'day': predicted_day.day,
 		'hour': i } for i, w in enumerate(weather)]
 	
-	df = df.append(d_24, ignore_index=True)
+	df = pd.concat([df, pd.DataFrame([d_24])], ignore_index=True)
 
 	return df, predicted_day
