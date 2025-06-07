@@ -34,27 +34,56 @@ def work(modelDir, inputDict):
 	outData = {}
 
 	## Convert user provided demand and temperature data from str to float
-	## NOTE: assumes the input temperature curve is in degrees Fahrenheit
+	## NOTE: assumes the input temperature curve is in degrees Fahrenheit. The degrees Celsius conversion is used later for vbatDispatch, which expects deg C. 
 	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
 
-	## Generate hourly array of consumption rates charged by the utility. Hardcoding for now because REopt doesnt have a series to help build this. 
-	## TODO: contact NREL and ask for it. 
-	## TODO: can we query the URDB with the given label and retrieve the needed hourly array of rates?
-	## DEBUG TODO: make this hardcoded array into a dynamic one that actually queries the URDB. Use the URDB API https://openei.org/services/doc/rest/util_rates/?version=3
-	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
+	## Gather input variables to pass to the omf.solvers.reopt_jl model
+	latitude = float(inputDict['latitude'])
+	longitude = float(inputDict['longitude'])
+	year = int(inputDict['year'])
+	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:59', freq='h')
+	projectionLength = int(inputDict['projectionLength'])
+
+	########################################################################################################################################################
+	## Construct the wholesale energy rate structure array
+	## Expects a user-provided JSON file or the default static testFile provided in the OMF
+	########################################################################################################################################################
+
+	try:
+		## Try to normally parse the JSON file
+		response_file = json.loads(inputDict['wholesaleRateStructureFile'])
+	except json.JSONDecodeError:
+		## Convert single quotes to double quotes for proper JSON formatting
+		fixed = inputDict['wholesaleRateStructureFile'].replace("'", '"')
+		response_file = json.loads(fixed)
+	except TypeError:
+		## If the wholesale_rate_curve is already a dictionary, use it directly
+		if isinstance(inputDict['wholesaleRateStructureFile'], dict):
+			response_file = inputDict['wholesaleRateStructureFile']
+
+	energy_weekday_schedule = response_file['energyweekdayschedule']
+	energy_weekend_schedule = response_file['energyweekendschedule']
+
+	## The energy rate structure info contains a nested list of dictionary items with "rate" and "unit"
+	## For example: [[{'rate': 0, 'unit': 'kWh'}][{'rate': 0.06, 'unit': 'kWh'}][{'rate': 0.1525, 'unit': 'kWh'}]]
+	energy_rate_structure = np.array(response_file['energyratestructure'])
+	energy_rate_structure_flattened = [item[0] for item in energy_rate_structure]
+	energy_rates = [rate['rate'] for rate in energy_rate_structure_flattened]
+
+	## Create an array of 8760 elements representing the hourly energy rates for the entire year
+	energy_rate_array = np.zeros(8760)
+	for hour_index, date in enumerate(timestamps):
+		if date.weekday() < 5:  ## Weekdays (Monday=0, Sunday=7) - use the weekday rate schedule
+			energy_rate_array[hour_index] = energy_rates[energy_weekday_schedule[date.month-1][date.hour]]
+		else: ## Weekends - use the weekend rate schedule
+			energy_rate_array[hour_index] = energy_rates[energy_weekend_schedule[date.month-1][date.hour]]
 
 	########################################################################################################################
 	## Run REopt.jl solver
 	########################################################################################################################
 	
-	## Gather input variables to pass to the omf.solvers.reopt_jl model
-	latitude = float(inputDict['latitude'])
-	longitude = float(inputDict['longitude'])
-	year = int(inputDict['year'])
-	projectionLength = int(inputDict['projectionLength'])
-
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
 	scenario = {
 		'Site': {
@@ -63,7 +92,7 @@ def work(modelDir, inputDict):
 		},
 		'ElectricTariff': {
 			#'urdb_label': urdbLabel,
-			#'urdb_response': urdb_response,
+			'urdb_response': response_file, #inputDict['wholesaleRateStructureFile'],
 			#'tou_energy_rates_per_kwh': energy_rate_list,
 			#'add_tou_energy_rates_to_urdb_rate': True
 		},
@@ -75,12 +104,6 @@ def work(modelDir, inputDict):
 			'analysis_years': projectionLength
 		}
 	}
-
-	## Add either the URDB Label or URDB Response File
-	if inputDict.get('urdbLabelBool') is not None:
-		scenario['ElectricTariff']['urdb_label'] = inputDict['urdbLabel']
-	else:
-		scenario['ElectricTariff']['urdb_response'] = inputDict['residentialRateStructureFile']
 
 	## Add fossil fuel generator to input scenario, if enabled
 	if inputDict['fossilGenerator'] == 'Yes' and float(inputDict['number_devices_GEN']) > 0:
@@ -135,14 +158,6 @@ def work(modelDir, inputDict):
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
 
-	## Create timestamp array from REopt input information
-	## TODO: check that this KeyError works
-	try:
-		year = reoptResults['ElectricLoad.year'][0]
-	except KeyError:
-		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
-	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
 	## Check if DER technology is enabled by the user and define relevant variables from REopt
 	if BESScheck == 'enabled':
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -181,8 +196,8 @@ def work(modelDir, inputDict):
 		'fileName': inputDict['fileName'],
 		'tempFileName': inputDict['temperatureFileName'],
 		'demandCurve': inputDict['demandCurve'],
-		'tempCurve': '\n'.join(f"{temp:.2f}" for temp in temperatures_degC), ## Convert temperatures_degC into the expected format for vbatDispatch
-		'energyRateCurve': inputDict['energyRateCurve'],
+		'tempCurve': '\n'.join(f"{temperature:.2f}" for temperature in temperatures_degC), ## Convert temperatures_degC into the expected format for vbatDispatch
+		'energyRateCurve': '\n'.join(f"{rate:.2f}" for rate in energy_rate_array), ## Convert energy_rate_array into the expected format for vbatDispatch
 	}
 	
 	## Define thermal variables that change depending on the thermal technology(ies) enabled by the user
@@ -1004,10 +1019,8 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
 		temperature_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TOU_rate_schedule.csv')) as f:
-		energy_rate_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.json')) as jsonFile:
-		residential_rate_curve = json.load(jsonFile)
+		wholesale_rate_curve = json.load(jsonFile)
 	#responseFilename = 'TODrate66a13566e90ecdb7d40581d2.json' ## TOD rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
 	#responseFilename = 'TOUrate5b311c595457a3496d8367be.json' ## TOU rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
 
@@ -1019,11 +1032,6 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
-		'urdbLabelBool': 'False',
-		#'urdbLabel': '539fb4beec4f024bc1dbecdd', ## Alaska Electric Light&Power Co, General Residential rate https://apps.openei.org/USURDB/rate/view/539fb4beec4f024bc1dbecdd#3__Energy
-		'urdbLabel' : '66a13566e90ecdb7d40581d2', # Brighton, CO Time of DAY rate residential rate https://apps.openei.org/USURDB/rate/view/66a13566e90ecdb7d40581d2#3__Energy
-		#'urdbLabel' : '612ff9c15457a3ec18a5f7d3', # Brighton, CO standard residential rate https://apps.openei.org/USURDB/rate/view/612ff9c15457a3ec18a5f7d3#3__Energy
-		#'urdbLabel' : '5b311c595457a3496d8367be', # Brighton, CO Residential Time of USE rate https://apps.openei.org/USURDB/rate/view/5b311c595457a3496d8367be#3__Energy
 		'latitude' : '39.969753', ## Brighton, CO
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
@@ -1031,19 +1039,17 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'temperatureFileName': 'open-meteo-denverCO-noheaders.csv',
 		'temperatureCurve': temperature_curve,
-		'energyRateFileName': 'TOU_rate_schedule.csv',
-		'energyRateCurve': energy_rate_curve,
-		'residentialRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
-		'residentialRateStructureFile': residential_rate_curve,
+		'wholesaleRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
+		'wholesaleRateStructureFile': wholesale_rate_curve,
 
 		## Fossil Fuel Generator Inputs
 		## Modeled after Generac 20 kW diesel model with max tank of 95 gallons
 		'fossilGenerator': 'Yes',
 		'number_devices_GEN': '5',
-		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
+		'existing_gen_kw': '20',
 		'fuel_type': '3', 
 		'fuel_avail': '95', 
-		'fuel_cost': '3.49', ## Number is based on fuel cost of diesel
+		'fuel_cost': '3.49', ## $3.49 is based on fuel cost of diesel fuel in March 2025
 
 		## Chemical Battery Inputs
 		## Modeled after residential Tesla Powerwall 3 battery specs
@@ -1071,7 +1077,7 @@ def new(modelDir):
 		'operationalCosts_ongoing': '1000.0',
 		'operationalCosts_onetime': '20000.0',
 
-		## Home Air Conditioner inputs (vbatDispatch):
+		## Home Air Conditioner inputs (for vbatDispatch):
 		'load_type_ac': '1', 
 		'number_devices_ac': '33000',
 		'power_ac': '5.6',
@@ -1081,7 +1087,7 @@ def new(modelDir):
 		'setpoint_ac': '22.5',
 		'deadband_ac': '0.625',
 
-		## Home Heat Pump inputs (vbatDispatch):
+		## Home Heat Pump inputs (for vbatDispatch):
 		'load_type_hp': '2', 
 		'number_devices_hp': '16500',
 		'power_hp': '5.6',
@@ -1091,7 +1097,7 @@ def new(modelDir):
 		'setpoint_hp': '19.5',
 		'deadband_hp': '0.625',
 
-		## Home Water Heater inputs (vbatDispatch):
+		## Home Water Heater inputs (for vbatDispatch):
 		'load_type_wh': '4', 
 		'number_devices_wh': '33000',
 		'power_wh': '4.5',
