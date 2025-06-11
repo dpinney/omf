@@ -1070,7 +1070,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			date[day].append(datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
 			row += 1
 		# convert array of durations into jagged numpy object
-		jaggedData = np.array(date)
+		jaggedData = np.array(date, dtype=object)
 		# get lengths of each row of data
 		lens = np.array([len(i) for i in jaggedData])
 		# mask of valid places in each row to fill with zeros
