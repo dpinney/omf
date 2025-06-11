@@ -63,22 +63,7 @@ def work(modelDir, inputDict):
 		if isinstance(inputDict['wholesaleRateStructureFile'], dict):
 			response_file = inputDict['wholesaleRateStructureFile']
 
-	energy_weekday_schedule = response_file['energyweekdayschedule']
-	energy_weekend_schedule = response_file['energyweekendschedule']
-
-	## The energy rate structure info contains a nested list of dictionary items with "rate" and "unit"
-	## For example: [[{'rate': 0, 'unit': 'kWh'}][{'rate': 0.06, 'unit': 'kWh'}][{'rate': 0.1525, 'unit': 'kWh'}]]
-	energy_rate_structure = np.array(response_file['energyratestructure'])
-	energy_rate_structure_flattened = [item[0] for item in energy_rate_structure]
-	energy_rates = [rate['rate'] for rate in energy_rate_structure_flattened]
-
-	## Create an array of 8760 elements representing the hourly energy rates for the entire year
-	energy_rate_array = np.zeros(8760)
-	for hour_index, date in enumerate(timestamps):
-		if date.weekday() < 5:  ## Weekdays (Monday=0, Sunday=7) - use the weekday rate schedule
-			energy_rate_array[hour_index] = energy_rates[energy_weekday_schedule[date.month-1][date.hour]]
-		else: ## Weekends - use the weekend rate schedule
-			energy_rate_array[hour_index] = energy_rates[energy_weekend_schedule[date.month-1][date.hour]]
+	energy_rate_array = derConsumer.construct_energy_rate_array(response_file, timestamps)
 
 	########################################################################################################################
 	## Run REopt.jl solver
