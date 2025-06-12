@@ -1142,7 +1142,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	outputPath = pJoin(modelDir,'output.json')
 	eventsPath = pJoin(modelDir,eventsFilename)
 
-	PowerModelsONM.build_settings_file(
+	PowerModelsONM._build_settings_file_toBeTested(
 		circuitPath = circuitPath,
 		settingsPath = settingsPath, 
 		loadPrioritiesFile = lpFile, 
@@ -1159,7 +1159,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	if os.path.exists(outputPath):
 		os.remove(outputPath)
 
-	PowerModelsONM.run_onm(
+	PowerModelsONM._run_onm_toBeTested(
 		circuitPath = circuitPath,
 		settingsPath = settingsPath,
 		outputPath = outputPath,

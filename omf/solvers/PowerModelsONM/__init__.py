@@ -1,3 +1,5 @@
+import subprocess
+import tempfile
 import os, platform, json, time
 from pathlib import Path
 from os.path import join as pJoin
@@ -35,6 +37,19 @@ def run_julia_script(juliaStr : str, cleanFileFormatting = True):
 		raise Exception("Operating System is not Darwin, Linux, or Windows")
 	print(f'Saving script to {juliaFileLocation}:\n{juliaStr}')
 	runCommands([cmdString,delCommand])
+
+def _run_julia_script_toBeTested(juliaStr : str, cleanFileFormatting = True):
+	''' Creates a Julia File containing the script in juliaStr, cleans up file location formatting (optional), runs it from the command line, then deletes it.
+		Leads to far fewer permissions and formatting issues than running a julia script directly in a commandline command
+	'''
+	if cleanFileFormatting:
+		juliaStr = juliaStr.replace('\\','/')
+	with tempfile.TemporaryDirectory() as tempDir:
+		juliaFileLocation = pJoin(tempDir, 'temp_julia_script.jl')
+		print(f'Saving script to {juliaFileLocation}:\n{juliaStr}')
+		with open(juliaFileLocation, 'w') as juliaFile:
+			juliaFile.write(juliaStr)
+		subprocess.run(['julia', juliaFileLocation])
 	
 def install_onm(target : list = platform.system()):
 	''' WARNING, WIP. TODO: Linux support, license check, tests. '''
@@ -151,6 +166,69 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		)'''
 	run_julia_script(juliaFileContents)
 
+def _build_settings_file_toBeTested(circuitPath='circuit.dss',settingsPath='settings.json', loadPrioritiesFile='', microgridTaggingFile='', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+	#Check for load priorities input
+	if loadPrioritiesFile: 
+		with open(loadPrioritiesFile) as loadPrioritiesJson:
+			loadPriorities = json.load(loadPrioritiesJson)
+		prioritiesFormatted = ''
+		for load in loadPriorities:
+			prioritiesFormatted += f'''
+				"{load}" => Dict{{String,Any}}(
+					"priority" => {loadPriorities[load]},
+				),'''
+		priorityDictBuilder = f'''
+			"load" => Dict{{String,Any}}(
+				{prioritiesFormatted}
+			),'''
+	else:
+		loadPriorities = ''
+		priorityDictBuilder = ''
+
+	#Check for microgrid tagging input
+	if microgridTaggingFile: 
+		with open(microgridTaggingFile) as microgridTaggingJson:
+			microgridTags = json.load(microgridTaggingJson)
+		mgTaggingFormatted = ''
+		for bus in microgridTags:
+			mgTaggingFormatted += f'''
+				"{bus}" => Dict{{String,Any}}(
+					"microgrid_id" => "{microgridTags[bus]}",
+				),'''
+		mgTaggingDictBuilder = f'''
+			"bus" => Dict{{String,Any}}(
+				{mgTaggingFormatted}
+			),'''
+	else:
+		microgridTags = ''
+		mgTaggingDictBuilder = ''
+
+	if loadPrioritiesFile or microgridTaggingFile:
+		#Create the custom settings dict builder and custom settings parameter call
+		settingsHead = f'''custom_settings = Dict{{String,Any}}('''
+		settingsEnd = f'''
+			);'''
+		customSettingsDictBuilder = settingsHead + priorityDictBuilder + mgTaggingDictBuilder + settingsEnd
+		customSettingsSwitch = f'custom_settings=custom_settings,'
+	else:
+		customSettingsDictBuilder = ''
+		customSettingsSwitch = ''
+
+	juliaFileContents = f'''using PowerModelsONM;
+		{customSettingsDictBuilder}
+		build_settings_file(
+			"{circuitPath}",
+			"{settingsPath}",
+			{customSettingsSwitch}
+			max_switch_actions={max_switch_actions}, #actions per time step. should always be 1, could be 2 or 3.
+			vm_lb_pu={vm_lb_pu}, # min voltage allowed in per-unit
+			vm_ub_pu={vm_ub_pu}, # max voltage allowed in per-unit
+			sbase_default={sbase_default}, # between 1k and 100k
+			line_limit_mult={line_limit_mult},
+			vad_deg={vad_deg}
+		)'''
+	_run_julia_script_toBeTested(juliaFileContents)
+
 def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custom_events='', default_switch_state='PMD.OPEN', default_switch_dispatchable='PMD.NO', default_switch_status='PMD.ENABLED'):
 	# For now, custom_events follows the already established schema in Julia Vector or Dicts format
 	if custom_events: 
@@ -202,6 +280,32 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 		); 
 		entrypoint(args); '''
 	run_julia_script(juliaFileContents)
+
+def _run_onm_toBeTested(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", faultsPath='', gurobi='false', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
+	#TODO: allow arguments to function for the ones hardcoded!
+	juliaFileContents = f'''using PowerModelsONM; 
+		args = Dict{{String,Any}}( 
+			"network"=>"{circuitPath}", 
+			"settings"=>"{settingsPath}", 
+			"events"=>"{eventsPath}", 
+			"faults"=>"{faultsPath}", 
+			"output"=>"{outputPath}", 
+			"verbose"=>{verbose}, 
+			"skip"=>{skipList}, 
+			"fix-small-numbers"=>{fixSmallNumbers}, 
+			"apply-switch-scores" => {applySwitchScores}, 
+			"pretty-print" => {prettyPrint}, 
+			"gurobi" => false, 
+			"opt-switch-formulation" => "{optSwitchFormulation}", 
+			"opt-switch-solver" => "{optSwitchSolver}", 
+			"opt-switch-algorithm" => "{optSwitchAlgorithm}", 
+			"opt-switch-problem" => "{optSwitchProblem}", 
+			"opt-disp-formulation" => "{optDispFormulation}", 
+			"opt-disp-solver" => "{optDispSolver}", 
+			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast 
+		); 
+		entrypoint(args); '''
+	_run_julia_script_toBeTested(juliaFileContents)
 
 if __name__ == '__main__':
 	# Basic Tests
