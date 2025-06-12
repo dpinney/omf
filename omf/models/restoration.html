@@ -276,180 +276,180 @@
 		</div>
 		<div id="mapInsert" style="width: 1000px; margin-left: auto; margin-right: auto;"></div>
 		<script type="text/javascript">
-		//Hack to stop leaflet from loading before geojson data loads 
-		if(modelStatus === "finished"){
-		mapHtml = '<div id="map"></div>';
-		gebi('mapInsert').innerHTML = mapHtml;
-		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
-		var geojson = JSON.parse(allOutputData['geoDict']);
-		console.log(geojson);
+			//Hack to stop leaflet from loading before geojson data loads 
+			if(modelStatus === "finished"){
+			mapHtml = '<div id="map"></div>';
+			gebi('mapInsert').innerHTML = mapHtml;
+			//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
+			var geojson = JSON.parse(allOutputData['geoDict']);
+			console.log(geojson);
 
-		function onEachFeature(feature, layer) {
-			var popup = '';
-			if (feature.properties['popupContent']) {
-				//popup += feature.properties['name']
-				popup += feature.properties['popupContent'];
-				layer.bindPopup(popup);
+			function onEachFeature(feature, layer) {
+				var popup = '';
+				if (feature.properties['popupContent']) {
+					//popup += feature.properties['name']
+					popup += feature.properties['popupContent'];
+					layer.bindPopup(popup);
+				}
 			}
-		}
 
-		function pointToLayerNode(feature, latlng) {
-			let fillColorValue = 'gray';
-			let rad = 3;
-			return L.circleMarker(latlng, {
-				radius: rad,
-				fillColor: fillColorValue,
-				color: "#000",
-				weight: 1,
-				opacity: 1,
-				fillOpacity: 1,//0.8
-			});
-		}
-
-		function pointToEvent(feature, latlng) {
-			if (feature.properties['pointColor']){
-				let fillColorValue = feature.properties['pointColor'];
-				let rad = 6;
-			
+			function pointToLayerNode(feature, latlng) {
+				let fillColorValue = 'gray';
+				let rad = 3;
 				return L.circleMarker(latlng, {
 					radius: rad,
 					fillColor: fillColorValue,
 					color: "#000",
 					weight: 1,
 					opacity: 1,
-					fillOpacity: 1,//0.8,
-					time: feature.properties['time'],
-					tempFillColor: fillColorValue
+					fillOpacity: 1,//0.8
 				});
 			}
-		}
 
-		function lineStyle(feature){
-			if (feature.geometry['type'] == 'LineString'){
-				if (feature.properties.edgeColor){
-					return {
-						"color": feature.properties.edgeColor,
-						"time": feature.properties.time,
-						"colorTemp": feature.properties.edgeColor
+			function pointToEvent(feature, latlng) {
+				if (feature.properties['pointColor']){
+					let fillColorValue = feature.properties['pointColor'];
+					let rad = 6;
+				
+					return L.circleMarker(latlng, {
+						radius: rad,
+						fillColor: fillColorValue,
+						color: "#000",
+						weight: 1,
+						opacity: 1,
+						fillOpacity: 1,//0.8,
+						time: feature.properties['time'],
+						tempFillColor: fillColorValue
+					});
+				}
+			}
+
+			function lineStyle(feature){
+				if (feature.geometry['type'] == 'LineString'){
+					if (feature.properties.edgeColor){
+						return {
+							"color": feature.properties.edgeColor,
+							"time": feature.properties.time,
+							"colorTemp": feature.properties.edgeColor
+						}
+					}
+					else{
+						return {
+							"color": "black"
+						}
 					}
 				}
-				else{
+				else if (feature.geometry['type'] == 'Polygon'){
 					return {
-						"color": "black"
+						"color": "blue"
 					}
 				}
 			}
-			else if (feature.geometry['type'] == 'Polygon'){
-				return {
-					"color": "blue"
-				}
-			}
-		}
 
-		geojsonLayer = L.geoJSON(false, {
-					pointToLayer: pointToLayerNode,
-					onEachFeature: onEachFeature,
-				});
-		eventLayer = L.geoJSON(false, {
-					pointToLayer:
-						pointToEvent,
-					onEachFeature:
-						onEachFeature,
-					style: lineStyle
-				});
-
-		geojson.features.forEach(function(feature){
-			if (feature.geometry['type'] == 'Point'){
-				geojsonLayer.addData(feature);
-				eventLayer.addData(
-					feature);
-			}
-			else if (feature.geometry['type'] == 'LineString'){
-				eventLayer.addData(
-					feature);
-			}
-			else if (feature.geometry['type'] == 'Polygon'){
-				geojsonLayer.addData(feature);
-			}
-
-		});
-
-		var bounds = geojsonLayer.getBounds();
-		// var map = L.map('map').fitBounds(bounds);
-		var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
-		
-		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-		L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; ' + mapLink + ' Contributors',
-			maxZoom: 18,
-			}).addTo(map);
-		L.control.scale().addTo(map);
-		geojsonLayer.addTo(map);
-		eventLayer.addTo(map);
-		
-		var stepSizeVal = parseFloat(allOutputData['stepSize']) //This should be the value of the stepsize
-		var startTimeVal = parseFloat(allOutputData['startTime'])
-		var endTimeVal = parseFloat(allOutputData['endTime']) //This should be the value of the runtime
-		document.getElementById('input-number-min').setAttribute("min", 0);
-		document.getElementById('input-number-min').setAttribute("max", endTimeVal-stepSizeVal);
-		document.getElementById('input-number-max').setAttribute("min", startTimeVal);
-		document.getElementById('input-number-max').setAttribute("max", endTimeVal);
-		// var runtimeVal = allInputData.runTime
-		var numSteps = ((endTimeVal-startTimeVal)/stepSizeVal)+1
-		var slidervar = document.getElementById('slider');
-		noUiSlider.create(slidervar, {
-			connect: true,
-			step: stepSizeVal,
-			start: [ 0, endTimeVal ],
-			range: {
-				min: 0,
-				max: endTimeVal
-			}
-		});
-		// document.getElementById('input-number-min').setAttribute("value", 1);
-		// document.getElementById('input-number-max').setAttribute("value", 24);
-		document.getElementById('input-number-min').setAttribute("value", 0);
-		document.getElementById('input-number-max').setAttribute("value", endTimeVal);
-
-		var inputNumberMin = document.getElementById('input-number-min');
-		var inputNumberMax = document.getElementById('input-number-max');
-		inputNumberMin.addEventListener('change', function(){
-			slidervar.noUiSlider.set([this.value, null]);
-		});
-		inputNumberMax.addEventListener('change', function(){
-			slidervar.noUiSlider.set([null, this.value]);
-		});
-
-		slidervar.noUiSlider.on('update', function( values, handle ) {
-			//handle = 0 if min-slider is moved and handle = 1 if max slider is moved
-			if (handle==0){
-				document.getElementById('input-number-min').value = values[0];
-			} else {
-				document.getElementById('input-number-max').value =  values[1];
-			}
-			rangeMin = document.getElementById('input-number-min').value;
-			rangeMax = document.getElementById('input-number-max').value;
-			eventLayer.eachLayer(function(layer){
-				if (((parseInt(layer.options.time) <= rangeMax) && (parseInt(layer.options.time) >= rangeMin)) || layer.options.colorTemp == 'red'){
-					layer.setStyle({
-						radius: 6,
-						fillColor: layer.options.tempFillColor,
-						"color": layer.options.colorTemp
+			geojsonLayer = L.geoJSON(false, {
+						pointToLayer: pointToLayerNode,
+						onEachFeature: onEachFeature,
 					});
-					layer.bringToFront()
-				}
-				else{
-					layer.setStyle({
-						radius: 1,
-						fillColor: 'black',
-						"color": 'black'
+			eventLayer = L.geoJSON(false, {
+						pointToLayer:
+							pointToEvent,
+						onEachFeature:
+							onEachFeature,
+						style: lineStyle
 					});
-					layer.bringToBack()
+
+			geojson.features.forEach(function(feature){
+				if (feature.geometry['type'] == 'Point'){
+					geojsonLayer.addData(feature);
+					eventLayer.addData(
+						feature);
+				}
+				else if (feature.geometry['type'] == 'LineString'){
+					eventLayer.addData(
+						feature);
+				}
+				else if (feature.geometry['type'] == 'Polygon'){
+					geojsonLayer.addData(feature);
+				}
+
+			});
+
+			var bounds = geojsonLayer.getBounds();
+			// var map = L.map('map').fitBounds(bounds);
+			var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
+			
+			mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+			L.tileLayer(
+				'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 18,
+				}).addTo(map);
+			L.control.scale().addTo(map);
+			geojsonLayer.addTo(map);
+			eventLayer.addTo(map);
+			
+			var stepSizeVal = parseFloat(allOutputData['stepSize']) //This should be the value of the stepsize
+			var startTimeVal = parseFloat(allOutputData['startTime'])
+			var endTimeVal = parseFloat(allOutputData['endTime']) //This should be the value of the runtime
+			document.getElementById('input-number-min').setAttribute("min", 0);
+			document.getElementById('input-number-min').setAttribute("max", endTimeVal-stepSizeVal);
+			document.getElementById('input-number-max').setAttribute("min", startTimeVal);
+			document.getElementById('input-number-max').setAttribute("max", endTimeVal);
+			// var runtimeVal = allInputData.runTime
+			var numSteps = ((endTimeVal-startTimeVal)/stepSizeVal)+1
+			var slidervar = document.getElementById('slider');
+			noUiSlider.create(slidervar, {
+				connect: true,
+				step: stepSizeVal,
+				start: [ 0, endTimeVal ],
+				range: {
+					min: 0,
+					max: endTimeVal
 				}
 			});
-		})
-	}
+			// document.getElementById('input-number-min').setAttribute("value", 1);
+			// document.getElementById('input-number-max').setAttribute("value", 24);
+			document.getElementById('input-number-min').setAttribute("value", 0);
+			document.getElementById('input-number-max').setAttribute("value", endTimeVal);
+
+			var inputNumberMin = document.getElementById('input-number-min');
+			var inputNumberMax = document.getElementById('input-number-max');
+			inputNumberMin.addEventListener('change', function(){
+				slidervar.noUiSlider.set([this.value, null]);
+			});
+			inputNumberMax.addEventListener('change', function(){
+				slidervar.noUiSlider.set([null, this.value]);
+			});
+
+			slidervar.noUiSlider.on('update', function( values, handle ) {
+				//handle = 0 if min-slider is moved and handle = 1 if max slider is moved
+				if (handle==0){
+					document.getElementById('input-number-min').value = values[0];
+				} else {
+					document.getElementById('input-number-max').value =  values[1];
+				}
+				rangeMin = document.getElementById('input-number-min').value;
+				rangeMax = document.getElementById('input-number-max').value;
+				eventLayer.eachLayer(function(layer){
+					if (((parseInt(layer.options.time) <= rangeMax) && (parseInt(layer.options.time) >= rangeMin)) || layer.options.colorTemp == 'red'){
+						layer.setStyle({
+							radius: 6,
+							fillColor: layer.options.tempFillColor,
+							"color": layer.options.colorTemp
+						});
+						layer.bringToFront()
+					}
+					else{
+						layer.setStyle({
+							radius: 1,
+							fillColor: 'black',
+							"color": 'black'
+						});
+						layer.bringToBack()
+					}
+				});
+			})
+		}
 	</script>
 	{{ rawOutputFiles }}
 	</div>
