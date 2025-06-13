@@ -1015,7 +1015,7 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 
 def applyCnxns(tree):
 	'''Gathers and applies connection information to dss lines and buses.'''
-	relevantObjs = ['capacitor','line','transformer','load','reactor','monitor','energymeter','generator','pvsystem','vsource','relay','fuse']
+	relevantObjs = ['capacitor','line','transformer','load','reactor','monitor','energymeter','generator','pvsystem', 'storage', 'vsource','relay','fuse']
 	# make a mapping between an object's name and its index in tree
 	name2key = {v.get('bus', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='setbusxy'}
 	name2key.update({v.get('object', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='new'})
