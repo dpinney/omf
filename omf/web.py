@@ -113,9 +113,9 @@ app.secret_key = cryptoRandomString()
 
 
 def _send_email(recipient, subject, message):
-	with open('emailCredentials.key') as f:
-		key = f.read()
-	c = boto3.client('ses', aws_access_key_id='AKIAJLART4NXGCNFEJIQ', aws_secret_access_key=key, region_name='us-east-1')
+	with open(os.path.join(_omfDir, 'emailCredentials.key')) as f:
+		key = f.read().strip()
+	c = boto3.client('ses', aws_access_key_id='AKIA34IQDYMM4QKGU3MH', aws_secret_access_key=key, region_name='us-east-1')
 	email_content = {
 		'Source': 'admin@omf.coop',
 		'Destination': {'ToAddresses': [recipient]},
@@ -125,7 +125,6 @@ def _send_email(recipient, subject, message):
 		}
 	}
 	c.send_email(**email_content)
-
 
 def send_link(email, message, u=None):
 	'''Send message to email using Amazon SES.'''

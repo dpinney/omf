@@ -53,4 +53,5 @@ from omf.models import derConsumer
 from omf.models import derUtilityCost
 from omf.models import wildfireAnticipation
 from omf.models import evRange
+from omf.models import hostingExpansion
 #from omf.models import microgridPlan

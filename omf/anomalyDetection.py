@@ -8,13 +8,15 @@ from omf.forecast import suppress_stdout_stderr
 
 def train_prophet(df, modelDir, confidence=0.99):
 	# train and cache into modelDir
-	from fbprophet import Prophet
+	try:
+		from fbprophet import Prophet # type: ignore
+	except ImportError:
+		from prophet import Prophet
 	m = Prophet(
 		yearly_seasonality=True, daily_seasonality=True, interval_width=confidence
 	)
 	with suppress_stdout_stderr():
 		m.fit(df)
-
 		# Predict the future.
 	print("PREDICTING!")
 	future = m.make_future_dataframe(periods=0)
@@ -26,7 +28,6 @@ def train_prophet(df, modelDir, confidence=0.99):
 		pJoin(modelDir, "forecasted_{}.csv".format(confidence)), index=False
 	)
 	return forecast
-
 
 def prophet(df, modelDir, confidence=0.99, cached=""):
 	# load cached df if exists, or call train_prophet
@@ -42,11 +43,9 @@ def prophet(df, modelDir, confidence=0.99, cached=""):
 	)
 	return forecast
 
-
 def elliptic_envelope(df, modelDir, norm_confidence=0.95):
 	from sklearn.covariance import EllipticEnvelope
 	from scipy.stats import normaltest
-
 	if "ds" in df.columns:
 		del df["ds"]
 	model = EllipticEnvelope()
@@ -59,31 +58,26 @@ def elliptic_envelope(df, modelDir, norm_confidence=0.95):
 	df.outlier = df.outlier < 0  # 1 if inlier, -1 if outlier
 	return df
 
-
 def t_test(df, modelDir, start_date, confidence=0.99, model="neuralNet"):
 	"""Is given a dataframe of demand, temp, and dates (in that order)"""
 	from scipy.stats import t
 	df = df.copy()
-
 	if model == "neuralNet":
 		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
 		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values
 		pred, acc = omf.forecast.neural_net_predictions(all_X, actual)
-
 	if model == "nextDayPeakKatrina":
 		ppt, pred, act_time, actual = omf.forecast.nextDayPeakKatrinaForecast(
 			df.values, start_date, modelDir, {}, returnActuals=True
 		)
-
 	diff = [p - a for p, a in zip(pred, actual[-8760:])]
 	diff = np.asarray(diff)
 	alpha = 1 - confidence
 	twosigma = -1 * t.ppf(alpha / 2, len(diff)) * np.std(diff)
 	diff = np.abs(diff)
 	diff = diff > twosigma
-
 	if model == "neuralNet":
 		return diff, actual[-8760:], pred, pred - twosigma, pred + twosigma
 	if model == "nextDayPeakKatrina":
@@ -92,24 +86,20 @@ def t_test(df, modelDir, start_date, confidence=0.99, model="neuralNet"):
 def percent_error(df, modelDir, start_date, p_error=0.05, model="neuralNet"):
 	"""Is given a dataframe of demand, temp, and dates (in that order)"""
 	df = df.copy()
-
 	if model == "neuralNet":
 		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
 		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values
 		pred, acc = omf.forecast.neural_net_predictions(all_X, actual)
-
 	if model == "nextDayPeakKatrina":
 		ppt, pred, act_time, actual = omf.forecast.nextDayPeakKatrinaForecast(
 			df.values, start_date, modelDir, {}, returnActuals=True
 		)
-
 	diff = [(p - a)/a for p, a in zip(pred, actual[-8760:])]
 	diff = np.asarray(diff)
 	diff = np.abs(diff)
 	diff = diff > p_error
-
 	if model == "neuralNet":
 		lower = (1/p_error) / (1/p_error + 1)
 		lower = [lower * p for p in pred]
