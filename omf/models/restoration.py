@@ -22,6 +22,7 @@ from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
 from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
 from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
 from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
+from omf.solvers.opendss.__init__ import reduceCircuit
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -1137,7 +1138,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	# Define file paths for use in function
 	lpFile = loadPriorityFile if loadPriorityFile != None else ''
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
-	circuitPath = pJoin(modelDir,'circuit_clean.dss')
+	circuitPath = pJoin(modelDir,'circuit_simplified.dss')
 	settingsPath = pJoin(modelDir,'settings.json')
 	outputPath = pJoin(modelDir,'output.json')
 	eventsPath = pJoin(modelDir,eventsFilename)
@@ -1559,7 +1560,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssToTree(f'{modelDir}/circuit_clean.dss')
+	dssTree = dssToTree(pJoin(modelDir,'circuit_simplified.dss'))
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -1825,6 +1826,82 @@ def copyInputFilesToModelDir(modelDir, inputDict):
 	
 	return pathToLocalFile
 
+def simplifyFeeder(inDss, outDss, maxBessCharge=True):
+	''' Simplifies a feeder to put less strain on simulations in which it is used. 
+	
+		Removes fuses and optionally sets kwhstored to the value of kwhrated.
+		Passes the feeder through feeder reduction code containing mergeContigLines(), rollUpTriplex(), and rollUpLoadTransformer().
+		Cleans the formatting of the reduced feeder with dss_to_clean_via_save() and then strips out tcc_curves, spectrum, growthshape, and default objects + calcv related things that were addded by the cleaning function.
+
+		Args:
+			inDss: The file path of the dss to be simplified
+			outDss: The desired file path of the resulting simplified dss
+			maxBessCharge: If True, each BESS will be defined as fully charged by setting the value of kwhstored to the value of kwhrated.
+	'''
+	with tempfile.TemporaryDirectory() as tempDir:
+		# remove fuses & set kwhstored equal to kwhrated
+		with open(inDss, 'r') as infile:
+			inputLines = infile.readlines()
+			outStr = ''
+			for line in inputLines:
+				line = line.lower()
+				if 'object=fuse.' not in line:
+					if 'kwhstored' in line and 'kwhrated' in line and maxBessCharge:
+						itemDict = {}
+						for item in line.split(' '):
+							try:
+								k,v = item.split('=')
+								itemDict[k] = v
+							except:
+								continue
+						toReplace = 'kwhstored='+itemDict['kwhstored']
+						replaceWith = 'kwhstored='+itemDict['kwhrated']
+						outStr += line.replace(toReplace,replaceWith)
+					else:
+						outStr += line
+		with open(pJoin(tempDir,'rm_fuses_max_storage.dss'),'w') as outfile:
+			outfile.write(outStr)		
+		print('Removed fuses and set kwhstored to kwhrated')
+		# reduce feeder size
+		tree = dssToTree(pJoin(tempDir,'rm_fuses_max_storage.dss'))
+		oldsz = len(tree)
+		tree = reduceCircuit(tree)
+		newsz = len(tree)
+		cutsz = oldsz-newsz
+		treeToDss(tree, pJoin(tempDir,'rm_fuses_max_storage_resized.dss'))
+		print(f'Performed feeder reduction, reducing the size of the feeder by {cutsz} objects (oldsz={oldsz}, newsz={newsz})')
+		# clean file
+		srcDss = pJoin(tempDir,'rm_fuses_max_storage_resized.dss')
+		cleanDss = pJoin(tempDir,'rm_fuses_max_storage_resized_clean.dss')
+		dss_to_clean_via_save(srcDss, cleanDss)
+		print('Cleaned file formatting')
+		# strip out tcc_curves, spectrum, growthshape, and default objects + calcv related things that were addded by cleaning function
+		with open(cleanDss, 'r') as infile:
+			inputLines = infile.readlines()
+			outStr = ''
+			removalFlags = ['tcc_curve',
+							'object=tcc_curve', 
+							'spectrum.dss',
+							'object=spectrum',
+							'growthshape.dss',
+							'object=growthshape',
+							'default',
+							'voltagebases',
+							'calcv',
+							'solve',
+							'show']
+			for line in inputLines:
+				keepLine = True
+				for flag in removalFlags:
+					if flag in line.lower():
+						keepLine = False
+						break
+				if keepLine:
+					outStr += line
+		print('Removed extra elements added by file cleaner function (defaults, tcc curves, spectrum, growthshapes, voltagebases, calcv, solve, show)')
+	with open(outDss,'w') as outfile:
+		outfile.write(outStr)
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -1837,12 +1914,8 @@ def work(modelDir, inputDict):
 
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = evilGldTreeToDssTree(tree)
-	treeToDss(niceDss, f'{modelDir}/circuit.dss')
-	# treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
-	dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
-	
-	# dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
-	# omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
+	treeToDss(niceDss, pJoin(modelDir,'circuit.dss'))
+	simplifyFeeder(pJoin(modelDir,'circuit.dss'),pJoin(modelDir,'circuit_simplified.dss'))
 
 	omdFilePath = f'{modelDir}/{feederName}.omd'
 	
