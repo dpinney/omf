@@ -17,7 +17,6 @@ from numpy_financial import npv
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import vbatDispatch as vb
-#from omf.models import derConsumer
 from omf.solvers import reopt_jl
 
 ## Model metadata:
