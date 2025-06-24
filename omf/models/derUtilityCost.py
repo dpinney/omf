@@ -66,7 +66,6 @@ def construct_tariff_arrays(response_file, timestamps):
 
 '''
 
-
 def construct_energy_rate_array(response_file, timestamps):
 	'''
 	Constructs an array of hourly energy rates for an entire year (length 8760) based on the provided response file's weekday and weekend rate schedule information.
@@ -108,12 +107,28 @@ def work(modelDir, inputDict):
 	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
+	
+	## Check if the demand and temperature curves are the correct length
+	if len(demand) != 8760:
+		raise ValueError(f"Demand curve must have exactly 8760 elements, but got {len(demand)}.")
+	if len(temperatures_degF) != 8760:
+		raise ValueError(f"Temperature curve must have exactly 8760 elements, but got {len(temperatures_degF)}.")
 
 	## Gather input variables to pass to the omf.solvers.reopt_jl model
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	year = int(inputDict['year'])
+	#start_time = str(inputDict['start_time'])
+	#end_time = str(inputDict['end_time'])
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:59', freq='h')
+	
+	## NOTE: the following couple lines are hard-coded temporarily to account for Kenergy's timestamp data being offset
+	#start_time = '2024-5-1'
+	#end_time = '2025-4-30 23:59'
+	#timestamps = pd.date_range(start=start_time, end=end_time, freq='h')
+
+	if len(timestamps) != 8760:
+		raise ValueError(f"The start time and end time must define a full year of hourly incremements (8760 elements). Instead, got {len(timestamps)} elements.")
 	projectionLength = int(inputDict['projectionLength'])
 
 	########################################################################################################################################################
@@ -856,8 +871,6 @@ def work(modelDir, inputDict):
 	GEN_peakDemand_savings_monthly = GEN_demand_at_baseP_cost*F_val
 	allDevices_peakDemand_savings_monthly = [a+b+c for a,b,c in zip(BESS_peakDemand_savings_monthly,TESS_peakDemand_savings_monthly,GEN_peakDemand_savings_monthly)]
 	allDevices_peakDemand_savings_total = sum(allDevices_peakDemand_savings_monthly)
-	#print('test all devices monthly peak demand savings: ', testallDevices_peakDemand_savings_monthly)
-	#print('total monthly peak demand savings: ', outData['monthlyPeakDemandSavings'])
 
 	BESS_peakDemand_savings_allyears = np.full(projectionLength, sum(BESS_peakDemand_savings_monthly))
 	BESS_consumption_savings_allyears = np.full(projectionLength, sum(BESS_consumption_savings_monthly))
