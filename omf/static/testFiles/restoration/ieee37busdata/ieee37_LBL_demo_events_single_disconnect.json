@@ -1,0 +1,20 @@
+[
+    {
+        "affected_asset": "line.l21",
+        "event_data": {
+            "dispatchable": false,
+            "state": "open",
+            "type": "breaker"
+        },
+        "event_type": "switch",
+        "timestep": 4
+    },
+    {
+        "affected_asset": "line.l21",
+        "event_data": {
+            "dispatchable": true
+        },
+        "event_type": "switch",
+        "timestep": 5
+    }
+]

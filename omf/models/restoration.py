@@ -1861,7 +1861,7 @@ def simplifyFeeder(inDss, outDss, maxBessCharge=True):
 						outStr += line
 		with open(pJoin(tempDir,'rm_fuses_max_storage.dss'),'w') as outfile:
 			outfile.write(outStr)		
-		print('Removed fuses and set kwhstored to kwhrated')
+		print('\nRemoved fuses and set kwhstored to kwhrated\n')
 		# reduce feeder size
 		tree = dssToTree(pJoin(tempDir,'rm_fuses_max_storage.dss'))
 		oldsz = len(tree)
@@ -1869,12 +1869,12 @@ def simplifyFeeder(inDss, outDss, maxBessCharge=True):
 		newsz = len(tree)
 		cutsz = oldsz-newsz
 		treeToDss(tree, pJoin(tempDir,'rm_fuses_max_storage_resized.dss'))
-		print(f'Performed feeder reduction, reducing the size of the feeder by {cutsz} objects (oldsz={oldsz}, newsz={newsz})')
+		print(f'\nPerformed feeder reduction, reducing the size of the feeder by {cutsz} objects (oldsz={oldsz}, newsz={newsz})\n')
 		# clean file
 		srcDss = pJoin(tempDir,'rm_fuses_max_storage_resized.dss')
 		cleanDss = pJoin(tempDir,'rm_fuses_max_storage_resized_clean.dss')
 		dss_to_clean_via_save(srcDss, cleanDss)
-		print('Cleaned file formatting')
+		print('\nCleaned file formatting\n')
 		# strip out tcc_curves, spectrum, growthshape, and default objects + calcv related things that were addded by cleaning function
 		with open(cleanDss, 'r') as infile:
 			inputLines = infile.readlines()
@@ -1898,7 +1898,7 @@ def simplifyFeeder(inDss, outDss, maxBessCharge=True):
 						break
 				if keepLine:
 					outStr += line
-		print('Removed extra elements added by file cleaner function (defaults, tcc curves, spectrum, growthshapes, voltagebases, calcv, solve, show)')
+		print('\nRemoved extra elements added by file cleaner function (defaults, tcc curves, spectrum, growthshapes, voltagebases, calcv, solve, show)\n')
 	with open(outDss,'w') as outfile:
 		outfile.write(outStr)
 
@@ -2050,6 +2050,27 @@ def new(modelDir):
 	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','customerInfoExample.csv']
 	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
 	'''
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','restoration','ieee37busdata', 'ieee37_LBL_simplified.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration', 'empty event.json']
+	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','empty dict.json']
+	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','empty dict.json']
+	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','ieee37busdata','customerInfoExample.csv']
+	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
+	
+
+	# ====== 1010 bus feeder Test Case
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles', '1010 bus feeder', '1010 bus feeder 100% charged l pv 24hr ADDED INVCONTROL_simplified.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration', 'empty event.json']
+	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','empty dict.json']
+	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','empty dict.json']
+	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','1010 bus feeder','customerInfoExample.csv']
+	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
+	
+	
 	# ====== 3300 bus feeder with PV & Storage test case
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300 bus feeder with pv and storage','MasterNewNames5hr_clean.omd']
 	# create bespoke events file
