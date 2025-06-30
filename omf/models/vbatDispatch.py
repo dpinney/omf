@@ -95,7 +95,8 @@ def work(modelDir, inputDict):
 
 	## Get the energy rate curve from the inputs
 	energy_rate_array = np.asarray([float(value) for value in inputDict['energyRateCurve'].split('\n') if value.strip()])
-	
+	out['energyRateCurve'] = energy_rate_array.tolist()
+
 	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
 	# m = [calendar[key]*24 for key in calendar]
 	# monthHours = [(sum(m[:i]), sum(m[:i+1])) for i, _ in enumerate(m)]

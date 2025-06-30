@@ -32,7 +32,6 @@ def work(modelDir, ind):
 	import tensorflow as tf
 	epochs = int(ind['epochs'])
 	o = {}  # See bottom of file for out's structure
-
 	try:
 		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
 			f.write(ind['histCurve'].replace('\r', ''))
@@ -59,7 +58,7 @@ def work(modelDir, ind):
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 
-	df = df.sort_values('dates')
+	df = df.sort_values(by='dates')
 	# df = autofill(df)
 	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
 	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24

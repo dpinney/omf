@@ -118,7 +118,7 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Use URDB Label?<span class="classic">If checked, the model will use the URDB label instead of the Residential Rate Structure file to obtain the energy rate structure information.</span></label>
+				<label class="tooltip">Use URDB Label?<span class="classic">If checked, the model will use the URDB label instead of the Energy Rate Structure (.csv) file to obtain the energy rate structure information.</span></label>
 				<input type="checkbox" id="urdbLabelBool" name="urdbLabelBool" {% if allInputDataDict.urdbLabelBool %} checked {% endif %}/>
 			</div>
 			<div class="shortInput">
@@ -126,7 +126,7 @@
 				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Residential Rate Structure (Optional) (.json file)<span class="classic">Please see the documentation at the help link for the required format and an example residential rate structure.</span></label>
+				<label class="tooltip">(Optional) Residential Rate Structure (.json file)<span class="classic">Please see the documentation at the help link for the required format and an example residential rate structure.</span></label>
 				<input id="residentialRateStructureFile" type="file" style="display:none" onchange="handle_files(this.files,'residentialRateStructureFile','residentialRateStructureFileName')">
 				<input id="residentialRateStructureFile" name="residentialRateStructureFile" value="{{allInputDataDict.residentialRateStructureFile}}" type="hidden">
 				<div>
@@ -134,6 +134,17 @@
 					<input id="residentialRateStructureFileName" name="residentialRateStructureFileName" value="{{allInputDataDict.residentialRateStructureFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
+			<!--
+			<div class="shortInput">
+				<label class="tooltip">(Optional) Residential Energy Rate Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example energy rate structure.</span></label>
+				<input id="residentialRateCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'residentialRateCurveFile','residentialRateCurveFileName')">
+				<input id="residentialRateCurveFile" name="residentialRateCurveFile" value="{{allInputDataDict.residentialRateCurveFile}}" type="hidden">
+				<div>
+					<label for="residentialRateCurveFile" class="fileButton">Choose File</label>
+					<input id="residentialRateCurveFileName" name="residentialRateCurveFileName" value="{{allInputDataDict.residentialRateCurveFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			-->
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used to devalue future incomes in the financial analysis. Income received now is more valuable than income received later.</span></label>
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">

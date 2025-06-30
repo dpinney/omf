@@ -17,7 +17,6 @@ from numpy_financial import npv
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import vbatDispatch as vb
-from omf.models import derConsumer
 from omf.solvers import reopt_jl
 
 ## Model metadata:
@@ -26,6 +25,76 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True ## Keep the model hidden=True during active development
+
+'''
+## NOTE & TODO: This function needs development. The purpose of this function is to handle both the energy rate structure and the demand charge rate structure from the .json response file, whereas the construct_energy_rate_array() function only handles the energy rate structure information.
+def construct_tariff_arrays(response_file, timestamps):
+	"""
+	Constructs hourly energy rate array (length 8760), and computes a blended annual demand charge.
+	Returns:
+	- energy_rate_array (array): an array of length 8760 for the hourly energy rate $/kWh for an entire year
+	- monthly_demand_rates (list of 12 floats): a monthly array of demand charges in $/kW
+	- blended_annual_demand_rate (float): Average monthly demand charge [$ per kW per month]. Rate will be applied to monthly peak demand.
+	"""
+
+	## --- Energy Rate Construction ---
+	energy_weekday_schedule = response_file['energyweekdayschedule']
+	energy_weekend_schedule = response_file['energyweekendschedule']
+	energy_rate_structure = np.array(response_file['energyratestructure'])
+	energy_rates = [item[0]['rate'] for item in energy_rate_structure]
+
+	energy_rate_array = np.zeros(8760)
+	for i, date in enumerate(timestamps):
+		schedule = energy_weekday_schedule if date.weekday() < 5 else energy_weekend_schedule
+		tier = schedule[date.month - 1][date.hour]
+		energy_rate_array[i] = energy_rates[tier]
+
+	## --- Demand Rate Construction ---
+	#monthly_demand_rates = None
+
+	#if 'demandratestructure' in response_file:
+	#	demand_rate_structure = np.array(response_file['demandratestructure'])
+	#	demand_rates = [item[0]['rate'] for item in demand_rate_structure]
+
+	#	demand_rate_array = np.zeros(8760)
+	#	for i, date in enumerate(timestamps):
+	#		schedule = demand_weekday_schedule if date.weekday() < 5 else demand_weekend_schedule
+	#		tier = schedule[date.month - 1][date.hour]
+	#		demand_rate_array[i] = demand_rates[tier]
+
+	return energy_rate_array
+
+'''
+
+def construct_energy_rate_array(response_file, timestamps):
+	'''
+	Constructs an array of hourly energy rates for an entire year (length 8760) based on the provided response file's weekday and weekend rate schedule information.
+	Expected inputs are: 
+	- response_file: (dict) containing the energy rate structure information e.g. energyweekendschedule, energyweekdayschedule, rate, and energyratestructure.
+	- timestamps: (array) of length 8760 with the hourly timestamps corresponding to the desired energy rate structure (this is used to determine when the weekdays and weekends occur for the given year)
+
+	Returns
+	- energy_rate_array: (array) of length 8760 with the appropriate hourly rate ($/kWh) depending on the weekday or weekend rate schedule.
+	'''
+	
+	## The energy rate structure info contains a nested list of dictionary items with "rate" and "unit"
+	## For example: [[{'rate': 0, 'unit': 'kWh'}][{'rate': 0.06, 'unit': 'kWh'}][{'rate': 0.1525, 'unit': 'kWh'}]]
+	energy_weekday_schedule = response_file['energyweekdayschedule']
+	energy_weekend_schedule = response_file['energyweekendschedule']
+	energy_rate_structure = np.array(response_file['energyratestructure'])
+	energy_rate_structure_flattened = [item[0] for item in energy_rate_structure]
+	energy_rates = [rate['rate'] for rate in energy_rate_structure_flattened]
+
+	## Construct an array of 8760 elements representing the hourly energy rates ($/kWh) for the entire year
+	energy_rate_array = np.zeros(8760)
+	for hour_index, date in enumerate(timestamps):
+		if date.weekday() < 5:  ## Weekdays (Monday=0, Sunday=7) - use the weekday rate schedule
+			energy_rate_array[hour_index] = energy_rates[energy_weekday_schedule[date.month-1][date.hour]] ## NOTE: date.month is offset by 1 due to 0 indexing
+		else: ## Weekends - use the weekend rate schedule
+			energy_rate_array[hour_index] = energy_rates[energy_weekend_schedule[date.month-1][date.hour]]
+
+	return energy_rate_array
+
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -38,12 +107,28 @@ def work(modelDir, inputDict):
 	temperatures_degF = [float(value) for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	temperatures_degC = [float(value)-32.0 * 5/9 for value in inputDict['temperatureCurve'].split('\n') if value.strip()]
 	demand = [float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]
+	
+	## Check if the demand and temperature curves are the correct length
+	if len(demand) != 8760:
+		raise ValueError(f"Demand curve must have exactly 8760 elements, but got {len(demand)}.")
+	if len(temperatures_degF) != 8760:
+		raise ValueError(f"Temperature curve must have exactly 8760 elements, but got {len(temperatures_degF)}.")
 
 	## Gather input variables to pass to the omf.solvers.reopt_jl model
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	year = int(inputDict['year'])
+	#start_time = str(inputDict['start_time'])
+	#end_time = str(inputDict['end_time'])
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:59', freq='h')
+	
+	## NOTE: the following couple lines are hard-coded temporarily to account for Kenergy's timestamp data being offset
+	#start_time = '2024-5-1'
+	#end_time = '2025-4-30 23:59'
+	#timestamps = pd.date_range(start=start_time, end=end_time, freq='h')
+
+	if len(timestamps) != 8760:
+		raise ValueError(f"The start time and end time must define a full year of hourly incremements (8760 elements). Instead, got {len(timestamps)} elements.")
 	projectionLength = int(inputDict['projectionLength'])
 
 	########################################################################################################################################################
@@ -51,19 +136,25 @@ def work(modelDir, inputDict):
 	## Expects a user-provided JSON file or the default static testFile provided in the OMF
 	########################################################################################################################################################
 
-	try:
-		## Try to normally parse the JSON file
-		response_file = json.loads(inputDict['wholesaleRateStructureFile'])
-	except json.JSONDecodeError:
-		## Convert single quotes to double quotes for proper JSON formatting
-		fixed = inputDict['wholesaleRateStructureFile'].replace("'", '"')
-		response_file = json.loads(fixed)
-	except TypeError:
-		## If the wholesale_rate_curve is already a dictionary, use it directly
-		if isinstance(inputDict['wholesaleRateStructureFile'], dict):
-			response_file = inputDict['wholesaleRateStructureFile']
-
-	energy_rate_array = derConsumer.construct_energy_rate_array(response_file, timestamps)
+	if inputDict.get('useWholesaleJSONBool'): ## Checkbox to use the .json file is True by default
+		## Load the Wholesale Energy Rate Structure JSON file
+		try:
+			## Try to normally parse the JSON file
+			response_file = json.loads(inputDict['wholesaleRateStructureFile'])
+		except json.JSONDecodeError:
+			## Convert single quotes to double quotes for proper JSON formatting
+			fixed = inputDict['wholesaleRateStructureFile'].replace("'", '"')
+			response_file = json.loads(fixed)
+		except TypeError:
+			## If the wholesale_rate_curve is already a dictionary, use it directly
+			if isinstance(inputDict['wholesaleRateStructureFile'], dict):
+				response_file = inputDict['wholesaleRateStructureFile']
+		
+		## Construct the energy rate array from the JSON file (used in the financial analysis below)
+		energy_rate_array = construct_energy_rate_array(response_file, timestamps)
+	
+	else: ## Use the Wholesale Energy Rate Curve (.csv) file instead of the Wholesale Energy Rate Structure (.json) file
+		energy_rate_array = [float(value) for value in inputDict['wholesaleRateCurveFile'].split('\n') if value.strip()]
 
 	########################################################################################################################
 	## Run REopt.jl solver
@@ -77,8 +168,8 @@ def work(modelDir, inputDict):
 		},
 		'ElectricTariff': {
 			#'urdb_label': urdbLabel,
-			'urdb_response': response_file, #inputDict['wholesaleRateStructureFile'],
-			#'tou_energy_rates_per_kwh': energy_rate_list,
+			#'urdb_response': response_file,
+			#'tou_energy_rates_per_kwh': energy_rate_array.tolist(), ## This method produced some issues with REopt (e.g. no generator was present in the outputs)
 			#'add_tou_energy_rates_to_urdb_rate': True
 		},
 		'ElectricLoad': {
@@ -89,6 +180,13 @@ def work(modelDir, inputDict):
 			'analysis_years': projectionLength
 		}
 	}
+
+	## Adjust the Electric Tariff input to REopt based on the user's preference of either the Wholesale Energy Rate Structure (.json) or Wholesale Energy Rate Curve (.csv)
+	if inputDict.get('useWholesaleJSONBool'): ## Use the Wholesale Energy Rate Structure (.json) file
+		scenario['ElectricTariff']['urdb_response'] = response_file
+	else: ## Use the Wholesale Energy Rate Curve (.csv) file
+		## NOTE: This method results in discrepant outputs compared to the urdb_response input method
+		scenario['ElectricTariff']['tou_energy_rates_per_kwh'] = energy_rate_array#.tolist()
 
 	## Add fossil fuel generator to input scenario, if enabled
 	if inputDict['fossilGenerator'] == 'Yes' and float(inputDict['number_devices_GEN']) > 0:
@@ -263,13 +361,9 @@ def work(modelDir, inputDict):
 		single_device_vbatPower_series = pd.Series(single_device_vbatPower)
 		single_device_vbat_discharge_component = single_device_vbatPower_series.where(single_device_vbatPower_series > 0, 0) ##positive values = discharging
 		single_device_vbat_charge_component = single_device_vbatPower_series.where(single_device_vbatPower_series < 0, 0) ##negative values = charging
-		single_device_vbat_charge_component_flipsign = single_device_vbat_charge_component.mul(-1)
+		#single_device_vbat_charge_component_flipsign = single_device_vbat_charge_component.mul(-1)
 		
 		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_vbatPower)]
-		combined_device_results['vbatPower_series'] = single_device_vbatPower_series
-		combined_device_results['vbat_discharge'] = [sum(x) for x in zip(combined_device_results['vbat_discharge'], single_device_vbat_discharge_component)]
-		combined_device_results['vbat_charge'] = [sum(x) for x in zip(combined_device_results['vbat_charge'], single_device_vbat_charge_component)]
-		combined_device_results['vbat_charge_flipsign'] = pd.Series(combined_device_results['vbat_charge']).mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
 		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
 		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
 		combined_device_results['vbatEnergy'] = [sum(x) for x in zip(combined_device_results['vbatEnergy'], single_device_results[device_result]['VBenergy'])]
@@ -299,11 +393,10 @@ def work(modelDir, inputDict):
 		single_device_compensation_allyears_array = np.full(projectionLength, single_device_compensation_year1_total)
 
 		## Calculate the consumption cost savings for each DER tech using the input rate structure (hourly data for the whole year)
-		single_device_demand = np.array(single_device_vbat_discharge_component)-np.array(single_device_vbat_charge_component_flipsign)
-		single_device_consumption_cost_year1 = [float(a) * float(b) for a, b in zip(single_device_demand, energy_rate_array)]
+		single_device_consumption_cost_year1 = [float(a) * float(b) for a, b in zip(single_device_vbatPower, energy_rate_array)]
 		single_device_consumption_cost_monthly = [sum(single_device_consumption_cost_year1[s:f]) for s, f in monthHours]
 		single_device_consumption_cost_allyears = np.full(projectionLength, sum(single_device_consumption_cost_year1))
-		single_device_monthlyTESS_consumption_total = [sum(single_device_demand[s:f]) for s, f in monthHours]
+		single_device_monthlyTESS_consumption_total = [sum(single_device_vbatPower[s:f]) for s, f in monthHours]
 
 		## Add up all the costs for the total TESS
 		costs_year1_monthly_single_device = single_device_subsidy_year1_array + single_device_compensation_year1_array
@@ -311,7 +404,7 @@ def work(modelDir, inputDict):
 
 		## Save relevant variables for calculating the demand cost savings later on
 		thermal_device_savings[device_result] = {
-			'demand': single_device_demand,
+			'demand': np.array(single_device_vbatPower),
 			'consumption_cost_monthly': np.array(single_device_consumption_cost_monthly),
 			'consumption_cost_allyears': np.array(single_device_consumption_cost_allyears),
     	}
@@ -319,8 +412,15 @@ def work(modelDir, inputDict):
 		## Savings Breakdown Per Thermal Technology cost variables
 		## NOTE: This is where the html variables outData['vbatResults_wh_costs_allyears'], outData['vbatResults_hp_costs_allyears'], and outData['vbatResults_ac_costs_allyears'] are saved.
 		outData[device_result+'_costs_allyears'] = list(costs_allyears_single_device*-1.0) ## Multiply by negative one for displaying in the plot as a cost
-
 		outData[device_result+'_check'] = 'enabled'
+
+	## Get the charging and discharging behavior from the total combined TESS
+	combined_TESS_vbatPower = combined_device_results['vbatPower']
+	combined_TESS_vbatPower_series = pd.Series(combined_TESS_vbatPower)
+	combined_device_results['vbat_discharge'] = combined_TESS_vbatPower_series.where(combined_TESS_vbatPower_series > 0, 0) ##positive values = discharging
+	combined_device_results['vbat_charge'] = combined_TESS_vbatPower_series.where(combined_TESS_vbatPower_series < 0, 0) ##negative values = charging
+	combined_device_results['vbat_charge_flipsign'] = combined_device_results['vbat_charge'].mul(-1)
+	
 
 	## NOTE: temporarily comment out the two derConsumer runs. This needs some development since derConsumer.py has changed over time.
 	"""
@@ -334,7 +434,6 @@ def work(modelDir, inputDict):
 	largeConsumerLoad = demand * largeConsumerLoadScaleFactor
 
 	## Convert small and large consumer load arrays into strings and pass it back to derConsumer
-	## TODO: Ideally this model wouldn't handle data in string format, it feels like extra work - consider changing that input format type later to floats
 	smallConsumerLoadString = '\n'.join([str(value) for value in smallConsumerLoad])
 	largeConsumerLoadString = '\n'.join([str(value) for value in largeConsumerLoad])
 
@@ -424,6 +523,7 @@ def work(modelDir, inputDict):
 	## vbatDispatch variables
 	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
 	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
+	vbat_charge_component[vbat_charge_component == -0.0] = 0.0 ## convert all -0 to just 0 for precaution
 
 	## Convert all values from kW to Watts for plotting purposes only
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
@@ -707,7 +807,7 @@ def work(modelDir, inputDict):
 	### Calculate the individual (BESS, TESS, and GEN) contributions to the consumption and peak demand savings
 	#########################################################################################################################################################
 	BESS_demand = np.array(BESS)-np.array(grid_charging_BESS)
-	TESS_demand = np.array(vbat_discharge_component)-np.array(vbat_charge_component)
+	TESS_demand = np.array(combined_TESS_vbatPower) #np.array(vbat_discharge_component)-np.array(vbat_charge_component)
 	GEN_demand = np.array(generator)
 
 	## Calculate the monthly energy consumption savings for BESS, TESS, and GEN technologies
@@ -771,8 +871,6 @@ def work(modelDir, inputDict):
 	GEN_peakDemand_savings_monthly = GEN_demand_at_baseP_cost*F_val
 	allDevices_peakDemand_savings_monthly = [a+b+c for a,b,c in zip(BESS_peakDemand_savings_monthly,TESS_peakDemand_savings_monthly,GEN_peakDemand_savings_monthly)]
 	allDevices_peakDemand_savings_total = sum(allDevices_peakDemand_savings_monthly)
-	#print('test all devices monthly peak demand savings: ', testallDevices_peakDemand_savings_monthly)
-	#print('total monthly peak demand savings: ', outData['monthlyPeakDemandSavings'])
 
 	BESS_peakDemand_savings_allyears = np.full(projectionLength, sum(BESS_peakDemand_savings_monthly))
 	BESS_consumption_savings_allyears = np.full(projectionLength, sum(BESS_consumption_savings_monthly))
@@ -813,15 +911,15 @@ def work(modelDir, inputDict):
 	## e.g. subsidies, operational costs, startup costs
 	######################################################################################################################################################
 
-	## If the DER tech is disabled, then set all their subsidies equal to zero.
-	if BESScheck == 'enabled':
+	## If the DER tech is disabled or the discharge array is empty, then set all its subsidies equal to zero.
+	if BESScheck == 'enabled' and np.sum(BESS_demand) > 0.0:
 		BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
 		BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])*float(inputDict['number_devices_BESS'])
 	else:
 		BESS_subsidy_ongoing = 0
 		BESS_subsidy_onetime = 0
 
-	if GENcheck == 'enabled':
+	if GENcheck == 'enabled' and np.sum(GEN_demand) > 0.0:
 		GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])*float(inputDict['number_devices_GEN'])
 		GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])*float(inputDict['number_devices_GEN'])
 	else:
@@ -1004,8 +1102,10 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
 		temperature_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.csv')) as f:
+		wholesale_rate_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','TODrate66a13566e90ecdb7d40581d2.json')) as jsonFile:
-		wholesale_rate_curve = json.load(jsonFile)
+		wholesale_rate_structure = json.load(jsonFile)
 	#responseFilename = 'TODrate66a13566e90ecdb7d40581d2.json' ## TOD rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
 	#responseFilename = 'TOUrate5b311c595457a3496d8367be.json' ## TOU rate JSON file (created using instructions from https://github.com/NREL/REopt-Analysis-Scripts/wiki/5.-Custom-Electric-Rates)
 
@@ -1024,8 +1124,11 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'temperatureFileName': 'open-meteo-denverCO-noheaders.csv',
 		'temperatureCurve': temperature_curve,
+		'useWholesaleJSONBool': True,
+		'wholesaleRateCurveFileName': 'TODrate66a13566e90ecdb7d40581d2.csv',
+		'wholesaleRateCurveFile': wholesale_rate_curve,
 		'wholesaleRateStructureFileName': 'TODrate66a13566e90ecdb7d40581d2.json',
-		'wholesaleRateStructureFile': wholesale_rate_curve,
+		'wholesaleRateStructureFile': wholesale_rate_structure,
 
 		## Fossil Fuel Generator Inputs
 		## Modeled after Generac 20 kW diesel model with max tank of 95 gallons
@@ -1096,7 +1199,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 @neoMetaModel_test_setup
-def _tests_disabled():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
@@ -1115,5 +1218,5 @@ def _tests_disabled():
 	__neoMetaModel__.renderAndShow(modelLoc) 
 
 if __name__ == '__main__':
-	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
+	_tests()
 	pass
