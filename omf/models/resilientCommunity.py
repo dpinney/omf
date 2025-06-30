@@ -1214,7 +1214,7 @@ def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand
 	getPercentile(newObsDict, 'community crit score')
 	return newObsDict,loadsDict, sviGeoDF
 
-def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
+def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand, pathToLoadsFile, loadsTypeList):
 	'''
 	Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
 	pathToOmd -> path to the omdfile
@@ -1223,22 +1223,76 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 	# iterate throughout circuit
 	#store census information
 	omd = json.load(open(pathToOmd))
+	loadsDF = pd.read_csv(pathToLoadsFile)
 	blockgroupDict = {}
 	loadsDict = {}
 	valList = []
 	geoms = []
 	obDict = {}
 	bg_outputDict = {}
+
+	sectionsDict, distanceDict, totalSections = runSections(pathToOmd, omd)
 	# Retrieve data to compute SVI
 	for ob in omd.get('tree', {}).values():
 		obType = ob['object']
 		obName = ob['name']
 		key = obType + '.' + obName
 		obDict[key] = ob
+		from_field = ob.get('from', None)
+		to_field = ob.get('to', None)
+		if from_field and to_field:
+			section_key = str((from_field, to_field))
+			if key in obDict and section_key in sectionsDict:
+				obDict[key]['section'] = sectionsDict[section_key]
+			else:
+				obDict[key]['section'] = None
+		elif obType == 'bus':
+			if key in obDict and section_key in sectionsDict:
+				obDict[key]['section'] = sectionsDict[section_key]
+		else:
+			obDict[key]['section'] = None
+		if (obType == 'load'):
+			filtered_df = loadsDF[loadsDF["Load Name"] == obName]
+			try:
+				loadIsResidential = filtered_df["Business Type"].iloc[0].lower() in loadsTypeList #== 'residential'
+			except IndexError as ie:
+				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')
+			if (loadIsResidential): 
+				loadsDict[key] = {"base crit score":None}
+				kw, kvar, kva = getPowerMeasures(ob)
+				loadsDict[key]['kva'] = kva
+				loadsDict[key]["base crit score"] = round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ float(avgPeakDemand)) * 4,2)
+				if obName in sectionsDict:
+					loadsDict[key]['section'] = sectionsDict[obName]
+				else:
+					loadsDict[key]['section'] = None
+				if obName in distanceDict:
+					loadsDict[key]['distance_from_source'] = int(distanceDict[obName])
+				else:
+					loadsDict[key]['distance_from_source'] = 0
+				long = float(ob['longitude'])
+				lat = float(ob['latitude'])
+				if blockgroupDict:
+					check = coordCheck(long, lat, blockgroupDict)
+					if check:
+						loadsDict[key]['blockgroup'] = check
+						continue
+					else:
+						blockgroup = findCensusBlockGroup(lat,long)
+				else:
+					blockgroup = findCensusBlockGroup(lat,long)
+				# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+				blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
+				loadsDict[key]['blockgroup'] = blockgroup
+				blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
+				valList.append(list(all_vals(blockgroupDict[blockgroup])))
+				geoms.append(blockgroupDict[blockgroup]['geometry'])
+
+
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
 			kw, kvar, kva = getPowerMeasures(ob)
-			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
+			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (float(avgPeakDemand))) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
@@ -1277,8 +1331,6 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 	#sviDF.to_csv('outSVI.csv', index=False)
 	sviGeoDF = createGeoDF(sviDF)
 	# put all
-	with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json', 'r') as file:
-		zillowPrices = json.load(file)
 	for ob in omd.get('tree', {}).values():
 		obType = ob['object']
 		obName = ob['name']
@@ -1286,7 +1338,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 		if (obType == 'load'):
 			currBlockGroup = loadsDict[key]['blockgroup']
 			svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
-			loadsDict[key]["community crit score"] = round(loadsDict[key]["base crit score"] *  svi_score * zillowPrices[currBlockGroup]['avgPrice'],2)
+			loadsDict[key]["community crit score"] = round(loadsDict[key]["base crit score"] *  svi_score,2)
 			loadsDict[key]['SOVI_SCORE'] = svi_score
 	getPercentile(loadsDict, "base crit score")
 	getPercentile(loadsDict, 'community crit score')
@@ -1300,6 +1352,40 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 	avg_community_criticality_score_index=('community crit index', 'mean'),
 	load_count=('base crit score', 'count')
 	).reset_index()
+	
+	# Group by 'section' and calculate desired metrics
+	section_loads = df_loads.groupby('section').agg(
+		avg_base_criticality_score=('base crit score', 'mean'),
+		avg_community_criticality_score=('community crit score', 'mean'),
+		avg_base_criticality_score_index=('base crit index', 'mean'),
+		avg_community_criticality_score_index=('community crit index', 'mean'),
+		avg_svi_score=('SOVI_SCORE', 'mean'),
+		load_count=('base crit score', 'count'),
+		load_amount=('kva', 'sum')
+		).reset_index()
+	# Convert existing sections to a set for quick lookup
+	existing_sections = set(section_loads['section'])
+	# Iterate from 1 to totalSections to check for missing sections
+	for section in range(1, totalSections + 1):  # Inclusive range
+		if section not in existing_sections:
+			# Append a row with all metrics set to None
+			section_loads = pd.concat([
+				section_loads,
+				pd.DataFrame({
+					'section': [section],
+					'avg_base_criticality_score': [None],
+					'avg_community_criticality_score': [None],
+					'avg_base_criticality_score_index': [None],
+					'avg_community_criticality_score_index': [None],
+					'avg_zillow_price': [None],
+					'load_count': [None],
+					'avg_svi_score':[None],
+					'load_amount': [None]
+				})
+			], ignore_index=True)
+	# Sort the DataFrame by 'section' to maintain order
+	section_loads = section_loads.sort_values(by='section').reset_index(drop=True)	
+	
 	del omd
 	digraph = createGraph(pathToOmd)
 	nodes = digraph.nodes()
@@ -1332,7 +1418,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 	# perform weighted avg community criticality for equipment
 	getPercentile(newObsDict, 'base crit score')
 	getPercentile(newObsDict, 'community crit score')
-	return newObsDict,loadsDict, sviGeoDF, sviDF
+	return newObsDict,loadsDict, sviGeoDF, sviDF, section_loads
 
 def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
 	'''
@@ -2326,13 +2412,13 @@ def buildsviBlockGroup(blockgroupFIPS):
 		# socioeconomic vars
 		'pct_Prs_Blw_Pov_Lev_ACS_16_20': float(combined_dict['pct_Prs_Blw_Pov_Lev_ACS_16_20']),
 		'pct_Civ_emp_16p_ACS_16_20': float(combined_dict['pct_Civ_emp_16p_ACS_16_20']),
-		'avg_Agg_HH_INC_ACS_16_20': float(combined_dict['avg_Agg_HH_INC_ACS_16_20'].replace('$', '').replace(',','')),
+		'avg_Agg_HH_INC_ACS_16_20': float(str(combined_dict['avg_Agg_HH_INC_ACS_16_20']).replace('$', '').replace(',','')),
 		'pct_Not_HS_Grad_ACS_16_20': float(combined_dict['pct_Not_HS_Grad_ACS_16_20']),
 		# household compisiton/ disability vars
 		'pct_Pop_65plus_ACS_16_20': float(combined_dict['Pop_65plus_ACS_16_20'])/float(combined_dict['Tot_Population_ACS_16_20']),
 		'pct_u19ACS_16_20': float(combined_dict['Civ_noninst_pop_U19_ACS_16_20'])/float(combined_dict['Civ_Noninst_Pop_ACS_16_20']),
 		'pct_Pop_Disabled_ACS_16_20': float(combined_dict['pct_Pop_Disabled_ACS_16_20']),
-		'pct_singlefamily_u18': (float(combined_dict['B23008_021E']) + float(combined_dict['B23008_008E']))/float(combined_dict['B23008_001E']),
+		'pct_singlefamily_u18': (float(combined_dict['B23008_021E']) + float(combined_dict['B23008_008E']))/max(0.0000000000001,float(combined_dict['B23008_001E'])),
 		#housing/transportation
 		'pct_MLT_U10p_ACS_16_20': float(combined_dict['pct_MLT_U10p_ACS_16_20']),
 		'pct_Mobile_Homes_ACS_16_20': float(combined_dict['pct_Mobile_Homes_ACS_16_20']),
@@ -2921,8 +3007,8 @@ def work(modelDir, inputDict):
 	#print(inputDict['load_types'])
 	# check downline loads
 	#loads_typeList = [item.lower() for item in inputDict['load_type'] ]
-	obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList, 'Yes')
-	#obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroups(omd_file_path, equipmentList, inputDict['averageDemand'])
+	#obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList, 'Yes')
+	obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroup(omd_file_path, equipmentList, inputDict['averageDemand'], loadsPath, loads_typeList)
 	#obDict, loads, geoDF = getDownLineLoadsEquipmentTract(omd_file_path, equipmentList)
 	# color vals based on selected column
 	createColorCSVBlockGroup(modelDir, loads, obDict)
@@ -3011,7 +3097,7 @@ def work(modelDir, inputDict):
 		round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_community_criticality_score_index"].tolist()
 	]
 	zillow_prices_vals3 = [
-		round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_zillow_price"].tolist()
+		round(val, 2) if pd.notnull(val) else None for val in []#loadSections["avg_zillow_price"].tolist()
 	]
 	load_count_vals = [
 		round(val, 2) if pd.notnull(val) else None for val in loadSections["load_count"].tolist()
@@ -3035,7 +3121,7 @@ def test():
 	runCalculations(pathToOmd,pathToLoadsFile,1,  ['residential'], modelDir, equipmentList)
 
 def new(modelDir):
-	omdfileName = 'iowa240_in_Florida_copy2'
+	omdfileName = 'ieee37_LBL_simplified'
 	#omdfileName = 'iowa240_in_Florida_modified'
 	#omdfileName = 'iowa240_dwp_22_no_show_voltage.dss'
 	defaultInputs = {
