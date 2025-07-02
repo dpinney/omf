@@ -49,6 +49,11 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:59', freq='h')
 
+	## NOTE: the following couple lines are hard-coded temporarily to account for Kenergy's timestamp data being offset
+	#start_time = '2024-5-1'
+	#end_time = '2025-4-30 23:59'
+	#timestamps = pd.date_range(start=start_time, end=end_time, freq='h')
+
 	## Make an API call if the URDB Label is selected, then build the energy rate array from the API response information
 	if inputDict.get('urdbLabelBool'): ## Checkbox to use the urdb label is True by default
 		## Use the URDB label to obtain the energy rate structure .json information via REopt API in order to construct an energy rate array that is used in the analysis.
