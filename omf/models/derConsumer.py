@@ -1,6 +1,7 @@
 ''' Performs cost-benefit analysis for a member-consumer with distributed 
 energy resource (DER) technologies. '''
-
+## Testing new workflow, will delete this line
+## Test
 ## Python imports
 import warnings
 #warnings.filterwarnings("ignore")
